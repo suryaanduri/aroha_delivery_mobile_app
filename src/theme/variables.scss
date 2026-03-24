@@ -1,2 +1,58 @@
 // For information on how to create your own theme, please refer to:
 // https://ionicframework.com/docs/theming/
+
+:root {
+  /* Core brand tokens for future dynamic theming */
+  --app-color-primary: #245f52;
+  --app-color-primary-rgb: 36, 95, 82;
+  --app-color-secondary: #f3f7f5;
+  --app-color-secondary-rgb: 243, 247, 245;
+  --app-color-tertiary: #caa36a;
+  --app-color-tertiary-rgb: 202, 163, 106;
+
+  /* Surface and text system */
+  --app-color-surface: #ffffff;
+  --app-color-surface-muted: #f7faf8;
+  --app-color-border: rgba(24, 39, 34, 0.09);
+  --app-color-border-strong: rgba(36, 95, 82, 0.18);
+  --app-color-text: #16231f;
+  --app-color-text-muted: #66756f;
+  --app-color-shadow: rgba(18, 35, 30, 0.08);
+
+  /* Spatial and motion tokens */
+  --app-radius-sm: 14px;
+  --app-radius-md: 20px;
+  --app-radius-lg: 28px;
+  --app-space-1: 4px;
+  --app-space-2: 8px;
+  --app-space-3: 12px;
+  --app-space-4: 16px;
+  --app-space-5: 20px;
+  --app-space-6: 24px;
+  --app-space-8: 32px;
+  --app-space-10: 40px;
+  --app-shadow-soft: 0 16px 40px rgba(18, 35, 30, 0.08);
+  --app-shadow-focus: 0 0 0 4px rgba(var(--app-color-primary-rgb), 0.12);
+
+  /* Ionic token bridge */
+  --ion-color-primary: var(--app-color-primary);
+  --ion-color-primary-rgb: var(--app-color-primary-rgb);
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #205447;
+  --ion-color-primary-tint: #3a6f63;
+
+  --ion-color-secondary: var(--app-color-secondary);
+  --ion-color-secondary-rgb: var(--app-color-secondary-rgb);
+  --ion-color-secondary-contrast: #16231f;
+  --ion-color-secondary-contrast-rgb: 22, 35, 31;
+  --ion-color-secondary-shade: #d6dad9;
+  --ion-color-secondary-tint: #f4f8f6;
+
+  --ion-color-tertiary: var(--app-color-tertiary);
+  --ion-color-tertiary-rgb: var(--app-color-tertiary-rgb);
+  --ion-color-tertiary-contrast: #16231f;
+  --ion-color-tertiary-contrast-rgb: 22, 35, 31;
+  --ion-color-tertiary-shade: #b28f5d;
+  --ion-color-tertiary-tint: #d1ae79;
+}
