@@ -1,0 +1,77 @@
+:host {
+  display: block;
+}
+
+.delivery-card,
+.delivery-card__chips,
+.delivery-card__summary,
+.delivery-card__topline,
+.delivery-card__slot,
+.delivery-card__footer {
+  display: flex;
+}
+
+.delivery-card {
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid rgba(var(--app-color-primary-rgb), 0.08);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: var(--app-shadow-soft);
+}
+
+.delivery-card__topline,
+.delivery-card__footer {
+  align-items: center;
+  justify-content: space-between;
+}
+
+.delivery-card__sequence,
+.delivery-card__slot {
+  color: var(--app-color-text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.delivery-card__slot {
+  gap: 6px;
+}
+
+.delivery-card__chips,
+.delivery-card__summary {
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.delivery-card__summary-block {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: rgba(var(--app-color-primary-rgb), 0.06);
+}
+
+.delivery-card__summary-block span {
+  display: block;
+  color: var(--app-color-text-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.delivery-card__summary-block strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.95rem;
+  letter-spacing: -0.02em;
+}
+
+.delivery-card__action {
+  --border-radius: 18px;
+  --padding-top: 14px;
+  --padding-bottom: 14px;
+  margin-left: auto;
+  font-weight: 700;
+}

@@ -1,3 +1,25 @@
-<p>
-  customer-info-card works!
-</p>
+<article class="customer-card">
+  <div class="customer-card__top">
+    <div class="customer-card__identity">
+      <div class="customer-card__title-row">
+        <h3>{{ name }}</h3>
+        <span *ngIf="customerCode" class="customer-card__code">{{ customerCode }}</span>
+      </div>
+      <p *ngIf="routeLabel" class="customer-card__route">
+        <ion-icon name="navigate-outline" aria-hidden="true"></ion-icon>
+        <span>{{ routeLabel }}</span>
+      </p>
+    </div>
+
+    <button *ngIf="showPhoneAction" class="customer-card__phone" type="button" aria-label="Call customer">
+      <ion-icon name="call-outline" aria-hidden="true"></ion-icon>
+    </button>
+  </div>
+
+  <p class="customer-card__address">
+    <ion-icon name="location-outline" aria-hidden="true"></ion-icon>
+    <span>{{ address }}</span>
+  </p>
+
+  <p *ngIf="landmark" class="customer-card__landmark">{{ landmark }}</p>
+</article>

@@ -1,14 +1,17 @@
-import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'app-section-header',
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './section-header.component.html',
-  styleUrls: ['./section-header.component.scss'],
+  styleUrl: './section-header.component.scss',
 })
-export class SectionHeaderComponent  implements OnInit {
-
-  constructor() { }
-
-  ngOnInit() {}
-
+export class SectionHeaderComponent {
+  @Input() title = '';
+  @Input() subtitle = '';
+  @Input() meta = '';
+  @Input() actionText = '';
+  @Output() actionPressed = new EventEmitter<void>();
 }

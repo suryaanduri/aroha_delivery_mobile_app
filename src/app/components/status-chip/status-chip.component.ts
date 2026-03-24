@@ -1,14 +1,37 @@
-import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, Input } from '@angular/core';
+
+export type DeliveryStatus = 'pending' | 'in-progress' | 'delivered' | 'skipped' | 'failed';
+export type ScheduleType = 'daily' | 'one-time' | 'alternate-day';
+export type StatusChipKind = 'status' | 'schedule' | 'neutral';
 
 @Component({
   selector: 'app-status-chip',
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './status-chip.component.html',
-  styleUrls: ['./status-chip.component.scss'],
+  styleUrl: './status-chip.component.scss',
 })
-export class StatusChipComponent  implements OnInit {
+export class StatusChipComponent {
+  @Input() label = '';
+  @Input() kind: StatusChipKind = 'neutral';
+  @Input() value?: DeliveryStatus | ScheduleType;
 
-  constructor() { }
+  get normalizedLabel(): string {
+    return this.label || this.value?.replace(/-/g, ' ') || '';
+  }
 
-  ngOnInit() {}
-
+  get tone(): string {
+    const value = this.value ?? '';
+    if (value === 'delivered' || value === 'daily') {
+      return 'positive';
+    }
+    if (value === 'in-progress' || value === 'one-time') {
+      return 'accent';
+    }
+    if (value === 'pending' || value === 'alternate-day') {
+      return 'neutral';
+    }
+    return value === 'failed' ? 'danger' : 'muted';
+  }
 }

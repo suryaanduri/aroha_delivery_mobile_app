@@ -1,3 +1,13 @@
-<p>
-  section-header works!
-</p>
+<div class="section-header">
+  <div class="section-header__copy">
+    <div class="section-header__title-row">
+      <h2>{{ title }}</h2>
+      <span *ngIf="meta" class="section-header__meta">{{ meta }}</span>
+    </div>
+    <p *ngIf="subtitle">{{ subtitle }}</p>
+  </div>
+
+  <button *ngIf="actionText" class="section-header__action" type="button" (click)="actionPressed.emit()">
+    {{ actionText }}
+  </button>
+</div>

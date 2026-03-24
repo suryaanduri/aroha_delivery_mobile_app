@@ -1,0 +1,50 @@
+:host {
+  display: block;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 28px 24px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: var(--app-shadow-soft);
+  text-align: center;
+}
+
+.empty-state__icon {
+  display: grid;
+  width: 64px;
+  height: 64px;
+  place-items: center;
+  border-radius: 20px;
+  background: rgba(var(--app-color-primary-rgb), 0.08);
+  color: var(--app-color-primary);
+  font-size: 1.5rem;
+}
+
+.empty-state__copy h2,
+.empty-state__copy p {
+  margin: 0;
+}
+
+.empty-state__copy h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.empty-state__copy p {
+  margin-top: 8px;
+  color: var(--app-color-text-muted);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.empty-state__action {
+  --border-radius: 18px;
+  --padding-top: 14px;
+  --padding-bottom: 14px;
+  font-weight: 700;
+}

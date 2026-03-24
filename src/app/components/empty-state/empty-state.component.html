@@ -1,3 +1,14 @@
-<p>
-  empty-state works!
-</p>
+<section class="empty-state">
+  <div class="empty-state__icon">
+    <ion-icon [name]="icon" aria-hidden="true"></ion-icon>
+  </div>
+
+  <div class="empty-state__copy">
+    <h2>{{ title }}</h2>
+    <p>{{ message }}</p>
+  </div>
+
+  <ion-button *ngIf="actionText" class="empty-state__action" fill="solid" (click)="actionPressed.emit()">
+    {{ actionText }}
+  </ion-button>
+</section>

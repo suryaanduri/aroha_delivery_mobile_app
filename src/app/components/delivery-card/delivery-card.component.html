@@ -1,3 +1,46 @@
-<p>
-  delivery-card works!
-</p>
+<article class="delivery-card" (click)="cardPressed.emit()">
+  <div class="delivery-card__topline">
+    <div class="delivery-card__sequence" *ngIf="sequenceLabel">{{ sequenceLabel }}</div>
+    <div class="delivery-card__slot" *ngIf="timeSlot">
+      <ion-icon name="time-outline" aria-hidden="true"></ion-icon>
+      <span>{{ timeSlot }}</span>
+    </div>
+  </div>
+
+  <div class="delivery-card__chips">
+    <app-status-chip [kind]="'schedule'" [value]="scheduleType"></app-status-chip>
+    <app-status-chip [kind]="'status'" [value]="status"></app-status-chip>
+  </div>
+
+  <app-customer-info-card
+    [name]="customerName"
+    [customerCode]="customerCode"
+    [address]="address"
+    [landmark]="landmark"
+    [routeLabel]="routeLabel"
+  ></app-customer-info-card>
+
+  <div class="delivery-card__summary">
+    <div class="delivery-card__summary-block">
+      <span>Milk</span>
+      <strong>{{ milkSummary }}</strong>
+    </div>
+    <div class="delivery-card__summary-block">
+      <span>Extras</span>
+      <strong>{{ extraSummary || 'No extras' }}</strong>
+    </div>
+  </div>
+
+  <app-product-list
+    [milkItems]="milkItems"
+    [extraItems]="extraItems"
+    [layout]="'compact'"
+  ></app-product-list>
+
+  <div class="delivery-card__footer">
+    <ion-button class="delivery-card__action" fill="solid" (click)="actionPressed.emit(); $event.stopPropagation()">
+      {{ actionText }}
+      <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
+    </ion-button>
+  </div>
+</article>

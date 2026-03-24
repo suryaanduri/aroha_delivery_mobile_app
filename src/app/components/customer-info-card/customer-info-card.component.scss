@@ -1,0 +1,79 @@
+:host {
+  display: block;
+}
+
+.customer-card,
+.customer-card__top,
+.customer-card__title-row,
+.customer-card__route,
+.customer-card__address {
+  display: flex;
+}
+
+.customer-card {
+  flex-direction: column;
+  gap: 10px;
+}
+
+.customer-card__top {
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.customer-card__title-row,
+.customer-card__route,
+.customer-card__address {
+  align-items: center;
+  gap: 8px;
+}
+
+.customer-card__identity {
+  min-width: 0;
+}
+
+.customer-card h3,
+.customer-card__route,
+.customer-card__address,
+.customer-card__landmark {
+  margin: 0;
+}
+
+.customer-card h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.customer-card__code {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(var(--app-color-primary-rgb), 0.08);
+  color: var(--app-color-primary);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.customer-card__route,
+.customer-card__address,
+.customer-card__landmark {
+  color: var(--app-color-text-muted);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.customer-card__phone {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 0;
+  border-radius: 12px;
+  background: rgba(var(--app-color-primary-rgb), 0.08);
+  color: var(--app-color-primary);
+}
+
+.customer-card__address ion-icon,
+.customer-card__route ion-icon {
+  flex-shrink: 0;
+}

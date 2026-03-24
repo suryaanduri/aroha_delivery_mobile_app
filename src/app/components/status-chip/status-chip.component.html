@@ -1,3 +1,4 @@
-<p>
-  status-chip works!
-</p>
+<span class="status-chip" [attr.data-kind]="kind" [attr.data-tone]="tone">
+  <span class="status-chip__dot" aria-hidden="true"></span>
+  <span class="status-chip__label">{{ normalizedLabel }}</span>
+</span>
