@@ -24,10 +24,6 @@
 
         <div class="brand-copy">
           <p class="brand-copy__kicker">Delivery Partner App</p>
-          <!-- <h1>Farm fresh delivery starts here</h1>
-          <p>
-            Sign in to access assigned routes, doorstep deliveries, and daily operations from one focused workspace.
-          </p> -->
         </div>
       </section>
 
@@ -78,9 +74,13 @@
             </div>
           </label>
 
+          <div *ngIf="errorMessage" class="login-form__error" role="alert">
+            {{ errorMessage }}
+          </div>
+
           <div class="login-form__meta">
             <p class="login-form__hint">For registered delivery partners only.</p>
-            <button type="button" class="login-form__link">Forgot password?</button>
+            <button type="button" class="login-form__link" (click)="goToForgotPassword()">Forgot password?</button>
           </div>
 
           <ion-button
@@ -89,7 +89,8 @@
             expand="block"
             [disabled]="!canSubmit"
           >
-            Log In
+            <ion-spinner *ngIf="loading" name="crescent" slot="start"></ion-spinner>
+            {{ loading ? 'Signing in...' : 'Log In' }}
           </ion-button>
         </form>
       </section>

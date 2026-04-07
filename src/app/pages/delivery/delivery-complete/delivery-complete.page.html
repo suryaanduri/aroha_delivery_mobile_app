@@ -1,6 +1,16 @@
 <ion-content [fullscreen]="true">
   <div class="delivery-complete-page">
     <main class="delivery-complete-shell">
+      <section *ngIf="loading" class="surface-card">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>Loading delivery details...</p>
+      </section>
+
+      <section *ngIf="!loading && errorMessage" class="surface-card">
+        <p>{{ errorMessage }}</p>
+      </section>
+
+      <ng-container *ngIf="!loading && !errorMessage">
       <section class="complete-header" aria-label="Completion header">
         <button class="complete-header__back" type="button" aria-label="Go back" (click)="cancel()">
           <ion-icon name="arrow-back-outline"></ion-icon>
@@ -42,8 +52,8 @@
           <button
             type="button"
             class="action-option"
-            [class.action-option--active]="selectedAction === 'delivered'"
-            (click)="selectAction('delivered')"
+            [class.action-option--active]="selectedAction === 'DELIVERED'"
+            (click)="selectAction('DELIVERED')"
           >
             <strong>Delivered</strong>
             <span>Successful handoff</span>
@@ -52,18 +62,18 @@
           <button
             type="button"
             class="action-option action-option--warning"
-            [class.action-option--active]="selectedAction === 'failed'"
-            (click)="selectAction('failed')"
+            [class.action-option--active]="selectedAction === 'CANCELLED'"
+            (click)="selectAction('CANCELLED')"
           >
-            <strong>Failed</strong>
+            <strong>Cancelled</strong>
             <span>Could not complete</span>
           </button>
 
           <button
             type="button"
             class="action-option action-option--neutral"
-            [class.action-option--active]="selectedAction === 'skipped'"
-            (click)="selectAction('skipped')"
+            [class.action-option--active]="selectedAction === 'SKIPPED'"
+            (click)="selectAction('SKIPPED')"
           >
             <strong>Skipped</strong>
             <span>Deferred to later</span>
@@ -78,8 +88,7 @@
         ></app-section-header>
 
         <app-product-list
-          [milkItems]="milkItems"
-          [extraItems]="extraItems"
+          [items]="items"
           [layout]="'expanded'"
         ></app-product-list>
       </section>
@@ -109,17 +118,6 @@
         </div>
 
         <div class="proof-stack">
-          <div *ngIf="selectedAction === 'delivered' && proofState.otp" class="proof-panel">
-            <label class="proof-panel__label">OTP Verification</label>
-            <input
-              type="text"
-              inputmode="numeric"
-              maxlength="6"
-              placeholder="Enter 6-digit OTP"
-              [(ngModel)]="otpCode"
-            />
-          </div>
-
           <div *ngIf="proofState.photo" class="proof-panel proof-panel--placeholder">
             <ion-icon name="camera-outline" aria-hidden="true"></ion-icon>
             <div>
@@ -128,16 +126,8 @@
             </div>
           </div>
 
-          <div *ngIf="proofState.signature" class="proof-panel proof-panel--placeholder">
-            <ion-icon name="receipt-outline" aria-hidden="true"></ion-icon>
-            <div>
-              <strong>Signature Proof</strong>
-              <p>Collect recipient sign-off when manual proof is required.</p>
-            </div>
-          </div>
-
-          <div *ngIf="selectedAction !== 'delivered'" class="proof-panel">
-            <label class="proof-panel__label">Reason</label>
+          <div *ngIf="reasonRequired" class="proof-panel">
+            <label class="proof-panel__label">Reason *</label>
             <div class="reason-grid">
               <button
                 type="button"
@@ -151,7 +141,7 @@
             </div>
           </div>
 
-          <div *ngIf="proofState.note || selectedAction !== 'delivered'" class="proof-panel">
+          <div *ngIf="proofState.note || reasonRequired" class="proof-panel">
             <label class="proof-panel__label">Delivery Note</label>
             <textarea
               rows="3"
@@ -179,14 +169,28 @@
           </div>
         </div>
       </section>
+      </ng-container>
     </main>
   </div>
 </ion-content>
 
-<div class="completion-bar">
+<div class="completion-bar" *ngIf="!loading && !errorMessage">
   <button class="completion-bar__ghost" type="button" (click)="cancel()">Cancel</button>
-  <ion-button class="completion-bar__primary" fill="solid" (click)="confirm()">
-    <ion-icon slot="start" [name]="selectedAction === 'delivered' ? 'checkmark-circle-outline' : 'alert-circle-outline'"></ion-icon>
-    {{ finalCtaLabel }}
+  <ion-button class="completion-bar__primary" fill="solid" [disabled]="!canSubmit" (click)="confirm()">
+    <ion-spinner *ngIf="submitting" name="crescent" slot="start"></ion-spinner>
+    <ion-icon
+      *ngIf="!submitting"
+      slot="start"
+      [name]="selectedAction === 'DELIVERED' ? 'checkmark-circle-outline' : 'alert-circle-outline'"
+    ></ion-icon>
+    {{ submitting ? 'Submitting...' : finalCtaLabel }}
   </ion-button>
 </div>
+
+<ion-toast
+  [isOpen]="toastOpen"
+  [message]="toastMessage"
+  [color]="toastColor"
+  [duration]="2200"
+  (didDismiss)="toastOpen = false"
+></ion-toast>

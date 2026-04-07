@@ -1,8 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { IonButton, IonContent, IonIcon } from '@ionic/angular/standalone';
+import { IonButton, IonContent, IonIcon, IonSpinner, IonToast } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
   alertCircleOutline,
@@ -11,21 +11,21 @@ import {
   chatbubbleEllipsesOutline,
   checkmarkCircleOutline,
   closeCircleOutline,
-  keyOutline,
-  pencilOutline,
   refreshOutline,
-  receiptOutline,
-  timeOutline
+  timeOutline,
 } from 'ionicons/icons';
 import { CustomerInfoCardComponent } from 'src/app/components/customer-info-card/customer-info-card.component';
 import { DeliveryProductItem, ProductListComponent } from 'src/app/components/product-list/product-list.component';
 import { SectionHeaderComponent } from 'src/app/components/section-header/section-header.component';
 import { DeliveryStatus, ScheduleType, StatusChipComponent } from 'src/app/components/status-chip/status-chip.component';
+import { DeliveryOrder } from 'src/app/models/order.model';
+import { OrderService, UpdateOrderStatusPayload } from 'src/app/services/order.service';
+import { getApiErrorMessage } from 'src/app/utils/api-contract.util';
 
-type CompletionAction = 'delivered' | 'failed' | 'skipped';
+type CompletionAction = 'DELIVERED' | 'CANCELLED' | 'SKIPPED';
 
 interface ProofOption {
-  key: 'otp' | 'photo' | 'signature' | 'note';
+  key: 'photo' | 'note';
   label: string;
   helper: string;
   icon: string;
@@ -40,61 +40,53 @@ interface ProofOption {
     IonButton,
     IonContent,
     IonIcon,
+    IonSpinner,
+    IonToast,
     CommonModule,
     FormsModule,
     CustomerInfoCardComponent,
     ProductListComponent,
     SectionHeaderComponent,
-    StatusChipComponent
-  ]
+    StatusChipComponent,
+  ],
 })
-export class DeliveryCompletePage {
-  readonly stopId: number;
-  selectedAction: CompletionAction = 'delivered';
-  otpCode = '';
+export class DeliveryCompletePage implements OnInit {
+  readonly stopId: string;
+  selectedAction: CompletionAction = 'DELIVERED';
+  loading = true;
+  submitting = false;
+  errorMessage = '';
+  toastMessage = '';
+  toastOpen = false;
+  toastColor: 'success' | 'danger' = 'success';
   deliveryNote = '';
   selectedReason = '';
   proofState = {
-    otp: true,
     photo: false,
-    signature: false,
-    note: false
+    note: false,
   };
 
-  readonly customerName = 'Green Meadows Residency';
-  readonly customerCode = 'C-184';
-  readonly routeLabel = 'Stop 01 • Zone A';
-  readonly address = '12 Palm Grove Main Road, Anna Nagar West';
-  readonly landmark = 'Security desk accepts early-morning handoff.';
-  readonly scheduleType: ScheduleType = 'daily';
-  readonly currentStatus: DeliveryStatus = 'in-progress';
-  readonly timeSlot = '06:30 AM - 06:45 AM';
-  readonly milkItems: DeliveryProductItem[] = [
-    { name: 'Toned Milk', quantity: '10 x 500ml' },
-    { name: 'Full Cream Milk', quantity: '2 x 1L' }
-  ];
-  readonly extraItems: DeliveryProductItem[] = [
-    { name: 'Curd Tub', quantity: '2' }
-  ];
-  readonly reasons = [
-    'Customer unavailable',
-    'Address locked',
-    'Payment issue',
-    'Route blocked',
-    'Product damaged'
-  ];
+  customerName = '';
+  customerCode = '';
+  routeLabel = '';
+  address = '';
+  landmark = '';
+  scheduleType: ScheduleType = 'daily';
+  currentStatus: DeliveryStatus = 'pending';
+  timeSlot = '';
+  items: DeliveryProductItem[] = [];
+  readonly reasons = ['Customer unavailable', 'Address locked', 'Payment issue', 'Route blocked', 'Product damaged'];
   readonly proofOptions: ProofOption[] = [
-    { key: 'otp', label: 'OTP', helper: 'Customer confirmation code', icon: 'key-outline' },
     { key: 'photo', label: 'Photo', helper: 'Doorstep proof capture', icon: 'camera-outline' },
-    { key: 'signature', label: 'Signature', helper: 'Manual recipient sign-off', icon: 'pencil-outline' },
-    { key: 'note', label: 'Note', helper: 'Add delivery remark', icon: 'chatbubble-ellipses-outline' }
+    { key: 'note', label: 'Note', helper: 'Add delivery remark', icon: 'chatbubble-ellipses-outline' },
   ];
 
   constructor(
     private readonly route: ActivatedRoute,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly orderService: OrderService
   ) {
-    this.stopId = Number(this.route.snapshot.paramMap.get('id') ?? '1');
+    this.stopId = this.route.snapshot.paramMap.get('id') ?? '';
     addIcons({
       alertCircleOutline,
       arrowBackOutline,
@@ -102,41 +94,54 @@ export class DeliveryCompletePage {
       chatbubbleEllipsesOutline,
       checkmarkCircleOutline,
       closeCircleOutline,
-      keyOutline,
-      pencilOutline,
-      receiptOutline,
       refreshOutline,
-      timeOutline
+      timeOutline,
     });
   }
 
+  ngOnInit(): void {
+    const action = (this.route.snapshot.queryParamMap.get('action') ?? 'DELIVERED').toUpperCase();
+    if (action === 'CANCELLED' || action === 'SKIPPED' || action === 'DELIVERED') {
+      this.selectedAction = action;
+    }
+    this.loadOrder();
+  }
+
   get itemSummary(): string {
-    return '12 milk packets • 2 extras';
+    return `${this.items.length} product${this.items.length !== 1 ? 's' : ''}`;
   }
 
   get selectedActionLabel(): string {
-    return this.selectedAction.charAt(0).toUpperCase() + this.selectedAction.slice(1);
+    return this.selectedAction.charAt(0) + this.selectedAction.slice(1).toLowerCase();
   }
 
   get finalCtaLabel(): string {
-    return this.selectedAction === 'delivered' ? 'Confirm Delivery' : 'Submit Status';
+    return this.selectedAction === 'DELIVERED' ? 'Confirm Delivery' : 'Submit Status';
+  }
+
+  get reasonRequired(): boolean {
+    return this.selectedAction === 'CANCELLED' || this.selectedAction === 'SKIPPED';
+  }
+
+  get canSubmit(): boolean {
+    if (this.loading || this.submitting || !!this.errorMessage) {
+      return false;
+    }
+    if (this.reasonRequired && !this.selectedReason.trim()) {
+      return false;
+    }
+    return true;
   }
 
   get proofSummary(): string[] {
     const items: string[] = [];
-    if (this.selectedAction === 'delivered' && this.proofState.otp && this.otpCode.trim()) {
-      items.push('OTP added');
-    }
     if (this.proofState.photo) {
       items.push('Photo ready');
-    }
-    if (this.proofState.signature) {
-      items.push('Signature required');
     }
     if (this.proofState.note && this.deliveryNote.trim()) {
       items.push('Note added');
     }
-    if ((this.selectedAction === 'failed' || this.selectedAction === 'skipped') && this.selectedReason) {
+    if (this.reasonRequired && this.selectedReason) {
       items.push(this.selectedReason);
     }
     return items;
@@ -144,12 +149,9 @@ export class DeliveryCompletePage {
 
   selectAction(action: CompletionAction): void {
     this.selectedAction = action;
-    if (action === 'delivered') {
+    if (action === 'DELIVERED') {
       this.selectedReason = '';
-      return;
     }
-    this.proofState.otp = false;
-    this.otpCode = '';
   }
 
   toggleProof(key: ProofOption['key']): void {
@@ -157,14 +159,11 @@ export class DeliveryCompletePage {
   }
 
   resetProof(): void {
-    this.otpCode = '';
     this.deliveryNote = '';
     this.selectedReason = '';
     this.proofState = {
-      otp: this.selectedAction === 'delivered',
       photo: false,
-      signature: false,
-      note: false
+      note: false,
     };
   }
 
@@ -173,6 +172,90 @@ export class DeliveryCompletePage {
   }
 
   confirm(): void {
-    void this.router.navigate(['/deliveries']);
+    if (!this.canSubmit) {
+      if (this.reasonRequired && !this.selectedReason.trim()) {
+        this.showToast('Reason is required for cancelled/skipped status.', 'danger');
+      }
+      return;
+    }
+
+    this.submitting = true;
+    const payload: UpdateOrderStatusPayload = {
+      status: this.selectedAction,
+      reason: this.reasonRequired ? this.selectedReason : undefined,
+      notes: this.deliveryNote.trim() || undefined,
+      proofImage: this.proofState.photo ? 'captured' : undefined,
+    };
+
+    this.orderService.updateOrderStatus(this.stopId, payload).subscribe({
+      next: (res) => {
+        this.submitting = false;
+        this.showToast(res.message || 'Status updated successfully.', 'success');
+        setTimeout(() => void this.router.navigate(['/deliveries']), 900);
+      },
+      error: (err: unknown) => {
+        this.submitting = false;
+        this.showToast(getApiErrorMessage(err, 'Unable to update status.'), 'danger');
+      },
+    });
+  }
+
+  private loadOrder(): void {
+    this.loading = true;
+    this.errorMessage = '';
+
+    this.orderService.getOrderById(this.stopId).subscribe({
+      next: (order) => {
+        if (!order) {
+          this.errorMessage = 'Delivery not found.';
+          this.loading = false;
+          return;
+        }
+        this.applyOrder(order);
+        this.loading = false;
+      },
+      error: (err: unknown) => {
+        this.errorMessage = getApiErrorMessage(err, 'Unable to load delivery details.');
+        this.loading = false;
+      },
+    });
+  }
+
+  private applyOrder(order: DeliveryOrder): void {
+    this.customerName = order.customerName ?? 'Customer';
+    this.customerCode = order.customerCode ?? '';
+    this.routeLabel = order.routeLabel ?? '';
+    this.address = order.address ?? '';
+    this.landmark = order.landmark ?? '';
+    this.scheduleType = this.normalizeScheduleType(order.scheduleType);
+    this.currentStatus = this.normalizeStatus(order.deliveryStatus ?? order.status);
+    this.timeSlot = order.timeSlot ?? '';
+    this.items = (order.items ?? []).map((item) => ({
+      name: item.name ?? 'Item',
+      quantity: [item.quantity, item.unit].filter(Boolean).join(' '),
+    }));
+  }
+
+  private normalizeStatus(status?: string): DeliveryStatus {
+    const normalized = (status ?? '').toUpperCase();
+    if (normalized === 'DELIVERED' || normalized === 'COMPLETED') return 'delivered';
+    if (normalized === 'IN_PROGRESS' || normalized === 'IN-PROGRESS' || normalized === 'STARTED') return 'in-progress';
+    if (normalized === 'CANCELLED' || normalized === 'CANCELED' || normalized === 'FAILED') return 'failed';
+    if (normalized === 'SKIPPED') return 'skipped';
+    return 'pending';
+  }
+
+  private normalizeScheduleType(type?: string): ScheduleType {
+    if (!type) return 'daily';
+    const normalized = type.toLowerCase().replace(/_/g, '-');
+    if (normalized.includes('alternate')) return 'alternate-day';
+    if (normalized === 'onetime' || (normalized.includes('one') && normalized.includes('time'))) return 'one-time';
+    return 'daily';
+  }
+
+  private showToast(message: string, color: 'success' | 'danger'): void {
+    this.toastMessage = message;
+    this.toastColor = color;
+    this.toastOpen = true;
   }
 }

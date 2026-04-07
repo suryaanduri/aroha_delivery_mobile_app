@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { cubeOutline, waterOutline } from 'ionicons/icons';
+import { cubeOutline } from 'ionicons/icons';
 
 export interface DeliveryProductItem {
   name: string;
@@ -17,11 +17,10 @@ export interface DeliveryProductItem {
   styleUrl: './product-list.component.scss',
 })
 export class ProductListComponent {
-  @Input() milkItems: DeliveryProductItem[] = [];
-  @Input() extraItems: DeliveryProductItem[] = [];
+  @Input() items: DeliveryProductItem[] = [];
   @Input() layout: 'compact' | 'expanded' = 'compact';
 
   constructor() {
-    addIcons({ cubeOutline, waterOutline });
+    addIcons({ cubeOutline });
   }
 }

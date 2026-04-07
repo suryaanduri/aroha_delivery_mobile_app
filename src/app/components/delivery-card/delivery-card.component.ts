@@ -16,7 +16,7 @@ import { DeliveryStatus, ScheduleType, StatusChipComponent } from '../status-chi
     IonIcon,
     CustomerInfoCardComponent,
     ProductListComponent,
-    StatusChipComponent
+    StatusChipComponent,
   ],
   templateUrl: './delivery-card.component.html',
   styleUrl: './delivery-card.component.scss',
@@ -30,13 +30,13 @@ export class DeliveryCardComponent {
   @Input() routeLabel = '';
   @Input() scheduleType: ScheduleType = 'daily';
   @Input() status: DeliveryStatus = 'pending';
-  @Input() milkSummary = '';
-  @Input() extraSummary = '';
+  @Input() deliveryStatusLabel = '';
+  @Input() orderStatusLabel = '';
+  @Input() productSummary = '';
   @Input() timeSlot = '';
   @Input() sequenceLabel = '';
   @Input() actionText = 'Open Stop';
-  @Input() milkItems: DeliveryProductItem[] = [];
-  @Input() extraItems: DeliveryProductItem[] = [];
+  @Input() items: DeliveryProductItem[] = [];
   @Output() cardPressed = new EventEmitter<void>();
   @Output() actionPressed = new EventEmitter<void>();
 

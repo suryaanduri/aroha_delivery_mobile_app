@@ -1,26 +1,12 @@
 <div class="product-list" [attr.data-layout]="layout">
-  <section *ngIf="milkItems.length" class="product-list__group product-list__group--milk">
-    <div class="product-list__header">
-      <ion-icon name="water-outline" aria-hidden="true"></ion-icon>
-      <span>Milk</span>
-    </div>
-
-    <div class="product-list__items">
-      <div class="product-row" *ngFor="let item of milkItems">
-        <span class="product-row__name">{{ item.name }}</span>
-        <strong class="product-row__qty">{{ item.quantity }}</strong>
-      </div>
-    </div>
-  </section>
-
-  <section *ngIf="extraItems.length" class="product-list__group">
+  <section *ngIf="items.length" class="product-list__group">
     <div class="product-list__header">
       <ion-icon name="cube-outline" aria-hidden="true"></ion-icon>
-      <span>Extras</span>
+      <span>Products</span>
     </div>
 
     <div class="product-list__items">
-      <div class="product-row" *ngFor="let item of extraItems">
+      <div class="product-row" *ngFor="let item of items">
         <span class="product-row__name">{{ item.name }}</span>
         <strong class="product-row__qty">{{ item.quantity }}</strong>
       </div>

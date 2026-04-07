@@ -4,37 +4,32 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { IonButton, IonContent, IonIcon, IonSpinner } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { eyeOffOutline, eyeOutline, lockClosedOutline, personCircleOutline } from 'ionicons/icons';
+import { arrowBackOutline, mailOutline } from 'ionicons/icons';
 import { AuthService } from 'src/app/services/auth.service';
 import { getApiErrorMessage } from 'src/app/utils/api-contract.util';
 
 @Component({
-  selector: 'app-login',
-  templateUrl: './login.page.html',
-  styleUrls: ['./login.page.scss'],
+  selector: 'app-forgot-password',
+  templateUrl: './forgot-password.page.html',
+  styleUrls: ['./forgot-password.page.scss'],
   standalone: true,
   imports: [IonButton, IonContent, IonIcon, IonSpinner, CommonModule, FormsModule],
 })
-export class LoginPage {
-  username = '';
-  password = '';
-  showPassword = false;
+export class ForgotPasswordPage {
+  email = '';
   loading = false;
   errorMessage = '';
+  successMessage = '';
 
   constructor(
     private readonly router: Router,
     private readonly authService: AuthService
   ) {
-    addIcons({ eyeOffOutline, eyeOutline, lockClosedOutline, personCircleOutline });
+    addIcons({ arrowBackOutline, mailOutline });
   }
 
   get canSubmit(): boolean {
-    return this.username.trim().length > 0 && this.password.length > 0 && !this.loading;
-  }
-
-  togglePasswordVisibility(): void {
-    this.showPassword = !this.showPassword;
+    return this.email.trim().length > 0 && !this.loading;
   }
 
   onSubmit(): void {
@@ -42,24 +37,22 @@ export class LoginPage {
 
     this.loading = true;
     this.errorMessage = '';
+    this.successMessage = '';
 
-    this.authService.login({ username: this.username.trim(), password: this.password }).subscribe({
+    this.authService.forgotPassword({ email: this.email.trim() }).subscribe({
       next: (res) => {
         this.loading = false;
-        if (res.mustResetPassword) {
-          void this.router.navigate(['/reset-password']);
-        } else {
-          void this.router.navigate(['/dashboard']);
-        }
+        this.successMessage = res.message || 'A temporary password has been sent to your email. Please check your inbox.';
+        setTimeout(() => void this.router.navigate(['/login']), 2500);
       },
       error: (err: unknown) => {
         this.loading = false;
-        this.errorMessage = getApiErrorMessage(err, 'Login failed. Please try again.');
+        this.errorMessage = getApiErrorMessage(err, 'Something went wrong. Please try again.');
       },
     });
   }
 
-  goToForgotPassword(): void {
-    void this.router.navigate(['/forgot-password']);
+  goBack(): void {
+    void this.router.navigate(['/login']);
   }
 }

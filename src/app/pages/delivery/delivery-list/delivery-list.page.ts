@@ -1,20 +1,30 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { IonButton, IonContent, IonIcon } from '@ionic/angular/standalone';
+import { IonButton, IonContent, IonIcon, IonSpinner } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { arrowBackOutline, closeCircleOutline, funnelOutline, locationOutline, searchOutline } from 'ionicons/icons';
+import {
+  arrowBackOutline,
+  closeCircleOutline,
+  funnelOutline,
+  locationOutline,
+  refreshOutline,
+  searchOutline,
+} from 'ionicons/icons';
 import { DeliveryCardComponent } from 'src/app/components/delivery-card/delivery-card.component';
 import { EmptyStateComponent } from 'src/app/components/empty-state/empty-state.component';
 import { SectionHeaderComponent } from 'src/app/components/section-header/section-header.component';
 import { DeliveryProductItem } from 'src/app/components/product-list/product-list.component';
 import { DeliveryStatus, ScheduleType } from 'src/app/components/status-chip/status-chip.component';
+import { OrderService } from 'src/app/services/order.service';
+import { DeliveryOrder } from 'src/app/models/order.model';
+import { getApiErrorMessage } from 'src/app/utils/api-contract.util';
 
-type FilterKey = 'all' | 'pending' | 'delivered' | 'alternate-day' | 'with-extras';
+type FilterKey = 'all' | 'pending' | 'delivered';
 
 interface DeliveryStop {
-  id: number;
+  id: string;
   customerName: string;
   customerCode: string;
   address: string;
@@ -22,12 +32,12 @@ interface DeliveryStop {
   routeLabel: string;
   scheduleType: ScheduleType;
   status: DeliveryStatus;
-  milkSummary: string;
-  extraSummary: string;
+  deliveryStatusLabel: string;
+  orderStatusLabel: string;
+  productSummary: string;
   timeSlot: string;
   sequenceLabel: string;
-  milkItems: DeliveryProductItem[];
-  extraItems: DeliveryProductItem[];
+  items: DeliveryProductItem[];
 }
 
 @Component({
@@ -39,113 +49,60 @@ interface DeliveryStop {
     IonButton,
     IonContent,
     IonIcon,
+    IonSpinner,
     CommonModule,
     FormsModule,
     RouterLink,
     DeliveryCardComponent,
     EmptyStateComponent,
-    SectionHeaderComponent
-  ]
+    SectionHeaderComponent,
+  ],
 })
-export class DeliveryListPage {
+export class DeliveryListPage implements OnInit {
   searchTerm = '';
   selectedFilter: FilterKey = 'all';
+  deliveries: DeliveryStop[] = [];
+  loading = true;
+  errorMessage = '';
 
-  readonly todayLabel = 'Tue, 24 Mar';
-  readonly routeLabel = 'Morning Route';
   readonly filterOptions: { key: FilterKey; label: string }[] = [
     { key: 'all', label: 'All' },
     { key: 'pending', label: 'Pending' },
     { key: 'delivered', label: 'Delivered' },
-    { key: 'alternate-day', label: 'Alternate-day' },
-    { key: 'with-extras', label: 'With Extras' }
   ];
 
-  readonly deliveries: DeliveryStop[] = [
-    {
-      id: 1,
-      customerName: 'Green Meadows Residency',
-      customerCode: 'C-184',
-      address: '12 Palm Grove Main Road, Anna Nagar West',
-      landmark: 'Near East gate security booth',
-      routeLabel: 'Stop 01 • Zone A',
-      scheduleType: 'daily',
-      status: 'in-progress',
-      milkSummary: '12 packets',
-      extraSummary: '2 items',
-      timeSlot: '06:30 - 06:45',
-      sequenceLabel: '#01',
-      milkItems: [{ name: 'Toned Milk', quantity: '10 x 500ml' }, { name: 'Full Cream Milk', quantity: '2 x 1L' }],
-      extraItems: [{ name: 'Curd Tub', quantity: '2' }]
-    },
-    {
-      id: 2,
-      customerName: 'Maya Krishnan',
-      customerCode: 'C-225',
-      address: '44 Lake View Street, Mogappair East',
-      landmark: 'Opposite children park',
-      routeLabel: 'Stop 02 • Zone A',
-      scheduleType: 'alternate-day',
-      status: 'pending',
-      milkSummary: '6 packets',
-      extraSummary: 'No extras',
-      timeSlot: '06:45 - 07:00',
-      sequenceLabel: '#02',
-      milkItems: [{ name: 'Cow Milk', quantity: '6 x 500ml' }],
-      extraItems: []
-    },
-    {
-      id: 3,
-      customerName: 'Vignesh Villa',
-      customerCode: 'C-091',
-      address: '9 Temple Avenue, Shenoy Nagar',
-      landmark: 'Grey villa with side gate',
-      routeLabel: 'Stop 03 • Zone B',
-      scheduleType: 'one-time',
-      status: 'pending',
-      milkSummary: '8 packets',
-      extraSummary: '3 items',
-      timeSlot: '07:00 - 07:15',
-      sequenceLabel: '#03',
-      milkItems: [{ name: 'Full Cream Milk', quantity: '8 x 500ml' }],
-      extraItems: [{ name: 'Paneer', quantity: '1' }, { name: 'A2 Ghee', quantity: '1' }, { name: 'Butter', quantity: '1' }]
-    },
-    {
-      id: 4,
-      customerName: 'Lakshmi Narayanan',
-      customerCode: 'C-048',
-      address: '3 North Mada Street, Mylapore',
-      landmark: 'Next to temple tank corner',
-      routeLabel: 'Stop 07 • Zone C',
-      scheduleType: 'daily',
-      status: 'delivered',
-      milkSummary: '4 packets',
-      extraSummary: '1 item',
-      timeSlot: '07:25 - 07:40',
-      sequenceLabel: '#07',
-      milkItems: [{ name: 'Toned Milk', quantity: '4 x 500ml' }],
-      extraItems: [{ name: 'Curd Cup', quantity: '1' }]
-    },
-    {
-      id: 5,
-      customerName: 'Skyline Heights',
-      customerCode: 'C-302',
-      address: '88 Club House Road, Kilpauk',
-      landmark: 'Tower B service entrance',
-      routeLabel: 'Stop 11 • Zone C',
-      scheduleType: 'daily',
-      status: 'delivered',
-      milkSummary: '14 packets',
-      extraSummary: 'No extras',
-      timeSlot: '07:50 - 08:05',
-      sequenceLabel: '#11',
-      milkItems: [{ name: 'Toned Milk', quantity: '14 x 500ml' }],
-      extraItems: []
-    }
-  ];
+  constructor(
+    private readonly router: Router,
+    private readonly orderService: OrderService
+  ) {
+    addIcons({
+      arrowBackOutline,
+      closeCircleOutline,
+      funnelOutline,
+      locationOutline,
+      refreshOutline,
+      searchOutline,
+    });
+  }
 
-  constructor(private readonly router: Router) {
-    addIcons({ arrowBackOutline, closeCircleOutline, funnelOutline, locationOutline, searchOutline });
+  ngOnInit(): void {
+    this.loadOrders();
+  }
+
+  get todayLabel(): string {
+    return new Date().toLocaleDateString('en-IN', {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+    });
+  }
+
+  private get todayDate(): string {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
   }
 
   get filteredDeliveries(): DeliveryStop[] {
@@ -161,10 +118,8 @@ export class DeliveryListPage {
 
       const matchesFilter =
         this.selectedFilter === 'all' ||
-        (this.selectedFilter === 'pending' && (stop.status === 'pending' || stop.status === 'in-progress')) ||
-        (this.selectedFilter === 'delivered' && stop.status === 'delivered') ||
-        (this.selectedFilter === 'alternate-day' && stop.scheduleType === 'alternate-day') ||
-        (this.selectedFilter === 'with-extras' && stop.extraItems.length > 0);
+        (this.selectedFilter === 'pending' && stop.status !== 'delivered') ||
+        (this.selectedFilter === 'delivered' && stop.status === 'delivered');
 
       return matchesSearch && matchesFilter;
     });
@@ -191,11 +146,7 @@ export class DeliveryListPage {
   }
 
   get pendingCount(): number {
-    return this.deliveries.filter((stop) => stop.status === 'pending').length;
-  }
-
-  get inProgressCount(): number {
-    return this.deliveries.filter((stop) => stop.status === 'in-progress').length;
+    return this.deliveries.filter((stop) => stop.status !== 'delivered').length;
   }
 
   get completedCount(): number {
@@ -214,7 +165,76 @@ export class DeliveryListPage {
     this.searchTerm = '';
   }
 
-  openDelivery(stopId: number): void {
+  openDelivery(stopId: string): void {
     void this.router.navigate(['/delivery', stopId]);
+  }
+
+  loadOrders(): void {
+    this.loading = true;
+    this.errorMessage = '';
+    this.orderService.getOrders({ deliveryDate: this.todayDate }).subscribe({
+      next: (orders) => {
+        this.deliveries = orders.map((order, idx) => this.mapOrderToStop(order, idx));
+        this.loading = false;
+      },
+      error: (err: unknown) => {
+        this.errorMessage = getApiErrorMessage(err, 'Unable to load deliveries. Tap retry to try again.');
+        this.loading = false;
+      },
+    });
+  }
+
+  private mapOrderToStop(order: DeliveryOrder, index: number): DeliveryStop {
+    const items: DeliveryProductItem[] = (order.items ?? []).map((item) => ({
+      name: item.name ?? 'Item',
+      quantity: [item.quantity, item.unit].filter(Boolean).join(' '),
+    }));
+
+    const seq = order.sequence ?? index + 1;
+    const deliveryStatusValue = order.deliveryStatus ?? order.status ?? '';
+
+    return {
+      id: order.id ?? order.orderId ?? String(index),
+      customerName: order.customerName ?? '',
+      customerCode: order.customerCode ?? '',
+      address: order.address ?? '',
+      landmark: order.landmark ?? '',
+      routeLabel: order.routeLabel ?? `Stop ${String(seq).padStart(2, '0')}`,
+      scheduleType: this.normalizeScheduleType(order.scheduleType),
+      status: this.normalizeStatus(deliveryStatusValue),
+      deliveryStatusLabel: this.formatStatusLabel(deliveryStatusValue),
+      orderStatusLabel: this.formatStatusLabel(order.orderStatus),
+      productSummary: `${items.length} product${items.length !== 1 ? 's' : ''}`,
+      timeSlot: order.timeSlot ?? '',
+      sequenceLabel: `#${String(seq).padStart(2, '0')}`,
+      items,
+    };
+  }
+
+  private normalizeStatus(status?: string): DeliveryStatus {
+    if (!status) return 'pending';
+    const s = status.toUpperCase();
+    if (s === 'DELIVERED' || s === 'COMPLETED') return 'delivered';
+    if (s === 'IN_PROGRESS' || s === 'IN-PROGRESS' || s === 'STARTED') return 'in-progress';
+    if (s === 'FAILED' || s === 'CANCELLED' || s === 'CANCELED') return 'failed';
+    if (s === 'SKIPPED') return 'skipped';
+    return 'pending';
+  }
+
+  private formatStatusLabel(status?: string): string {
+    if (!status || !status.trim()) return 'N/A';
+    return status
+      .toLowerCase()
+      .replace(/[_-]+/g, ' ')
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+
+  private normalizeScheduleType(type?: string): ScheduleType {
+    if (!type) return 'daily';
+    const t = type.toLowerCase().replace(/_/g, '-');
+    if (t.includes('alternate')) return 'alternate-day';
+    if (t.includes('one') && t.includes('time')) return 'one-time';
+    if (t === 'onetime') return 'one-time';
+    return 'daily';
   }
 }

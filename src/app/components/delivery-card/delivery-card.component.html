@@ -21,20 +21,23 @@
     [routeLabel]="routeLabel"
   ></app-customer-info-card>
 
-  <div class="delivery-card__summary">
+  <div class="delivery-card__summary" *ngIf="productSummary">
     <div class="delivery-card__summary-block">
-      <span>Milk</span>
-      <strong>{{ milkSummary }}</strong>
+      <span>Products</span>
+      <strong>{{ productSummary }}</strong>
     </div>
-    <div class="delivery-card__summary-block">
-      <span>Extras</span>
-      <strong>{{ extraSummary || 'No extras' }}</strong>
+    <div class="delivery-card__summary-block" *ngIf="deliveryStatusLabel">
+      <span>Delivery Status</span>
+      <strong>{{ deliveryStatusLabel }}</strong>
+    </div>
+    <div class="delivery-card__summary-block" *ngIf="orderStatusLabel">
+      <span>Order Status</span>
+      <strong>{{ orderStatusLabel }}</strong>
     </div>
   </div>
 
   <app-product-list
-    [milkItems]="milkItems"
-    [extraItems]="extraItems"
+    [items]="items"
     [layout]="'compact'"
   ></app-product-list>
 

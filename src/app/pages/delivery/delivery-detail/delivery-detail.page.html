@@ -1,6 +1,16 @@
 <ion-content [fullscreen]="true">
   <div class="delivery-detail-page">
     <main class="delivery-detail-shell">
+      <section *ngIf="loading" class="surface-card">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>Loading delivery details...</p>
+      </section>
+
+      <section *ngIf="!loading && errorMessage" class="surface-card">
+        <p>{{ errorMessage }}</p>
+      </section>
+
+      <ng-container *ngIf="!loading && !errorMessage">
       <section class="detail-header" aria-label="Navigation header">
         <button class="detail-header__back" type="button" aria-label="Go back" routerLink="/deliveries">
           <ion-icon name="arrow-back-outline"></ion-icon>
@@ -41,12 +51,16 @@
             <strong>{{ timeSlot }}</strong>
           </div>
           <div class="summary-line">
-            <span class="summary-line__label">Milk</span>
-            <strong>{{ milkSummary }}</strong>
+            <span class="summary-line__label">Products</span>
+            <strong>{{ productSummary }}</strong>
           </div>
           <div class="summary-line">
-            <span class="summary-line__label">Extras</span>
-            <strong>{{ extraSummary }}</strong>
+            <span class="summary-line__label">Delivery status</span>
+            <strong>{{ deliveryStatusLabel }}</strong>
+          </div>
+          <div class="summary-line">
+            <span class="summary-line__label">Order status</span>
+            <strong>{{ orderStatusLabel }}</strong>
           </div>
         </div>
       </section>
@@ -54,12 +68,11 @@
       <section class="surface-card surface-card--items">
         <app-section-header
           title="Items to Deliver"
-          subtitle="Verify milk and extra products before confirming."
+          subtitle="Verify all products before confirming."
         ></app-section-header>
 
         <app-product-list
-          [milkItems]="milkItems"
-          [extraItems]="extraItems"
+          [items]="items"
           [layout]="'expanded'"
         ></app-product-list>
       </section>
@@ -93,20 +106,21 @@
           </button>
         </div>
       </section>
+      </ng-container>
     </main>
   </div>
 </ion-content>
 
-<div class="detail-action-bar">
+<div class="detail-action-bar" *ngIf="!loading && !errorMessage">
   <div class="detail-action-bar__context">
     <span class="detail-action-bar__label">Current stop</span>
     <strong>{{ customerName }}</strong>
   </div>
 
   <div class="detail-action-bar__actions">
-    <button class="detail-action-bar__secondary" type="button" (click)="goToComplete()">Failed</button>
-    <button class="detail-action-bar__secondary" type="button" (click)="goToComplete()">Skipped</button>
-    <ion-button class="detail-action-bar__primary" fill="solid" (click)="goToComplete()">
+    <button class="detail-action-bar__secondary" type="button" (click)="goToComplete('CANCELLED')">Cancel</button>
+    <button class="detail-action-bar__secondary" type="button" (click)="goToComplete('SKIPPED')">Skipped</button>
+    <ion-button class="detail-action-bar__primary" fill="solid" (click)="goToComplete('DELIVERED')">
       <ion-icon slot="start" name="checkmark-circle-outline"></ion-icon>
       Mark Delivered
     </ion-button>
