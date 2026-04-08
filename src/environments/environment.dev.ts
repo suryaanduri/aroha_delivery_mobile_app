@@ -1,5 +1,5 @@
 export const environment = {
   production: false,
-  apiBaseUrl: 'https://dev-admin.arohafresh.com',
+  apiBaseUrl: 'https://dev.arohafresh.com',
   authPrefix: '/api/auth',
 };

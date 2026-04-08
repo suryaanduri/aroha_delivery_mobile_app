@@ -13,7 +13,7 @@ import {
 import { unwrapApiSuccess } from '../utils/api-contract.util';
 
 interface LoginData {
-  user: AuthUser;
+  user?: AuthUser;
   mustResetPassword?: boolean;
 }
 
@@ -87,19 +87,79 @@ export class AuthService {
 
   private mapLoginResponse(res: unknown): LoginResponse {
     if (res && typeof res === 'object' && 'success' in (res as Record<string, unknown>)) {
-      const { data, message } = unwrapApiSuccess<LoginData>(res, 'Login successful');
-      if (!data?.user) {
+      const { data, message } = unwrapApiSuccess<LoginData | Record<string, unknown>>(res, 'Login successful');
+      const root = res as Record<string, unknown>;
+
+      const user = this.extractLoginUser(res, data);
+      if (!user) {
         throw new Error('Invalid login response from server');
       }
+
       return {
         success: true,
         message,
-        mustResetPassword: Boolean(data?.mustResetPassword),
-        user: data.user,
+        mustResetPassword: this.extractMustResetPassword(root, data),
+        user,
       };
     }
 
     // Backward compatibility with old direct LoginResponse payload.
     return res as LoginResponse;
+  }
+
+  /**
+   * Tries `data.user`, then user-shaped `data` (flat), then top-level `user`.
+   * Temporary-password / must-reset responses often omit `data.user` or put fields on `data` directly.
+   */
+  private extractLoginUser(res: unknown, data: unknown): AuthUser | null {
+    const root = res && typeof res === 'object' ? (res as Record<string, unknown>) : {};
+
+    if (data && typeof data === 'object' && data !== null) {
+      const d = data as Record<string, unknown>;
+      const fromNested = this.normalizeAuthUser(d['user']);
+      if (fromNested) {
+        return fromNested;
+      }
+      const fromFlat = this.normalizeAuthUser(d);
+      if (fromFlat) {
+        return fromFlat;
+      }
+    }
+
+    return this.normalizeAuthUser(root['user']);
+  }
+
+  private extractMustResetPassword(root: Record<string, unknown>, data: unknown): boolean {
+    if (typeof root['mustResetPassword'] === 'boolean') {
+      return root['mustResetPassword'];
+    }
+    if (data && typeof data === 'object' && data !== null && 'mustResetPassword' in data) {
+      return Boolean((data as LoginData).mustResetPassword);
+    }
+    return false;
+  }
+
+  /** Accepts nested `data.user`, top-level `user`, or `data` shaped like a user (common for must-reset flows). */
+  private normalizeAuthUser(raw: unknown): AuthUser | null {
+    if (raw === null || raw === undefined) {
+      return null;
+    }
+    if (typeof raw !== 'object') {
+      return null;
+    }
+    const o = raw as Record<string, unknown>;
+    const id = o['id'] != null ? String(o['id']) : '';
+    const email = o['email'] != null ? String(o['email']) : '';
+    const username =
+      o['username'] != null ? String(o['username']) : o['userName'] != null ? String(o['userName']) : email;
+    const name =
+      o['name'] != null ? String(o['name']) : o['fullName'] != null ? String(o['fullName']) : username;
+    const role = o['role'] != null ? String(o['role']) : '';
+
+    if (!id && !email && !username) {
+      return null;
+    }
+
+    return { id, email, username, name, role };
   }
 }

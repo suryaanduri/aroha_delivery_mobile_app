@@ -66,8 +66,8 @@ export class OrderService {
     }
 
     const payload = data as Record<string, unknown>;
-    if (Array.isArray(payload.orders)) {
-      return payload.orders as DeliveryOrder[];
+    if (Array.isArray(payload['orders'])) {
+      return payload['orders'] as DeliveryOrder[];
     }
     for (const key of ['data', 'results', 'content']) {
       const value = payload[key];
