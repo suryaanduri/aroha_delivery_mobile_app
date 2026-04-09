@@ -1,45 +1,52 @@
 <article class="delivery-card" [class.delivery-card--priority]="priority" (click)="cardPressed.emit()">
   <div class="delivery-card__topline">
-    <div class="delivery-card__sequence" *ngIf="sequenceLabel">{{ sequenceLabel }}</div>
-    <div class="delivery-card__priority" *ngIf="priority">Next Stop</div>
+    <div class="delivery-card__left-meta">
+      <div class="delivery-card__sequence" *ngIf="sequenceLabel">{{ sequenceLabel }}</div>
+      <div class="delivery-card__priority" *ngIf="priority">Next Stop</div>
+    </div>
+
     <div class="delivery-card__slot" *ngIf="timeSlot">
       <ion-icon name="time-outline" aria-hidden="true"></ion-icon>
       <span>{{ timeSlot }}</span>
     </div>
   </div>
 
-  <div class="delivery-card__chips">
-    <app-status-chip [kind]="'schedule'" [value]="scheduleType"></app-status-chip>
-    <app-status-chip [kind]="'status'" [value]="status"></app-status-chip>
+  <div class="delivery-card__main">
+    <div class="delivery-card__identity">
+      <div class="delivery-card__name-row">
+        <h3>{{ customerName }}</h3>
+        <span *ngIf="customerCode" class="delivery-card__code">{{ customerCode }}</span>
+      </div>
+
+      <div class="delivery-card__route" *ngIf="routeLabel">
+        <ion-icon name="navigate-outline" aria-hidden="true"></ion-icon>
+        <span>{{ routeLabel }}</span>
+      </div>
+    </div>
+
+    <div class="delivery-card__chips">
+      <app-status-chip [kind]="'schedule'" [value]="scheduleType"></app-status-chip>
+      <app-status-chip [kind]="'status'" [value]="status"></app-status-chip>
+    </div>
   </div>
 
-  <app-customer-info-card
-    [name]="customerName"
-    [customerCode]="customerCode"
-    [address]="address"
-    [landmark]="landmark"
-    [routeLabel]="routeLabel"
-  ></app-customer-info-card>
-
-  <div class="delivery-card__summary" *ngIf="productSummary">
-    <div class="delivery-card__summary-block">
-      <span>Products</span>
-      <strong>{{ productSummary }}</strong>
+  <div class="delivery-card__location">
+    <ion-icon name="location-outline" aria-hidden="true"></ion-icon>
+    <div class="delivery-card__location-copy">
+      <p>{{ address }}</p>
+      <span *ngIf="landmark">{{ landmark }}</span>
     </div>
-    <div class="delivery-card__summary-block" *ngIf="deliveryStatusLabel">
-      <span>Delivery Status</span>
+  </div>
+
+  <div class="delivery-card__summary">
+    <div class="delivery-card__summary-item" *ngIf="productSummary">
+      <ion-icon name="cube-outline" aria-hidden="true"></ion-icon>
+      <span>{{ productSummary }}</span>
+    </div>
+    <div class="delivery-card__summary-item" *ngIf="deliveryStatusLabel">
       <strong>{{ deliveryStatusLabel }}</strong>
     </div>
-    <div class="delivery-card__summary-block" *ngIf="orderStatusLabel">
-      <span>Order Status</span>
-      <strong>{{ orderStatusLabel }}</strong>
-    </div>
   </div>
-
-  <app-product-list
-    [items]="items"
-    [layout]="'compact'"
-  ></app-product-list>
 
   <div class="delivery-card__footer">
     <ion-button class="delivery-card__action" fill="solid" (click)="actionPressed.emit(); $event.stopPropagation()">

@@ -2,9 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { IonButton, IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { arrowForwardOutline, timeOutline } from 'ionicons/icons';
-import { CustomerInfoCardComponent } from '../customer-info-card/customer-info-card.component';
-import { DeliveryProductItem, ProductListComponent } from '../product-list/product-list.component';
+import { arrowForwardOutline, cubeOutline, locationOutline, navigateOutline, timeOutline } from 'ionicons/icons';
+import { DeliveryProductItem } from '../product-list/product-list.component';
 import { DeliveryStatus, ScheduleType, StatusChipComponent } from '../status-chip/status-chip.component';
 
 @Component({
@@ -14,8 +13,6 @@ import { DeliveryStatus, ScheduleType, StatusChipComponent } from '../status-chi
     CommonModule,
     IonButton,
     IonIcon,
-    CustomerInfoCardComponent,
-    ProductListComponent,
     StatusChipComponent,
   ],
   templateUrl: './delivery-card.component.html',
@@ -41,6 +38,6 @@ export class DeliveryCardComponent {
   @Output() actionPressed = new EventEmitter<void>();
 
   constructor() {
-    addIcons({ arrowForwardOutline, timeOutline });
+    addIcons({ arrowForwardOutline, cubeOutline, locationOutline, navigateOutline, timeOutline });
   }
 }

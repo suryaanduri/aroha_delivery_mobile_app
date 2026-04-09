@@ -4,174 +4,9 @@ ion-content {
   font-family: "SF Pro Text", "Avenir Next", "Segoe UI", sans-serif;
 }
 
-.delivery-detail-page {
-  min-height: 100%;
-  padding: calc(env(safe-area-inset-top) + 14px) 16px calc(env(safe-area-inset-bottom) + 140px);
-  background:
-    radial-gradient(circle at top right, rgba(var(--app-color-primary-rgb), 0.06), transparent 24%),
-    linear-gradient(180deg, #f7fbf9, #edf4f0);
-}
-
-.delivery-detail-shell,
-.summary-grid,
-.proof-grid,
-.instruction-list,
+.detail-action-bar,
 .detail-action-bar__actions {
   display: flex;
-  flex-direction: column;
-}
-
-.delivery-detail-shell {
-  gap: 14px;
-  max-width: 440px;
-  margin: 0 auto;
-}
-
-.detail-header,
-.summary-meta,
-.summary-line,
-.proof-card,
-.instruction-list li,
-.detail-action-bar {
-  display: flex;
-  align-items: center;
-}
-
-.detail-header {
-  gap: 12px;
-}
-
-.detail-header__back {
-  display: grid;
-  width: 42px;
-  height: 42px;
-  flex-shrink: 0;
-  place-items: center;
-  border: 1px solid rgba(20, 38, 33, 0.08);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.92);
-  color: var(--app-color-text);
-}
-
-.detail-header__copy {
-  min-width: 0;
-  flex: 1;
-}
-
-.detail-header__eyebrow {
-  margin: 0 0 4px;
-  color: var(--app-color-text-muted);
-  font-size: 0.74rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.detail-header h1,
-.detail-action-bar__context strong,
-.summary-line strong,
-.proof-card__copy strong {
-  margin: 0;
-  font-family: "SF Pro Display", "Avenir Next", "Segoe UI", sans-serif;
-  letter-spacing: -0.03em;
-}
-
-.detail-header h1 {
-  font-size: 1.42rem;
-  line-height: 1.02;
-}
-
-.surface-card {
-  padding: 16px;
-  border: 1px solid rgba(20, 38, 33, 0.08);
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.94);
-  box-shadow: 0 12px 28px rgba(18, 35, 30, 0.06);
-}
-
-.surface-card--items {
-  border-color: rgba(var(--app-color-primary-rgb), 0.12);
-}
-
-.summary-grid {
-  gap: 12px;
-  margin-top: 12px;
-}
-
-.summary-meta {
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.summary-line {
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 0 0;
-  border-top: 1px solid rgba(20, 38, 33, 0.08);
-}
-
-.summary-line__label,
-.proof-card__copy span,
-.detail-action-bar__label {
-  color: var(--app-color-text-muted);
-}
-
-.summary-line__label {
-  font-size: 0.84rem;
-  font-weight: 600;
-}
-
-.instruction-list {
-  gap: 10px;
-  padding: 0;
-  margin: 12px 0 0;
-  list-style: none;
-}
-
-.instruction-list li {
-  align-items: flex-start;
-  gap: 10px;
-  color: var(--app-color-text);
-  font-size: 0.9rem;
-  line-height: 1.5;
-}
-
-.instruction-list ion-icon {
-  margin-top: 2px;
-  color: #a56d1a;
-}
-
-.proof-grid {
-  gap: 10px;
-  margin-top: 12px;
-}
-
-.proof-card {
-  gap: 12px;
-  padding: 14px;
-  border: 1px solid rgba(20, 38, 33, 0.08);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.76);
-  color: var(--app-color-text);
-  text-align: left;
-}
-
-.proof-card__icon {
-  display: grid;
-  width: 40px;
-  height: 40px;
-  flex-shrink: 0;
-  place-items: center;
-  border-radius: 14px;
-  background: rgba(var(--app-color-primary-rgb), 0.08);
-  color: var(--app-color-primary);
-}
-
-.proof-card__copy span {
-  display: block;
-  margin-top: 4px;
-  font-size: 0.82rem;
-  line-height: 1.4;
 }
 
 .detail-action-bar {
@@ -184,21 +19,30 @@ ion-content {
   align-items: stretch;
   gap: 12px;
   padding: 14px 16px calc(env(safe-area-inset-bottom) + 14px);
-  border-top: 1px solid rgba(20, 38, 33, 0.08);
-  background: rgba(250, 252, 251, 0.96);
+  border-top: 1px solid rgba(227, 236, 232, 0.95);
+  background: rgba(248, 251, 249, 0.94);
   backdrop-filter: blur(18px);
+  box-shadow: 0 -16px 40px rgba(20, 61, 49, 0.08);
+}
+
+.detail-action-bar__context strong,
+.detail-action-bar__label {
+  display: block;
 }
 
 .detail-action-bar__context strong {
-  display: block;
-  margin-top: 2px;
-  font-size: 0.98rem;
+  margin-top: 3px;
+  font-family: "SF Pro Display", "Avenir Next", "Segoe UI", sans-serif;
+  font-size: 1rem;
+  letter-spacing: -0.03em;
+  color: #0f2a24;
 }
 
 .detail-action-bar__label {
-  font-size: 0.76rem;
+  color: #5f746e;
+  font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
@@ -207,18 +51,25 @@ ion-content {
 }
 
 .detail-action-bar__secondary {
-  min-height: 44px;
-  border: 1px solid rgba(20, 38, 33, 0.12);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.92);
-  color: var(--app-color-text);
+  min-height: 46px;
+  flex: 1;
+  border: 1px solid #d9e7e1;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.96);
+  color: #23453c;
   font: inherit;
+  font-size: 0.92rem;
   font-weight: 700;
+  box-shadow: 0 10px 24px rgba(20, 61, 49, 0.05);
 }
 
 .detail-action-bar__primary {
-  --border-radius: 16px;
+  --background: linear-gradient(180deg, #1f7a63, #176652);
+  --border-radius: 18px;
   --padding-top: 15px;
   --padding-bottom: 15px;
+  flex: 1.2;
+  margin: 0;
   font-weight: 800;
+  letter-spacing: -0.01em;
 }
