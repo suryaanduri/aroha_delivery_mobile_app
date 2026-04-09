@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable, tap } from 'rxjs';
+import { Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import {
   ApiSuccessResponse,
@@ -9,21 +10,31 @@ import {
   LoginRequest,
   LoginResponse,
   ResetPasswordRequest,
+  StoredAuthSession,
 } from '../models/auth.model';
 import { unwrapApiSuccess } from '../utils/api-contract.util';
 
 interface LoginData {
   user?: AuthUser;
   mustResetPassword?: boolean;
+  token?: string;
+  accessToken?: string;
+  jwt?: string;
 }
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private static readonly STORAGE_KEY = 'aroha.auth.session';
   private readonly baseUrl = `${environment.apiBaseUrl}${environment.authPrefix}`;
   private currentUser: AuthUser | null = null;
   private _mustResetPassword = false;
+  private accessToken: string | null = null;
+  private initialized = false;
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(
+    private readonly http: HttpClient,
+    private readonly router: Router
+  ) {}
 
   get user(): AuthUser | null {
     return this.currentUser;
@@ -33,8 +44,52 @@ export class AuthService {
     return this.currentUser !== null;
   }
 
+  get hasInitialized(): boolean {
+    return this.initialized;
+  }
+
   get mustResetPassword(): boolean {
     return this._mustResetPassword;
+  }
+
+  get token(): string | null {
+    return this.accessToken;
+  }
+
+  initializeAuth(): void {
+    if (this.initialized) {
+      return;
+    }
+
+    this.initialized = true;
+
+    const storage = this.getStorage();
+    if (!storage) {
+      return;
+    }
+
+    const raw = storage.getItem(AuthService.STORAGE_KEY);
+    if (!raw) {
+      return;
+    }
+
+    try {
+      const stored = JSON.parse(raw) as Partial<StoredAuthSession>;
+      const user = this.normalizeAuthUser(stored.user);
+
+      if (!user) {
+        this.clearPersistedSession();
+        return;
+      }
+
+      this.currentUser = user;
+      this._mustResetPassword = Boolean(stored.mustResetPassword);
+      this.accessToken = typeof stored.accessToken === 'string' && stored.accessToken.trim().length > 0
+        ? stored.accessToken
+        : null;
+    } catch {
+      this.clearPersistedSession();
+    }
   }
 
   login(payload: LoginRequest): Observable<LoginResponse> {
@@ -44,8 +99,11 @@ export class AuthService {
         map((res) => this.mapLoginResponse(res)),
         tap((res) => {
           if (res.success) {
-            this.currentUser = res.user;
-            this._mustResetPassword = res.mustResetPassword;
+            this.setSession({
+              user: res.user,
+              mustResetPassword: res.mustResetPassword,
+              accessToken: res.accessToken,
+            });
           }
         })
       );
@@ -63,6 +121,7 @@ export class AuthService {
         tap((res) => {
           if (res.success) {
             this._mustResetPassword = false;
+            this.persistSession();
           }
         })
       );
@@ -81,8 +140,51 @@ export class AuthService {
   }
 
   logout(): void {
+    this.clearSessionState();
+    void this.router.navigateByUrl('/login');
+  }
+
+  handleUnauthorized(): void {
+    this.clearSessionState();
+    void this.router.navigateByUrl('/login');
+  }
+
+  getPostAuthRedirectUrl(): string {
+    return this.mustResetPassword ? '/reset-password' : '/dashboard';
+  }
+
+  private setSession(session: StoredAuthSession): void {
+    this.currentUser = session.user;
+    this._mustResetPassword = session.mustResetPassword;
+    this.accessToken = session.accessToken?.trim() ? session.accessToken : null;
+    this.persistSession();
+  }
+
+  private persistSession(): void {
+    const storage = this.getStorage();
+    if (!storage || !this.currentUser) {
+      return;
+    }
+
+    const session: StoredAuthSession = {
+      user: this.currentUser,
+      mustResetPassword: this._mustResetPassword,
+      accessToken: this.accessToken ?? undefined,
+    };
+
+    storage.setItem(AuthService.STORAGE_KEY, JSON.stringify(session));
+  }
+
+  private clearSessionState(): void {
     this.currentUser = null;
     this._mustResetPassword = false;
+    this.accessToken = null;
+    this.clearPersistedSession();
+  }
+
+  private clearPersistedSession(): void {
+    const storage = this.getStorage();
+    storage?.removeItem(AuthService.STORAGE_KEY);
   }
 
   private mapLoginResponse(res: unknown): LoginResponse {
@@ -100,11 +202,19 @@ export class AuthService {
         message,
         mustResetPassword: this.extractMustResetPassword(root, data),
         user,
+        accessToken: this.extractAccessToken(root, data),
       };
     }
 
     // Backward compatibility with old direct LoginResponse payload.
-    return res as LoginResponse;
+    const response = res as LoginResponse;
+    return {
+      ...response,
+      accessToken: this.extractAccessToken(
+        response as unknown as Record<string, unknown>,
+        response as unknown
+      ),
+    };
   }
 
   /**
@@ -139,6 +249,27 @@ export class AuthService {
     return false;
   }
 
+  private extractAccessToken(root: Record<string, unknown>, data: unknown): string | undefined {
+    const token = this.findTokenValue(data) ?? this.findTokenValue(root);
+    return token?.trim() ? token : undefined;
+  }
+
+  private findTokenValue(source: unknown): string | null {
+    if (!source || typeof source !== 'object') {
+      return null;
+    }
+
+    const record = source as Record<string, unknown>;
+    for (const key of ['token', 'accessToken', 'jwt']) {
+      const value = record[key];
+      if (typeof value === 'string' && value.trim().length > 0) {
+        return value;
+      }
+    }
+
+    return null;
+  }
+
   /** Accepts nested `data.user`, top-level `user`, or `data` shaped like a user (common for must-reset flows). */
   private normalizeAuthUser(raw: unknown): AuthUser | null {
     if (raw === null || raw === undefined) {
@@ -161,5 +292,9 @@ export class AuthService {
     }
 
     return { id, email, username, name, role };
+  }
+
+  private getStorage(): Storage | null {
+    return typeof localStorage === 'undefined' ? null : localStorage;
   }
 }

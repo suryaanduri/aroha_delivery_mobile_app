@@ -1,5 +1,46 @@
-import { HttpInterceptorFn } from '@angular/common/http';
+import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { catchError, throwError } from 'rxjs';
+import { environment } from 'src/environments/environment';
+import { AuthService } from '../services/auth.service';
 
 export const credentialsInterceptor: HttpInterceptorFn = (req, next) => {
-  return next(req.clone({ withCredentials: true }));
+  const auth = inject(AuthService);
+
+  auth.initializeAuth();
+
+  const isApiRequest = req.url.startsWith(environment.apiBaseUrl);
+  const isPublicAuthRequest =
+    req.url.includes('/credential-login') ||
+    req.url.includes('/forgot-password');
+
+  let request = req;
+
+  if (isApiRequest) {
+    request = request.clone({ withCredentials: true });
+  }
+
+  const token = auth.token;
+  if (isApiRequest && token && !isPublicAuthRequest) {
+    request = request.clone({
+      setHeaders: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }
+
+  return next(request).pipe(
+    catchError((error: unknown) => {
+      if (
+        error instanceof HttpErrorResponse &&
+        error.status === 401 &&
+        isApiRequest &&
+        !isPublicAuthRequest
+      ) {
+        auth.handleUnauthorized();
+      }
+
+      return throwError(() => error);
+    })
+  );
 };

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { IonButton, IonContent, IonIcon, IonSpinner } from '@ionic/angular/standalone';
+import { IonContent, IonIcon, IonSpinner } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
   arrowForwardOutline,
@@ -24,7 +24,7 @@ import { getApiErrorMessage } from 'src/app/utils/api-contract.util';
   templateUrl: './dashboard.page.html',
   styleUrls: ['./dashboard.page.scss'],
   standalone: true,
-  imports: [IonButton, IonContent, IonIcon, IonSpinner, CommonModule, RouterLink],
+  imports: [IonContent, IonIcon, IonSpinner, CommonModule, RouterLink],
 })
 export class DashboardPage implements OnInit {
   orders: DeliveryOrder[] = [];

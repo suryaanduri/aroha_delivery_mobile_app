@@ -6,6 +6,8 @@ export const authGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
 
+  auth.initializeAuth();
+
   if (!auth.isLoggedIn) {
     return router.createUrlTree(['/login']);
   }
@@ -21,9 +23,28 @@ export const resetPasswordGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
 
+  auth.initializeAuth();
+
   if (!auth.isLoggedIn) {
     return router.createUrlTree(['/login']);
   }
 
+  if (!auth.mustResetPassword) {
+    return router.createUrlTree(['/dashboard']);
+  }
+
   return true;
+};
+
+export const guestGuard: CanActivateFn = () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+
+  auth.initializeAuth();
+
+  if (!auth.isLoggedIn) {
+    return true;
+  }
+
+  return router.parseUrl(auth.getPostAuthRedirectUrl());
 };

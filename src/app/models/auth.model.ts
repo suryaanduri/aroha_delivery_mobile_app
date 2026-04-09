@@ -16,6 +16,7 @@ export interface LoginResponse {
   message: string;
   mustResetPassword: boolean;
   user: AuthUser;
+  accessToken?: string;
 }
 
 export interface ResetPasswordRequest {
@@ -36,4 +37,10 @@ export interface ApiSuccessResponse {
 export interface ApiErrorResponse {
   status: 'error';
   message: string;
+}
+
+export interface StoredAuthSession {
+  user: AuthUser;
+  mustResetPassword: boolean;
+  accessToken?: string;
 }
