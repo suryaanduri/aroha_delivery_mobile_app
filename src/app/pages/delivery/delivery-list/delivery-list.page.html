@@ -1,68 +1,86 @@
 <ion-content [fullscreen]="true">
   <app-page-shell>
-      <app-top-header
-        [eyebrow]="todayLabel"
-        [title]="pageTitle"
-        [subtitle]="pendingCount + ' Pending • ' + completedCount + ' Completed'"
-        backRoute="/dashboard"
-        backAriaLabel="Back to dashboard"
+    <app-top-header
+      [eyebrow]="todayLabel"
+      title="Today's Deliveries"
+      [subtitle]="pendingCount + ' pending • ' + completedCount + ' completed'"
+      backRoute="/dashboard"
+      backAriaLabel="Back to dashboard"
+    >
+      <ion-button
+        header-end
+        class="delivery-list-header__map"
+        fill="solid"
+        aria-label="Open route map"
+        routerLink="/deliveries/map"
       >
-        <ion-button header-end class="delivery-list-header__map" fill="solid" aria-label="Open route map" routerLink="/deliveries/map">
-          <ion-icon name="location-outline"></ion-icon>
-        </ion-button>
-      </app-top-header>
+        <ion-icon name="location-outline"></ion-icon>
+      </ion-button>
+    </app-top-header>
 
-      <!-- Loading state -->
-      <app-surface-card *ngIf="loading" class="loading-state" aria-label="Loading" tone="muted">
-        <ion-spinner name="crescent"></ion-spinner>
-        <p>Loading deliveries...</p>
-      </app-surface-card>
+    <app-surface-card *ngIf="loading" class="loading-state" aria-label="Loading" tone="muted">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Loading deliveries...</p>
+    </app-surface-card>
 
-      <!-- Error state -->
-      <app-surface-card *ngIf="!loading && errorMessage" class="error-state" aria-label="Error" tone="danger">
-        <p>{{ errorMessage }}</p>
-        <ion-button fill="outline" size="small" (click)="loadOrders()">
-          <ion-icon slot="start" name="refresh-outline"></ion-icon>
-          Retry
-        </ion-button>
-      </app-surface-card>
+    <app-surface-card *ngIf="!loading && errorMessage" class="error-state" aria-label="Error" tone="danger">
+      <p>{{ errorMessage }}</p>
+      <ion-button fill="outline" size="small" (click)="loadOrders()">
+        <ion-icon slot="start" name="refresh-outline"></ion-icon>
+        Retry
+      </ion-button>
+    </app-surface-card>
 
-      <!-- Content (loaded) -->
-      <ng-container *ngIf="!loading && !errorMessage">
-        <app-surface-card class="summary-strip" aria-label="Delivery summary" tone="muted" [compact]="true">
-          <article class="summary-pill">
-            <span>Total</span>
-            <strong>{{ totalStops }}</strong>
-          </article>
+    <ng-container *ngIf="!loading && !errorMessage">
+      <app-surface-card class="control-deck" aria-label="Route summary and filters">
+        <div class="control-deck__summary">
+          <div class="control-deck__lead">
+            <p class="control-deck__eyebrow">Route overview</p>
+            <h2>{{ totalStops }}</h2>
+            <p class="control-deck__caption">{{ totalStops === 1 ? 'stop today' : 'stops today' }}</p>
+          </div>
+        </div>
+
+        <div class="control-deck__stats">
           <article class="summary-pill">
             <span>Pending</span>
             <strong>{{ pendingCount }}</strong>
           </article>
-          <article class="summary-pill summary-pill--accent">
+          <article class="summary-pill summary-pill--soft">
             <span>Completed</span>
             <strong>{{ completedCount }}</strong>
           </article>
-        </app-surface-card>
+        </div>
 
-        <app-surface-card class="search-panel" aria-label="Search and filters" [compact]="true">
+        <div class="control-deck__search-row">
           <label class="search-field">
             <ion-icon name="search-outline" aria-hidden="true"></ion-icon>
             <input
               type="search"
               name="searchTerm"
-              placeholder="Search customer, code, or address"
+              placeholder="Search customer or address"
               [(ngModel)]="searchTerm"
               aria-label="Search deliveries"
             />
-            <button *ngIf="searchTerm" class="search-field__clear" type="button" (click)="clearSearch()" aria-label="Clear search">
+
+            <button
+              *ngIf="searchTerm"
+              class="search-field__clear"
+              type="button"
+              (click)="clearSearch()"
+              aria-label="Clear search"
+            >
               <ion-icon name="close-circle-outline" aria-hidden="true"></ion-icon>
             </button>
-            <button class="search-field__filter" type="button" aria-label="Open filters">
-              <ion-icon name="funnel-outline" aria-hidden="true"></ion-icon>
-              <span *ngIf="activeFilterCount" class="search-field__filter-count">{{ activeFilterCount }}</span>
-            </button>
-          </label>
 
+            <div class="search-field__filter" aria-hidden="true">
+              <ion-icon name="funnel-outline"></ion-icon>
+              <span *ngIf="activeFilterCount" class="search-field__filter-count">{{ activeFilterCount }}</span>
+            </div>
+          </label>
+        </div>
+
+        <div class="control-deck__filters">
           <div class="filter-rail">
             <button
               *ngFor="let filter of filterOptions"
@@ -74,68 +92,74 @@
               {{ filter.label }}
             </button>
           </div>
-        </app-surface-card>
+        </div>
+      </app-surface-card>
 
-        <ng-container *ngIf="filteredDeliveries.length; else emptyResult">
-          <section *ngIf="nextStop" class="list-section">
-            <app-section-header
-              title="Next Stop"
-              [meta]="nextStop.sequenceLabel"
-            ></app-section-header>
+      <ng-container *ngIf="filteredDeliveries.length; else emptyResult">
+        <section *ngIf="nextStop" class="list-section list-section--next">
+          <div class="next-stop-intro">
+            <p class="next-stop-intro__eyebrow">Next stop</p>
+            <div class="next-stop-intro__row">
+              <div>
+                <h2>Open next delivery</h2>
+                <p>{{ nextStop.sequenceLabel }} in your active route</p>
+              </div>
+            </div>
+          </div>
 
+          <app-delivery-card
+            [stop]="nextStop"
+            [priority]="true"
+            actionText="Open Stop"
+            (cardPressed)="openDelivery(nextStop.id)"
+            (actionPressed)="openDelivery(nextStop.id)"
+          ></app-delivery-card>
+        </section>
+
+        <section *ngIf="remainingActiveStops.length" class="list-section">
+          <app-section-header
+            title="Active stops"
+            [meta]="remainingActiveStops.length + ' remaining'"
+          ></app-section-header>
+
+          <div class="delivery-list-stack">
             <app-delivery-card
-              [stop]="nextStop"
-              [priority]="true"
+              [stop]="stop"
+              *ngFor="let stop of remainingActiveStops"
               actionText="Open Stop"
-              (cardPressed)="openDelivery(nextStop.id)"
-              (actionPressed)="openDelivery(nextStop.id)"
+              (cardPressed)="openDelivery(stop.id)"
+              (actionPressed)="openDelivery(stop.id)"
             ></app-delivery-card>
-          </section>
+          </div>
+        </section>
 
-          <section *ngIf="remainingActiveStops.length" class="list-section">
-            <app-section-header
-              title="Active Stops"
-              [meta]="remainingActiveStops.length + ' stops'"
-            ></app-section-header>
+        <section *ngIf="completedStops.length" class="list-section list-section--completed">
+          <app-section-header
+            title="Completed"
+            [meta]="completedStops.length + ' done'"
+          ></app-section-header>
 
-            <div class="delivery-list-stack">
-              <app-delivery-card
-                [stop]="stop"
-                *ngFor="let stop of remainingActiveStops"
-                actionText="Open Stop"
-                (cardPressed)="openDelivery(stop.id)"
-                (actionPressed)="openDelivery(stop.id)"
-              ></app-delivery-card>
-            </div>
-          </section>
-
-          <section *ngIf="completedStops.length" class="list-section">
-            <app-section-header
-              title="Completed"
-              [meta]="completedStops.length + ' done'"
-            ></app-section-header>
-
-            <div class="delivery-list-stack delivery-list-stack--completed">
-              <app-delivery-card
-                [stop]="stop"
-                *ngFor="let stop of completedStops"
-                actionText="View Stop"
-                (cardPressed)="openDelivery(stop.id)"
-                (actionPressed)="openDelivery(stop.id)"
-              ></app-delivery-card>
-            </div>
-          </section>
-        </ng-container>
-
-        <ng-template #emptyResult>
-          <app-empty-state
-            icon="search-outline"
-            title="No deliveries found"
-            message="Try adjusting search or filter selections to find the right stop."
-            actionText="Show All"
-            (actionPressed)="searchTerm = ''; selectFilter('all')"
-          ></app-empty-state>
-        </ng-template>
+          <div class="delivery-list-stack delivery-list-stack--completed">
+            <app-delivery-card
+              [stop]="stop"
+              *ngFor="let stop of completedStops"
+              actionText="View Stop"
+              (cardPressed)="openDelivery(stop.id)"
+              (actionPressed)="openDelivery(stop.id)"
+            ></app-delivery-card>
+          </div>
+        </section>
       </ng-container>
+
+      <ng-template #emptyResult>
+        <app-empty-state
+          icon="search-outline"
+          title="No deliveries found"
+          message="Try adjusting search or filter selections to find the right stop."
+          actionText="Show All"
+          (actionPressed)="searchTerm = ''; selectFilter('all')"
+        ></app-empty-state>
+      </ng-template>
+    </ng-container>
   </app-page-shell>
 </ion-content>
