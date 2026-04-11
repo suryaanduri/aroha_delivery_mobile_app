@@ -68,4 +68,11 @@ export class DeliveryMapPage {
   openStop(stopId: number): void {
     void this.router.navigate(['/delivery', stopId]);
   }
+    get todayLabel(): string {
+    return new Date().toLocaleDateString('en-IN', {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+    });
+  }
 }
