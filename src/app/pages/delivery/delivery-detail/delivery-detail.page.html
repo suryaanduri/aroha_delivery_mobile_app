@@ -1,13 +1,12 @@
 <ion-content [fullscreen]="true">
-  <div class="min-h-full bg-[#F4F7F5]">
+  <app-page-shell [withActionBar]="true" [maxWidth]="460">
     <div class="pointer-events-none absolute inset-0 overflow-hidden">
       <div class="absolute -left-20 top-28 h-64 w-64 rounded-full bg-[radial-gradient(circle,_rgba(47,174,143,0.12),_transparent_72%)]"></div>
       <div class="absolute right-[-76px] top-8 h-72 w-72 rounded-full bg-[radial-gradient(circle,_rgba(31,122,99,0.14),_transparent_70%)]"></div>
       <div class="absolute bottom-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-[radial-gradient(circle,_rgba(255,255,255,0.72),_transparent_72%)]"></div>
     </div>
 
-    <main class="relative mx-auto flex min-h-full w-full max-w-[460px] flex-col gap-5 px-4 pb-[calc(env(safe-area-inset-bottom)+156px)] pt-[calc(env(safe-area-inset-top)+18px)]">
-      <section *ngIf="loading" class="rounded-[28px] border border-[#E3ECE8] bg-white/95 px-6 py-10 shadow-[0_20px_48px_rgba(20,61,49,0.06)]">
+      <app-surface-card *ngIf="loading" tone="muted" class="rounded-[28px] bg-white/95 px-6 py-10">
         <div class="flex flex-col items-center gap-4 text-center">
           <div class="flex h-16 w-16 items-center justify-center rounded-[22px] border border-[#DDEAE4] bg-[#F7FBF9] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
             <ion-spinner name="crescent" class="h-8 w-8 text-[#1F7A63]"></ion-spinner>
@@ -17,9 +16,9 @@
             <p class="text-[14px] leading-6 text-[#5F746E]">Preparing customer and delivery information.</p>
           </div>
         </div>
-      </section>
+      </app-surface-card>
 
-      <section *ngIf="!loading && errorMessage" class="rounded-[28px] border border-[#F1CDC2] bg-[linear-gradient(180deg,#FFFFFF,#FFF8F6)] px-5 py-5 shadow-[0_20px_48px_rgba(91,38,22,0.05)]">
+      <app-surface-card *ngIf="!loading && errorMessage" tone="danger" class="rounded-[28px] px-5 py-5">
         <div class="flex items-start gap-3">
           <div class="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#FDEAE5] text-[#E76F51] shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]">
             <ion-icon name="alert-circle-outline" class="text-[18px]"></ion-icon>
@@ -29,39 +28,27 @@
             <p class="text-[14px] leading-6 text-[#7A645D]">{{ errorMessage }}</p>
           </div>
         </div>
-      </section>
+      </app-surface-card>
 
       <ng-container *ngIf="!loading && !errorMessage">
-        <section class="overflow-hidden rounded-[30px] border border-white/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,252,250,0.94))] px-5 pb-5 pt-4 shadow-[0_24px_60px_rgba(20,61,49,0.08)]" aria-label="Navigation header">
-          <div class="mb-4 flex items-start justify-between gap-3">
-            <button
-              type="button"
-              routerLink="/deliveries"
-              aria-label="Go back"
-              class="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[#D9E7E1] bg-white/95 text-[#1F7A63] shadow-[0_10px_24px_rgba(20,61,49,0.08)] transition-transform active:scale-[0.97]"
-            >
-              <ion-icon name="arrow-back-outline" class="text-[20px]"></ion-icon>
-            </button>
-
-            <app-status-chip [kind]="'status'" [value]="status"></app-status-chip>
-          </div>
-
+        <app-surface-card tone="success" class="overflow-hidden rounded-[30px] px-5 pb-5 pt-4" aria-label="Navigation header">
+          <app-top-header
+            backRoute="/deliveries"
+            backAriaLabel="Go back to deliveries"
+            [title]="customerName"
+          >
+            <app-status-chip header-end [kind]="'status'" [value]="status"></app-status-chip>
+          </app-top-header>
           <div class="space-y-3">
             <div class="inline-flex items-center gap-2 rounded-full border border-[#DCEBE4] bg-white/88 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#5F746E] shadow-[0_8px_20px_rgba(20,61,49,0.04)]">
               <span *ngIf="sequenceLabel">{{ sequenceLabel }}</span>
               <span *ngIf="sequenceLabel && timeSlot">•</span>
               <span>{{ timeSlot }}</span>
             </div>
-
-            <div class="space-y-2">
-              <h1 class="max-w-[13ch] text-[32px] font-bold leading-[1.02] tracking-[-0.04em] text-[#0F2A24]">
-                {{ customerName }}
-              </h1>
-            </div>
           </div>
-        </section>
+        </app-surface-card>
 
-        <section class="rounded-[28px] border border-[#E3ECE8] bg-[linear-gradient(180deg,#FFFFFF,#F8FBF9)] p-4 shadow-[0_20px_48px_rgba(20,61,49,0.06)]">
+        <app-surface-card tone="success" class="rounded-[28px] p-4">
           <div class="rounded-2xl border border-[#E6EEEA] bg-[#F8FBF9] px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]">
             <app-section-header
               title="Stop Overview"
@@ -98,9 +85,9 @@
               <p class="mt-2 text-[17px] font-semibold tracking-[-0.02em] text-[#0F2A24]">{{ deliveryStatusLabel }}</p>
             </div>
           </div>
-        </section>
+        </app-surface-card>
 
-        <section class="rounded-[28px] border border-[#D9EAE3] bg-[linear-gradient(180deg,#FFFFFF,#F7FCF9)] p-4 shadow-[0_22px_52px_rgba(20,61,49,0.07)]">
+        <app-surface-card tone="success" class="rounded-[28px] p-4">
           <div class="rounded-2xl border border-[#DCF0E7] bg-[#F2FBF7] px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
             <app-section-header
               title="Items to Deliver"
@@ -113,9 +100,9 @@
               [layout]="'expanded'"
             ></app-product-list>
           </div>
-        </section>
+        </app-surface-card>
 
-        <section *ngIf="deliveryNotes.length" class="rounded-[28px] border border-[#EEE2BF] bg-[linear-gradient(180deg,#FFFFFF,#FFF9EE)] p-4 shadow-[0_18px_44px_rgba(122,88,33,0.05)]">
+        <app-surface-card *ngIf="deliveryNotes.length" tone="warning" class="rounded-[28px] p-4">
           <div class="rounded-2xl border border-[#F1E5C5] bg-[#FFF8E7] px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
             <app-section-header title="Delivery Notes"></app-section-header>
           </div>
@@ -131,9 +118,9 @@
               <span>{{ note }}</span>
             </li>
           </ul>
-        </section>
+        </app-surface-card>
 
-        <section class="rounded-[28px] border border-[#E3ECE8] bg-white/96 p-4 shadow-[0_20px_48px_rgba(20,61,49,0.06)]">
+        <app-surface-card class="rounded-[28px] p-4">
           <div class="rounded-2xl border border-[#E6EEEA] bg-[#F8FBF9] px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]">
             <app-section-header
               title="Proof of Delivery"
@@ -155,18 +142,12 @@
               </div>
             </button>
           </div>
-        </section>
+        </app-surface-card>
       </ng-container>
-    </main>
-  </div>
+  </app-page-shell>
 </ion-content>
 
-<div class="detail-action-bar" *ngIf="!loading && !errorMessage">
-  <div class="detail-action-bar__context">
-    <span class="detail-action-bar__label">Current stop</span>
-    <strong>{{ customerName }}</strong>
-  </div>
-
+<app-action-bar *ngIf="!loading && !errorMessage" label="Current stop" [value]="customerName">
   <div class="detail-action-bar__actions">
     <button class="detail-action-bar__secondary" type="button" (click)="goToComplete('CANCELLED')">Cancel</button>
     <button class="detail-action-bar__secondary" type="button" (click)="goToComplete('SKIPPED')">Skipped</button>
@@ -175,4 +156,4 @@
       Mark Delivered
     </ion-button>
   </div>
-</div>
+</app-action-bar>

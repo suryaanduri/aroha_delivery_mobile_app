@@ -1,0 +1,11 @@
+<div
+  class="page-shell"
+  [attr.data-variant]="variant"
+  [class.page-shell--with-action-bar]="withActionBar"
+  [style.--page-shell-max-width.px]="maxWidth"
+>
+  <div class="page-shell__backdrop" aria-hidden="true"></div>
+  <main class="page-shell__content">
+    <ng-content></ng-content>
+  </main>
+</div>

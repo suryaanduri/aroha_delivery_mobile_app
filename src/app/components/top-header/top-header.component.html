@@ -1,0 +1,24 @@
+<header class="top-header">
+  <div class="top-header__lead">
+    <a
+      *ngIf="backRoute"
+      class="top-header__back"
+      [routerLink]="backRoute"
+      [attr.aria-label]="backAriaLabel"
+    >
+      <ion-icon name="arrow-back-outline" aria-hidden="true"></ion-icon>
+    </a>
+
+    <ng-content select="[header-start]"></ng-content>
+  </div>
+
+  <div class="top-header__copy">
+    <p *ngIf="eyebrow" class="top-header__eyebrow">{{ eyebrow }}</p>
+    <h1 class="top-header__title">{{ title }}</h1>
+    <p *ngIf="subtitle" class="top-header__subtitle">{{ subtitle }}</p>
+  </div>
+
+  <div class="top-header__actions">
+    <ng-content select="[header-end]"></ng-content>
+  </div>
+</header>

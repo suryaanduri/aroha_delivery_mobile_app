@@ -14,30 +14,15 @@ import {
 } from 'ionicons/icons';
 import { DeliveryCardComponent } from 'src/app/components/delivery-card/delivery-card.component';
 import { EmptyStateComponent } from 'src/app/components/empty-state/empty-state.component';
+import { PageShellComponent } from 'src/app/components/page-shell/page-shell.component';
 import { SectionHeaderComponent } from 'src/app/components/section-header/section-header.component';
-import { DeliveryProductItem } from 'src/app/components/product-list/product-list.component';
-import { DeliveryStatus, ScheduleType } from 'src/app/components/status-chip/status-chip.component';
+import { SurfaceCardComponent } from 'src/app/components/surface-card/surface-card.component';
+import { TopHeaderComponent } from 'src/app/components/top-header/top-header.component';
 import { OrderService } from 'src/app/services/order.service';
-import { DeliveryOrder } from 'src/app/models/order.model';
+import { getMockDeliveryOrders } from 'src/app/mocks/delivery.mock';
+import { DeliveryStopViewModel, mapOrderToDeliveryStopViewModel } from 'src/app/utils/delivery-view.util';
 
 type FilterKey = 'all' | 'pending' | 'delivered';
-
-interface DeliveryStop {
-  id: string;
-  customerName: string;
-  customerCode: string;
-  address: string;
-  landmark: string;
-  routeLabel: string;
-  scheduleType: ScheduleType;
-  status: DeliveryStatus;
-  deliveryStatusLabel: string;
-  orderStatusLabel: string;
-  productSummary: string;
-  timeSlot: string;
-  sequenceLabel: string;
-  items: DeliveryProductItem[];
-}
 
 @Component({
   selector: 'app-delivery-list',
@@ -54,13 +39,16 @@ interface DeliveryStop {
     RouterLink,
     DeliveryCardComponent,
     EmptyStateComponent,
+    PageShellComponent,
     SectionHeaderComponent,
+    SurfaceCardComponent,
+    TopHeaderComponent,
   ],
 })
 export class DeliveryListPage implements OnInit {
   searchTerm = '';
   selectedFilter: FilterKey = 'all';
-  deliveries: DeliveryStop[] = [];
+  deliveries: DeliveryStopViewModel[] = [];
   loading = true;
   errorMessage = '';
 
@@ -104,7 +92,7 @@ export class DeliveryListPage implements OnInit {
     return `${yyyy}-${mm}-${dd}`;
   }
 
-  get filteredDeliveries(): DeliveryStop[] {
+  get filteredDeliveries(): DeliveryStopViewModel[] {
     const query = this.searchTerm.trim().toLowerCase();
 
     return this.deliveries.filter((stop) => {
@@ -124,24 +112,28 @@ export class DeliveryListPage implements OnInit {
     });
   }
 
-  get activeStops(): DeliveryStop[] {
+  get activeStops(): DeliveryStopViewModel[] {
     return this.filteredDeliveries.filter((stop) => stop.status !== 'delivered');
   }
 
-  get nextStop(): DeliveryStop | null {
+  get nextStop(): DeliveryStopViewModel | null {
     return this.activeStops[0] ?? null;
   }
 
-  get remainingActiveStops(): DeliveryStop[] {
+  get remainingActiveStops(): DeliveryStopViewModel[] {
     return this.activeStops.slice(1);
   }
 
-  get completedStops(): DeliveryStop[] {
+  get completedStops(): DeliveryStopViewModel[] {
     return this.filteredDeliveries.filter((stop) => stop.status === 'delivered');
   }
 
   get totalStops(): number {
     return this.deliveries.length;
+  }
+
+  get pageTitle(): string {
+    return `Today's Deliveries (${this.totalStops})`;
   }
 
   get pendingCount(): number {
@@ -173,170 +165,14 @@ export class DeliveryListPage implements OnInit {
     this.errorMessage = '';
     this.orderService.getOrders({ deliveryDate: this.todayDate }).subscribe({
       next: (orders) => {
-        this.deliveries = orders.length
-          ? orders.map((order, idx) => this.mapOrderToStop(order, idx))
-          : this.getStaticStops();
+        const sourceOrders = orders.length ? orders : getMockDeliveryOrders();
+        this.deliveries = sourceOrders.map((order, idx) => mapOrderToDeliveryStopViewModel(order, idx));
         this.loading = false;
       },
-      error: (err: unknown) => {
-        this.deliveries = this.getStaticStops();
-        this.errorMessage = '';
+      error: () => {
+        this.deliveries = getMockDeliveryOrders().map((order, idx) => mapOrderToDeliveryStopViewModel(order, idx));
         this.loading = false;
       },
     });
-  }
-
-  private getStaticStops(): DeliveryStop[] {
-    return [
-      {
-        id: 'demo-stop-1',
-        customerName: 'Green Valley Residency',
-        customerCode: 'AF-1042',
-        address: '12 Lake View Road, Coimbatore',
-        landmark: 'Near East Gate',
-        routeLabel: 'Morning Route',
-        scheduleType: 'daily',
-        status: 'pending',
-        deliveryStatusLabel: 'Pending',
-        orderStatusLabel: 'Confirmed',
-        productSummary: '3 products',
-        timeSlot: '06:30 AM - 07:00 AM',
-        sequenceLabel: '#01',
-        items: [
-          { name: 'A2 Cow Milk', quantity: '2 L' },
-          { name: 'Fresh Curd', quantity: '1 Tub' },
-          { name: 'Paneer', quantity: '250 g' },
-        ],
-      },
-      {
-        id: 'demo-stop-2',
-        customerName: 'Maya Narayanan',
-        customerCode: 'AF-2187',
-        address: '44 Park Avenue, RS Puram',
-        landmark: 'Opp. Bakery Corner',
-        routeLabel: 'Morning Route',
-        scheduleType: 'alternate-day',
-        status: 'in-progress',
-        deliveryStatusLabel: 'In Progress',
-        orderStatusLabel: 'Packed',
-        productSummary: '2 products',
-        timeSlot: '07:00 AM - 07:30 AM',
-        sequenceLabel: '#02',
-        items: [
-          { name: 'Buffalo Milk', quantity: '1 L' },
-          { name: 'Ghee', quantity: '500 ml' },
-        ],
-      },
-      {
-        id: 'demo-stop-3',
-        customerName: 'Apex Fitness Studio',
-        customerCode: 'AF-3321',
-        address: '9 Cross Cut Road, Gandhipuram',
-        landmark: 'Behind City Pharmacy',
-        routeLabel: 'Central Route',
-        scheduleType: 'daily',
-        status: 'pending',
-        deliveryStatusLabel: 'Pending',
-        orderStatusLabel: 'Confirmed',
-        productSummary: '4 products',
-        timeSlot: '07:30 AM - 08:00 AM',
-        sequenceLabel: '#03',
-        items: [
-          { name: 'Skim Milk', quantity: '4 L' },
-          { name: 'Greek Yogurt', quantity: '6 Cups' },
-          { name: 'Butter', quantity: '2 Packs' },
-          { name: 'Paneer', quantity: '500 g' },
-        ],
-      },
-      {
-        id: 'demo-stop-4',
-        customerName: 'Latha Traders',
-        customerCode: 'AF-4176',
-        address: '88 Mettupalayam Road, Sai Baba Colony',
-        landmark: 'Next to Petrol Bunk',
-        routeLabel: 'Central Route',
-        scheduleType: 'one-time',
-        status: 'delivered',
-        deliveryStatusLabel: 'Delivered',
-        orderStatusLabel: 'Completed',
-        productSummary: '2 products',
-        timeSlot: '08:00 AM - 08:20 AM',
-        sequenceLabel: '#04',
-        items: [
-          { name: 'Full Cream Milk', quantity: '3 L' },
-          { name: 'Fresh Curd', quantity: '2 Tubs' },
-        ],
-      },
-    ];
-  }
-
-  private mapOrderToStop(order: DeliveryOrder, index: number): DeliveryStop {
-    const items: DeliveryProductItem[] = (order.items ?? []).map((item) => ({
-      name: item.name ?? 'Item',
-      quantity: [item.quantity, item.unit].filter(Boolean).join(' '),
-    }));
-
-    const seq = order.sequence ?? index + 1;
-    const deliveryStatusValue = order.deliveryStatus ?? order.status ?? '';
-
-    return {
-      id: order.id ?? order.orderId ?? String(index),
-      customerName: order.customerName ?? '',
-      customerCode: order.customerCode ?? '',
-      address: order.address ?? '',
-      landmark: order.landmark ?? '',
-      routeLabel: order.routeLabel ?? `Stop ${String(seq).padStart(2, '0')}`,
-      scheduleType: this.normalizeScheduleType(order.scheduleType),
-      status: this.normalizeStatus(deliveryStatusValue),
-      deliveryStatusLabel: this.getExactStatusLabel(deliveryStatusValue),
-      orderStatusLabel: this.getExactStatusLabel(order.orderStatus),
-      productSummary: this.getProductSummary(order, items.length),
-      timeSlot: order.timeSlot ?? '',
-      sequenceLabel: `#${String(seq).padStart(2, '0')}`,
-      items,
-    };
-  }
-
-  private normalizeStatus(status?: string): DeliveryStatus {
-    if (!status) return 'pending';
-    const s = status.toUpperCase();
-    if (s === 'DELIVERED' || s === 'COMPLETED') return 'delivered';
-    if (s === 'IN_PROGRESS' || s === 'IN-PROGRESS' || s === 'STARTED') return 'in-progress';
-    if (s === 'FAILED' || s === 'CANCELLED' || s === 'CANCELED') return 'failed';
-    if (s === 'SKIPPED') return 'skipped';
-    return 'pending';
-  }
-
-  private formatStatusLabel(status?: string): string {
-    if (!status || !status.trim()) return 'N/A';
-    return status
-      .toLowerCase()
-      .replace(/[_-]+/g, ' ')
-      .replace(/\b\w/g, (c) => c.toUpperCase());
-  }
-
-  private getExactStatusLabel(status?: string): string {
-    return status?.trim() || 'N/A';
-  }
-
-  private getProductSummary(order: DeliveryOrder, itemCountFromItems: number): string {
-    if (order.productSummary?.trim()) {
-      return order.productSummary.trim();
-    }
-
-    if (typeof order.itemCount === 'number') {
-      return `${order.itemCount} product${order.itemCount !== 1 ? 's' : ''}`;
-    }
-
-    return `${itemCountFromItems} product${itemCountFromItems !== 1 ? 's' : ''}`;
-  }
-
-  private normalizeScheduleType(type?: string): ScheduleType {
-    if (!type) return 'daily';
-    const t = type.toLowerCase().replace(/_/g, '-');
-    if (t.includes('alternate')) return 'alternate-day';
-    if (t.includes('one') && t.includes('time')) return 'one-time';
-    if (t === 'onetime') return 'one-time';
-    return 'daily';
   }
 }

@@ -1,30 +1,26 @@
 <ion-content [fullscreen]="true">
-  <div class="delivery-complete-page">
-    <main class="delivery-complete-shell">
-      <section *ngIf="loading" class="surface-card">
+  <app-page-shell [withActionBar]="true">
+      <app-surface-card *ngIf="loading" tone="muted">
         <ion-spinner name="crescent"></ion-spinner>
         <p>Loading delivery details...</p>
-      </section>
+      </app-surface-card>
 
-      <section *ngIf="!loading && errorMessage" class="surface-card">
+      <app-surface-card *ngIf="!loading && errorMessage" tone="danger">
         <p>{{ errorMessage }}</p>
-      </section>
+      </app-surface-card>
 
       <ng-container *ngIf="!loading && !errorMessage">
-      <section class="complete-header" aria-label="Completion header">
-        <button class="complete-header__back" type="button" aria-label="Go back" (click)="cancel()">
+      <app-top-header
+        [eyebrow]="routeLabel + ' • ' + timeSlot"
+        title="Complete Stop"
+      >
+        <button header-start class="complete-header__back" type="button" aria-label="Go back" (click)="cancel()">
           <ion-icon name="arrow-back-outline"></ion-icon>
         </button>
+        <app-status-chip header-end [kind]="'status'" [value]="currentStatus"></app-status-chip>
+      </app-top-header>
 
-        <div class="complete-header__copy">
-          <p class="complete-header__eyebrow">{{ routeLabel }} • {{ timeSlot }}</p>
-          <h1>Complete Stop</h1>
-        </div>
-
-        <app-status-chip [kind]="'status'" [value]="currentStatus"></app-status-chip>
-      </section>
-
-      <section class="surface-card surface-card--context">
+      <app-surface-card class="surface-card surface-card--context">
         <div class="context-band">
           <div class="context-band__copy">
             <strong>{{ customerName }}</strong>
@@ -40,9 +36,9 @@
           [landmark]="landmark"
           [routeLabel]="routeLabel"
         ></app-customer-info-card>
-      </section>
+      </app-surface-card>
 
-      <section class="surface-card surface-card--action">
+      <app-surface-card class="surface-card surface-card--action">
         <app-section-header
           title="Select Outcome"
           subtitle="Choose the final status before attaching proof."
@@ -79,9 +75,9 @@
             <span>Deferred to later</span>
           </button>
         </div>
-      </section>
+      </app-surface-card>
 
-      <section class="surface-card surface-card--items">
+      <app-surface-card class="surface-card surface-card--items">
         <app-section-header
           title="Items Confirmed"
           subtitle="Review the delivery contents before submission."
@@ -91,9 +87,9 @@
           [items]="items"
           [layout]="'expanded'"
         ></app-product-list>
-      </section>
+      </app-surface-card>
 
-      <section class="surface-card">
+      <app-surface-card class="surface-card">
         <app-section-header
           title="Proof & Notes"
           subtitle="Only capture what is needed for this outcome."
@@ -150,9 +146,9 @@
             ></textarea>
           </div>
         </div>
-      </section>
+      </app-surface-card>
 
-      <section class="surface-card">
+      <app-surface-card class="surface-card">
         <app-section-header
           title="Confirmation Summary"
           subtitle="Review the final outcome before submission."
@@ -168,13 +164,12 @@
             <strong>{{ proofSummary.length ? proofSummary.join(' • ') : 'No proof attached' }}</strong>
           </div>
         </div>
-      </section>
+      </app-surface-card>
       </ng-container>
-    </main>
-  </div>
+  </app-page-shell>
 </ion-content>
 
-<div class="completion-bar" *ngIf="!loading && !errorMessage">
+<app-action-bar *ngIf="!loading && !errorMessage">
   <button class="completion-bar__ghost" type="button" (click)="cancel()">Cancel</button>
   <ion-button class="completion-bar__primary" fill="solid" [disabled]="!canSubmit" (click)="confirm()">
     <ion-spinner *ngIf="submitting" name="crescent" slot="start"></ion-spinner>
@@ -185,7 +180,7 @@
     ></ion-icon>
     {{ submitting ? 'Submitting...' : finalCtaLabel }}
   </ion-button>
-</div>
+</app-action-bar>
 
 <ion-toast
   [isOpen]="toastOpen"

@@ -1,0 +1,10 @@
+<div class="action-bar">
+  <div class="action-bar__context" *ngIf="label || value">
+    <span *ngIf="label" class="action-bar__label">{{ label }}</span>
+    <strong *ngIf="value" class="action-bar__value">{{ value }}</strong>
+  </div>
+
+  <div class="action-bar__actions">
+    <ng-content></ng-content>
+  </div>
+</div>

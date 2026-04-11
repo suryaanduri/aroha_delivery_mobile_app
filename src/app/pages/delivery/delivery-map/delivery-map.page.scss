@@ -4,26 +4,12 @@ ion-content {
   font-family: "SF Pro Text", "Avenir Next", "Segoe UI", sans-serif;
 }
 
-.delivery-map-page {
-  min-height: 100%;
-  padding: calc(env(safe-area-inset-top) + 14px) 14px calc(env(safe-area-inset-bottom) + 18px);
-  background: linear-gradient(180deg, #f5faf7, #e8f0eb);
-}
-
-.delivery-map-shell,
 .map-sheet,
 .stop-strip {
   display: flex;
   flex-direction: column;
 }
 
-.delivery-map-shell {
-  gap: 14px;
-  max-width: 440px;
-  margin: 0 auto;
-}
-
-.map-header,
 .map-header__switch,
 .map-stage__topbar,
 .map-chip,
@@ -34,11 +20,6 @@ ion-content {
   align-items: center;
 }
 
-.map-header {
-  gap: 10px;
-}
-
-.map-header__back,
 .map-header__mode,
 .map-stage__locate {
   display: grid;
@@ -51,35 +32,16 @@ ion-content {
   color: var(--app-color-text);
 }
 
-.map-header__copy {
-  flex: 1;
-  min-width: 0;
-}
-
-.map-header__eyebrow,
 .active-stop-card__top p,
 .active-stop-card__meta span {
   margin: 0;
   color: var(--app-color-text-muted);
 }
 
-.map-header__eyebrow {
-  margin-bottom: 4px;
-  font-size: 0.74rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.map-header h1,
 .active-stop-card__top h2,
 .stop-pill strong {
   margin: 0;
   font-family: "SF Pro Display", "Avenir Next", "Segoe UI", sans-serif;
-}
-
-.map-header h1 {
-  font-size: 1.42rem;
 }
 
 .map-header__switch {
@@ -178,10 +140,6 @@ ion-content {
 
 .map-sheet {
   gap: 12px;
-  padding: 16px;
-  border-radius: 26px;
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 16px 34px rgba(18, 35, 30, 0.08);
 }
 
 .active-stop-card {

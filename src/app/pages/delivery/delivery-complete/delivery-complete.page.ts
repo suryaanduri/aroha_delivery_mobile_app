@@ -16,11 +16,16 @@ import {
 } from 'ionicons/icons';
 import { CustomerInfoCardComponent } from 'src/app/components/customer-info-card/customer-info-card.component';
 import { DeliveryProductItem, ProductListComponent } from 'src/app/components/product-list/product-list.component';
+import { ActionBarComponent } from 'src/app/components/action-bar/action-bar.component';
+import { PageShellComponent } from 'src/app/components/page-shell/page-shell.component';
 import { SectionHeaderComponent } from 'src/app/components/section-header/section-header.component';
 import { DeliveryStatus, ScheduleType, StatusChipComponent } from 'src/app/components/status-chip/status-chip.component';
+import { SurfaceCardComponent } from 'src/app/components/surface-card/surface-card.component';
+import { TopHeaderComponent } from 'src/app/components/top-header/top-header.component';
 import { DeliveryOrder } from 'src/app/models/order.model';
 import { OrderService, UpdateOrderStatusPayload } from 'src/app/services/order.service';
 import { getApiErrorMessage } from 'src/app/utils/api-contract.util';
+import { mapOrderItems, normalizeDeliveryStatus, normalizeScheduleType } from 'src/app/utils/delivery-view.util';
 
 type CompletionAction = 'DELIVERED' | 'CANCELLED' | 'SKIPPED';
 
@@ -44,10 +49,14 @@ interface ProofOption {
     IonToast,
     CommonModule,
     FormsModule,
+    ActionBarComponent,
     CustomerInfoCardComponent,
+    PageShellComponent,
     ProductListComponent,
     SectionHeaderComponent,
     StatusChipComponent,
+    SurfaceCardComponent,
+    TopHeaderComponent,
   ],
 })
 export class DeliveryCompletePage implements OnInit {
@@ -227,30 +236,10 @@ export class DeliveryCompletePage implements OnInit {
     this.routeLabel = order.routeLabel ?? '';
     this.address = order.address ?? '';
     this.landmark = order.landmark ?? '';
-    this.scheduleType = this.normalizeScheduleType(order.scheduleType);
-    this.currentStatus = this.normalizeStatus(order.deliveryStatus ?? order.status);
+    this.scheduleType = normalizeScheduleType(order.scheduleType);
+    this.currentStatus = normalizeDeliveryStatus(order.deliveryStatus ?? order.status);
     this.timeSlot = order.timeSlot ?? '';
-    this.items = (order.items ?? []).map((item) => ({
-      name: item.name ?? 'Item',
-      quantity: [item.quantity, item.unit].filter(Boolean).join(' '),
-    }));
-  }
-
-  private normalizeStatus(status?: string): DeliveryStatus {
-    const normalized = (status ?? '').toUpperCase();
-    if (normalized === 'DELIVERED' || normalized === 'COMPLETED') return 'delivered';
-    if (normalized === 'IN_PROGRESS' || normalized === 'IN-PROGRESS' || normalized === 'STARTED') return 'in-progress';
-    if (normalized === 'CANCELLED' || normalized === 'CANCELED' || normalized === 'FAILED') return 'failed';
-    if (normalized === 'SKIPPED') return 'skipped';
-    return 'pending';
-  }
-
-  private normalizeScheduleType(type?: string): ScheduleType {
-    if (!type) return 'daily';
-    const normalized = type.toLowerCase().replace(/_/g, '-');
-    if (normalized.includes('alternate')) return 'alternate-day';
-    if (normalized === 'onetime' || (normalized.includes('one') && normalized.includes('time'))) return 'one-time';
-    return 'daily';
+    this.items = mapOrderItems(order);
   }
 
   private showToast(message: string, color: 'success' | 'danger'): void {

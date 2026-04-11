@@ -12,15 +12,29 @@ import {
   navigateOutline,
   timeOutline
 } from 'ionicons/icons';
+import { PageShellComponent } from 'src/app/components/page-shell/page-shell.component';
 import { SectionHeaderComponent } from 'src/app/components/section-header/section-header.component';
 import { StatusChipComponent } from 'src/app/components/status-chip/status-chip.component';
+import { SurfaceCardComponent } from 'src/app/components/surface-card/surface-card.component';
+import { TopHeaderComponent } from 'src/app/components/top-header/top-header.component';
 
 @Component({
   selector: 'app-delivery-map',
   templateUrl: './delivery-map.page.html',
   styleUrls: ['./delivery-map.page.scss'],
   standalone: true,
-  imports: [IonButton, IonContent, IonIcon, CommonModule, RouterLink, SectionHeaderComponent, StatusChipComponent]
+  imports: [
+    IonButton,
+    IonContent,
+    IonIcon,
+    CommonModule,
+    RouterLink,
+    PageShellComponent,
+    SectionHeaderComponent,
+    StatusChipComponent,
+    SurfaceCardComponent,
+    TopHeaderComponent,
+  ]
 })
 export class DeliveryMapPage {
   readonly totalStops = 5;

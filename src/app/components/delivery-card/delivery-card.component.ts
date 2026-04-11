@@ -5,6 +5,7 @@ import { addIcons } from 'ionicons';
 import { arrowForwardOutline, cubeOutline, locationOutline, navigateOutline, timeOutline } from 'ionicons/icons';
 import { DeliveryProductItem } from '../product-list/product-list.component';
 import { DeliveryStatus, ScheduleType, StatusChipComponent } from '../status-chip/status-chip.component';
+import { DeliveryStopViewModel } from 'src/app/utils/delivery-view.util';
 
 @Component({
   selector: 'app-delivery-card',
@@ -19,6 +20,7 @@ import { DeliveryStatus, ScheduleType, StatusChipComponent } from '../status-chi
   styleUrl: './delivery-card.component.scss',
 })
 export class DeliveryCardComponent {
+  @Input() stop?: DeliveryStopViewModel;
   @Input() priority = false;
   @Input() customerName = '';
   @Input() customerCode = '';
@@ -39,5 +41,24 @@ export class DeliveryCardComponent {
 
   constructor() {
     addIcons({ arrowForwardOutline, cubeOutline, locationOutline, navigateOutline, timeOutline });
+  }
+
+  get viewModel(): DeliveryStopViewModel {
+    return {
+      id: this.stop?.id ?? '',
+      customerName: this.stop?.customerName ?? this.customerName,
+      customerCode: this.stop?.customerCode ?? this.customerCode,
+      address: this.stop?.address ?? this.address,
+      landmark: this.stop?.landmark ?? this.landmark,
+      routeLabel: this.stop?.routeLabel ?? this.routeLabel,
+      scheduleType: this.stop?.scheduleType ?? this.scheduleType,
+      status: this.stop?.status ?? this.status,
+      deliveryStatusLabel: this.stop?.deliveryStatusLabel ?? this.deliveryStatusLabel,
+      orderStatusLabel: this.stop?.orderStatusLabel ?? this.orderStatusLabel,
+      productSummary: this.stop?.productSummary ?? this.productSummary,
+      timeSlot: this.stop?.timeSlot ?? this.timeSlot,
+      sequenceLabel: this.stop?.sequenceLabel ?? this.sequenceLabel,
+      items: this.stop?.items ?? this.items,
+    };
   }
 }

@@ -1,17 +1,12 @@
 <ion-content [fullscreen]="true">
-  <div class="delivery-map-page">
-    <main class="delivery-map-shell">
-      <section class="map-header" aria-label="Route map header">
-        <button class="map-header__back" type="button" routerLink="/dashboard" aria-label="Back to dashboard">
-          <ion-icon name="arrow-back-outline"></ion-icon>
-        </button>
-
-        <div class="map-header__copy">
-          <p class="map-header__eyebrow">Morning Route • {{ totalStops }} Stops</p>
-          <h1>Today's Route</h1>
-        </div>
-
-        <div class="map-header__switch">
+  <app-page-shell variant="map">
+      <app-top-header
+        [eyebrow]="'Morning Route • ' + totalStops + ' Stops'"
+        title="Today&apos;s Route"
+        backRoute="/dashboard"
+        backAriaLabel="Back to dashboard"
+      >
+        <div header-end class="map-header__switch">
           <button type="button" class="map-header__mode" routerLink="/deliveries">
             <ion-icon name="calendar-outline"></ion-icon>
           </button>
@@ -19,9 +14,9 @@
             <ion-icon name="map-outline"></ion-icon>
           </button>
         </div>
-      </section>
+      </app-top-header>
 
-      <section class="map-stage" aria-label="Mock route map">
+      <app-surface-card class="map-stage" aria-label="Mock route map" tone="muted">
         <div class="map-stage__topbar">
           <div class="map-chip">
             <ion-icon name="navigate-outline"></ion-icon>
@@ -53,9 +48,9 @@
         <button class="map-stage__locate" type="button" aria-label="Locate current route position">
           <ion-icon name="locate-outline"></ion-icon>
         </button>
-      </section>
+      </app-surface-card>
 
-      <section class="map-sheet">
+      <app-surface-card class="map-sheet">
         <app-section-header
           title="Active Stop"
           subtitle="Tap a stop to open delivery execution."
@@ -102,7 +97,6 @@
             <ion-icon slot="end" name="location-outline"></ion-icon>
           </ion-button>
         </div>
-      </section>
-    </main>
-  </div>
+      </app-surface-card>
+  </app-page-shell>
 </ion-content>

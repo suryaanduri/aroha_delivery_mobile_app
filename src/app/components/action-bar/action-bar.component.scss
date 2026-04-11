@@ -1,0 +1,46 @@
+:host,
+.action-bar,
+.action-bar__actions {
+  display: flex;
+}
+
+.action-bar {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 20;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px calc(env(safe-area-inset-bottom) + 14px);
+  border-top: 1px solid rgba(227, 236, 232, 0.94);
+  background: rgba(250, 252, 251, 0.96);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 -16px 40px rgba(20, 61, 49, 0.08);
+}
+
+.action-bar__label,
+.action-bar__value {
+  display: block;
+}
+
+.action-bar__label {
+  color: var(--app-color-text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.action-bar__value {
+  margin-top: 3px;
+  color: var(--app-color-text);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.action-bar__actions {
+  align-items: center;
+  gap: 10px;
+}
