@@ -6,144 +6,157 @@
       <div class="absolute bottom-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-[radial-gradient(circle,_rgba(255,255,255,0.72),_transparent_72%)]"></div>
     </div>
 
-      <app-surface-card *ngIf="loading" tone="muted" class="rounded-[28px] bg-white/95 px-6 py-10">
-        <div class="flex flex-col items-center gap-4 text-center">
-          <div class="flex h-16 w-16 items-center justify-center rounded-[22px] border border-[#DDEAE4] bg-[#F7FBF9] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
-            <ion-spinner name="crescent" class="h-8 w-8 text-[#1F7A63]"></ion-spinner>
-          </div>
-          <div class="space-y-1">
-            <h2 class="text-[19px] font-semibold tracking-[-0.03em] text-[#0F2A24]">Loading stop details</h2>
-            <p class="text-[14px] leading-6 text-[#5F746E]">Preparing customer and delivery information.</p>
-          </div>
+    <app-surface-card *ngIf="loading" tone="muted" class="rounded-[28px] bg-white/95 px-6 py-10">
+      <div class="flex flex-col items-center gap-4 text-center">
+        <div class="flex h-16 w-16 items-center justify-center rounded-[22px] border border-[#DDEAE4] bg-[#F7FBF9] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
+          <ion-spinner name="crescent" class="h-8 w-8 text-[#1F7A63]"></ion-spinner>
         </div>
-      </app-surface-card>
-
-      <app-surface-card *ngIf="!loading && errorMessage" tone="danger" class="rounded-[28px] px-5 py-5">
-        <div class="flex items-start gap-3">
-          <div class="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#FDEAE5] text-[#E76F51] shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]">
-            <ion-icon name="alert-circle-outline" class="text-[18px]"></ion-icon>
-          </div>
-          <div class="space-y-1">
-            <h2 class="text-[18px] font-semibold tracking-[-0.03em] text-[#0F2A24]">Delivery unavailable</h2>
-            <p class="text-[14px] leading-6 text-[#7A645D]">{{ errorMessage }}</p>
-          </div>
+        <div class="space-y-1">
+          <h2 class="text-[19px] font-semibold tracking-[-0.03em] text-[#0F2A24]">Loading stop details</h2>
+          <p class="text-[14px] leading-6 text-[#5F746E]">Preparing customer and delivery information.</p>
         </div>
-      </app-surface-card>
+      </div>
+    </app-surface-card>
 
-      <ng-container *ngIf="!loading && !errorMessage">
-        <app-surface-card tone="success" class="overflow-hidden rounded-[30px] px-5 pb-5 pt-4" aria-label="Navigation header">
+    <app-surface-card *ngIf="!loading && errorMessage" tone="danger" class="rounded-[28px] px-5 py-5">
+      <div class="flex items-start gap-3">
+        <div class="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#FDEAE5] text-[#E76F51] shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]">
+          <ion-icon name="alert-circle-outline" class="text-[18px]"></ion-icon>
+        </div>
+        <div class="space-y-1">
+          <h2 class="text-[18px] font-semibold tracking-[-0.03em] text-[#0F2A24]">Delivery unavailable</h2>
+          <p class="text-[14px] leading-6 text-[#7A645D]">{{ errorMessage }}</p>
+        </div>
+      </div>
+    </app-surface-card>
+
+    <ng-container *ngIf="!loading && !errorMessage">
+      <section class="detail-page">
+        <app-surface-card tone="success" class="detail-hero" aria-label="Delivery header">
           <app-top-header
             backRoute="/deliveries"
             backAriaLabel="Go back to deliveries"
+            [eyebrow]="sequenceLabel || 'Delivery stop'"
             [title]="customerName"
+            [subtitle]="routeLabel"
           >
             <app-status-chip header-end [kind]="'status'" [value]="status"></app-status-chip>
           </app-top-header>
-          <div class="space-y-3">
-            <div class="inline-flex items-center gap-2 rounded-full border border-[#DCEBE4] bg-white/88 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#5F746E] shadow-[0_8px_20px_rgba(20,61,49,0.04)]">
+
+          <div class="detail-hero__meta">
+            <div class="detail-hero__pill" *ngIf="sequenceLabel || timeSlot">
               <span *ngIf="sequenceLabel">{{ sequenceLabel }}</span>
               <span *ngIf="sequenceLabel && timeSlot">•</span>
-              <span>{{ timeSlot }}</span>
+              <span *ngIf="timeSlot">{{ timeSlot }}</span>
             </div>
-          </div>
-        </app-surface-card>
-
-        <app-surface-card tone="success" class="rounded-[28px] p-4">
-          <div class="rounded-2xl border border-[#E6EEEA] bg-[#F8FBF9] px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]">
-            <app-section-header
-              title="Stop Overview"
-              [meta]="sequenceLabel"
-            ></app-section-header>
-          </div>
-
-          <div class="mt-4">
-            <app-customer-info-card
-              [name]="customerName"
-              [customerCode]="''"
-              [address]="address"
-              [landmark]="landmark"
-              [routeLabel]="routeLabel"
-            ></app-customer-info-card>
-          </div>
-
-          <div class="mt-4 flex flex-wrap gap-2">
             <app-status-chip [kind]="'schedule'" [value]="scheduleType"></app-status-chip>
-            <app-status-chip [kind]="'status'" [value]="status"></app-status-chip>
+          </div>
+        </app-surface-card>
+
+        <app-surface-card tone="success" class="detail-section detail-section--hero">
+          <div class="detail-section__header detail-section__header--hero">
+            <app-section-header title="Stop Overview" [meta]="sequenceLabel"></app-section-header>
           </div>
 
-          <div class="mt-4 grid gap-2.5 sm:grid-cols-2">
-            <div class="rounded-[22px] border border-[#E3ECE8] bg-white px-4 py-3 shadow-[0_8px_20px_rgba(20,61,49,0.04)]">
-              <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6A7F79]">Time slot</p>
-              <p class="mt-2 text-[17px] font-semibold tracking-[-0.02em] text-[#0F2A24]">{{ timeSlot }}</p>
+          <div class="overview-card">
+            <div class="overview-card__header">
+              <div class="overview-card__identity">
+                <h2>{{ customerName }}</h2>
+                <p *ngIf="routeLabel" class="overview-card__route">
+                  <ion-icon name="navigate-outline" aria-hidden="true"></ion-icon>
+                  <span>{{ routeLabel }}</span>
+                </p>
+              </div>
+
+              <button class="overview-card__call" type="button" aria-label="Call customer">
+                <ion-icon name="call-outline" aria-hidden="true"></ion-icon>
+              </button>
             </div>
-            <div class="rounded-[22px] border border-[#E3ECE8] bg-white px-4 py-3 shadow-[0_8px_20px_rgba(20,61,49,0.04)]">
-              <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6A7F79]">Products</p>
-              <p class="mt-2 text-[17px] font-semibold tracking-[-0.02em] text-[#0F2A24]">{{ productSummary }}</p>
+
+            <div class="overview-card__location">
+              <ion-icon name="location-outline" aria-hidden="true"></ion-icon>
+              <div class="overview-card__location-copy">
+                <p>{{ address }}</p>
+                <span *ngIf="landmark">{{ landmark }}</span>
+              </div>
             </div>
-            <div class="rounded-[22px] border border-[#E3ECE8] bg-white px-4 py-3 shadow-[0_8px_20px_rgba(20,61,49,0.04)]">
-              <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6A7F79]">Delivery status</p>
-              <p class="mt-2 text-[17px] font-semibold tracking-[-0.02em] text-[#0F2A24]">{{ deliveryStatusLabel }}</p>
+
+            <div class="overview-card__chips">
+              <app-status-chip [kind]="'schedule'" [value]="scheduleType"></app-status-chip>
+              <app-status-chip [kind]="'status'" [value]="status"></app-status-chip>
+            </div>
+
+            <div class="overview-card__meta-grid">
+              <article class="meta-tile" *ngIf="timeSlot">
+                <span class="meta-tile__label">Time Slot</span>
+                <strong class="meta-tile__value">{{ timeSlot }}</strong>
+              </article>
+              <article class="meta-tile">
+                <span class="meta-tile__label">Products</span>
+                <strong class="meta-tile__value">{{ productSummary }}</strong>
+              </article>
+              <article class="meta-tile">
+                <span class="meta-tile__label">Delivery</span>
+                <strong class="meta-tile__value">{{ deliveryStatusLabel }}</strong>
+              </article>
             </div>
           </div>
         </app-surface-card>
 
-        <app-surface-card tone="success" class="rounded-[28px] p-4">
-          <div class="rounded-2xl border border-[#DCF0E7] bg-[#F2FBF7] px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
-            <app-section-header
-              title="Items to Deliver"
-            ></app-section-header>
+        <app-surface-card tone="success" class="detail-section">
+          <div class="detail-section__header">
+            <app-section-header title="Items to Deliver"></app-section-header>
           </div>
 
-          <div class="mt-4">
-            <app-product-list
-              [items]="items"
-              [layout]="'expanded'"
-            ></app-product-list>
+          <div class="item-list">
+            <article class="item-row" *ngFor="let item of items">
+              <div class="item-row__copy">
+                <span class="item-row__icon">
+                  <ion-icon name="cube-outline" aria-hidden="true"></ion-icon>
+                </span>
+                <div>
+                  <strong>{{ item.name }}</strong>
+                </div>
+              </div>
+              <span class="item-row__qty">{{ item.quantity }}</span>
+            </article>
           </div>
         </app-surface-card>
 
-        <app-surface-card *ngIf="deliveryNotes.length" tone="warning" class="rounded-[28px] p-4">
-          <div class="rounded-2xl border border-[#F1E5C5] bg-[#FFF8E7] px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
+        <app-surface-card *ngIf="deliveryNotes.length" tone="warning" class="detail-section detail-section--notes">
+          <div class="detail-section__header">
             <app-section-header title="Delivery Notes"></app-section-header>
           </div>
 
-          <ul class="mt-4 space-y-3">
-            <li
-              *ngFor="let note of deliveryNotes"
-              class="flex items-start gap-3 rounded-[20px] border border-[#F1E5C5] bg-white/90 px-4 py-3 text-[14px] leading-6 text-[#433A2B] shadow-[0_8px_20px_rgba(122,88,33,0.04)]"
-            >
-              <span class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#FFF1CC] text-[#B37A1D]">
-                <ion-icon name="alert-circle-outline" class="text-[17px]" aria-hidden="true"></ion-icon>
+          <ul class="note-list">
+            <li *ngFor="let note of deliveryNotes" class="note-row">
+              <span class="note-row__icon">
+                <ion-icon name="alert-circle-outline" aria-hidden="true"></ion-icon>
               </span>
               <span>{{ note }}</span>
             </li>
           </ul>
         </app-surface-card>
 
-        <app-surface-card class="rounded-[28px] p-4">
-          <div class="rounded-2xl border border-[#E6EEEA] bg-[#F8FBF9] px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]">
-            <app-section-header
-              title="Proof of Delivery"
-            ></app-section-header>
+        <app-surface-card class="detail-section">
+          <div class="detail-section__header">
+            <app-section-header title="Proof of Delivery"></app-section-header>
           </div>
 
-          <div class="mt-4 grid gap-3">
-            <button
-              class="flex items-center gap-3 rounded-[24px] border border-[#E3ECE8] bg-[linear-gradient(180deg,#FFFFFF,#F8FBF9)] px-4 py-4 text-left shadow-[0_10px_24px_rgba(20,61,49,0.05)] transition-transform active:scale-[0.99]"
-              type="button"
-              *ngFor="let option of proofOptions"
-            >
-              <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#F2FBF7] text-[#1F7A63] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-                <ion-icon [name]="option.icon" class="text-[20px]" aria-hidden="true"></ion-icon>
-              </div>
-              <div class="min-w-0">
-                <strong class="block text-[16px] font-semibold tracking-[-0.02em] text-[#0F2A24]">{{ option.label }}</strong>
-                <span class="mt-1 block text-[13px] leading-5 text-[#5F746E]">{{ option.helper }}</span>
-              </div>
+          <div class="proof-list">
+            <button class="proof-option" type="button" *ngFor="let option of proofOptions">
+              <span class="proof-option__icon">
+                <ion-icon [name]="option.icon" aria-hidden="true"></ion-icon>
+              </span>
+              <span class="proof-option__copy">
+                <strong>{{ option.label }}</strong>
+                <span>{{ option.helper }}</span>
+              </span>
             </button>
           </div>
         </app-surface-card>
-      </ng-container>
+      </section>
+    </ng-container>
   </app-page-shell>
 </ion-content>
 

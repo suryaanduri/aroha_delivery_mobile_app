@@ -7,12 +7,15 @@ import {
   alertCircleOutline,
   arrowBackOutline,
   cameraOutline,
+  callOutline,
   checkmarkCircleOutline,
   chatbubbleEllipsesOutline,
+  cubeOutline,
+  locationOutline,
+  navigateOutline,
   timeOutline,
 } from 'ionicons/icons';
-import { CustomerInfoCardComponent } from 'src/app/components/customer-info-card/customer-info-card.component';
-import { DeliveryProductItem, ProductListComponent } from 'src/app/components/product-list/product-list.component';
+import { DeliveryProductItem } from 'src/app/components/product-list/product-list.component';
 import { ActionBarComponent } from 'src/app/components/action-bar/action-bar.component';
 import { PageShellComponent } from 'src/app/components/page-shell/page-shell.component';
 import { SectionHeaderComponent } from 'src/app/components/section-header/section-header.component';
@@ -42,9 +45,7 @@ import {
     IonSpinner,
     CommonModule,
     ActionBarComponent,
-    CustomerInfoCardComponent,
     PageShellComponent,
-    ProductListComponent,
     SectionHeaderComponent,
     StatusChipComponent,
     SurfaceCardComponent,
@@ -84,8 +85,12 @@ export class DeliveryDetailPage implements OnInit {
       alertCircleOutline,
       arrowBackOutline,
       cameraOutline,
+      callOutline,
       checkmarkCircleOutline,
       chatbubbleEllipsesOutline,
+      cubeOutline,
+      locationOutline,
+      navigateOutline,
       timeOutline,
     });
   }
