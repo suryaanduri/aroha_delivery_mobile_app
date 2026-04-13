@@ -1,102 +1,201 @@
 <ion-content [fullscreen]="true">
   <app-page-shell variant="map">
-      <app-top-header
-        [eyebrow]="todayLabel"
-        title="Today&apos;s Route"
-        backRoute="/dashboard"
-        backAriaLabel="Back to dashboard"
-      >
-        <div header-end class="map-header__switch">
-          <button type="button" class="map-header__mode" routerLink="/deliveries">
-            <ion-icon name="calendar-outline"></ion-icon>
-          </button>
-          <button type="button" class="map-header__mode map-header__mode--active" aria-label="Map view active">
-            <ion-icon name="map-outline"></ion-icon>
-          </button>
-        </div>
-      </app-top-header>
-
-      <app-surface-card class="map-stage" aria-label="Mock route map" tone="muted">
-        <div class="map-stage__topbar">
-          <div class="map-chip">
-            <ion-icon name="navigate-outline"></ion-icon>
-            <span>{{ routeDistance }}</span>
-          </div>
-          <div class="map-chip">
-            <ion-icon name="time-outline"></ion-icon>
-            <span>{{ routeEta }}</span>
-          </div>
-        </div>
-
-        <div class="map-canvas">
-          <div class="map-canvas__route"></div>
-
-          <button
-            *ngFor="let stop of stops"
-            type="button"
-            class="map-pin"
-            [class.map-pin--active]="stop.id === activeStopId"
-            [class.map-pin--done]="stop.status === 'delivered'"
-            [class]="stop.pinClass"
-            (click)="openStop(stop.id)"
-            [attr.aria-label]="'Open stop ' + stop.name"
-          >
-            <span>{{ stop.id }}</span>
-          </button>
-        </div>
-
-        <button class="map-stage__locate" type="button" aria-label="Locate current route position">
-          <ion-icon name="locate-outline"></ion-icon>
+    <app-top-header
+      [eyebrow]="todayLabel"
+      title="Today&apos;s Route"
+      subtitle="Live route view for today&apos;s delivery execution."
+      backRoute="/dashboard"
+      backAriaLabel="Back to dashboard"
+    >
+      <div header-end class="route-header__switch" aria-label="Route mode switch">
+        <button type="button" class="route-header__mode" (click)="goToList()" aria-label="Open list view">
+          <ion-icon name="calendar-outline"></ion-icon>
         </button>
-      </app-surface-card>
+        <button type="button" class="route-header__mode route-header__mode--active" aria-label="Map view active">
+          <ion-icon name="map-outline"></ion-icon>
+        </button>
+      </div>
+    </app-top-header>
 
-      <app-surface-card class="map-sheet">
-        <app-section-header
-          title="Active Stop"
-          subtitle="Tap a stop to open delivery execution."
-          [meta]="activeStop.eta"
-        ></app-section-header>
+    <app-surface-card *ngIf="loading" class="route-state route-state--loading" aria-label="Loading route">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Loading route map and today&apos;s stops...</p>
+    </app-surface-card>
 
-        <article class="active-stop-card" (click)="openStop(activeStop.id)">
-          <div class="active-stop-card__top">
-            <div>
-              <h2>{{ activeStop.name }}</h2>
-              <p>{{ activeStop.area }}</p>
+    <app-surface-card *ngIf="!loading && errorMessage" class="route-state route-state--error" tone="danger">
+      <p>{{ errorMessage }}</p>
+      <ion-button fill="outline" size="small" (click)="loadRoute()">
+        <ion-icon slot="start" name="refresh-outline"></ion-icon>
+        Retry
+      </ion-button>
+    </app-surface-card>
+
+    <ng-container *ngIf="!loading && !errorMessage">
+      <app-surface-card aria-label="Delivery route map" tone="muted">
+        <div class="route-stage">
+          <div class="route-stage__glow" aria-hidden="true"></div>
+
+          <div class="route-stage__topbar">
+            <div class="route-chip">
+              <span class="route-chip__label">Stops</span>
+              <strong>{{ routeStats.totalStops }}</strong>
             </div>
-            <app-status-chip [kind]="'status'" [value]="activeStop.status"></app-status-chip>
+            <div class="route-chip">
+              <span class="route-chip__label">Distance</span>
+              <strong>{{ routeDistanceLabel }}</strong>
+            </div>
+            <div class="route-chip">
+              <span class="route-chip__label">ETA</span>
+              <strong>{{ routeEtaLabel }}</strong>
+            </div>
           </div>
 
-          <div class="active-stop-card__meta">
-            <div>
-              <span>Next action</span>
-              <strong>Open stop details</strong>
-            </div>
-            <ion-button class="active-stop-card__cta" fill="solid" (click)="openStop(activeStop.id); $event.stopPropagation()">
-              Open Stop
-            </ion-button>
-          </div>
-        </article>
+          <ng-container *ngIf="googleMapsLoaded; else mapUnavailable">
+            <google-map
+              class="route-stage__map"
+              [options]="mapOptions"
+              (mapReady)="onMapReady($event)"
+            >
+              <map-polyline
+                *ngIf="routePath.length > 1"
+                [path]="routePath"
+                [options]="{
+                  strokeColor: '#163c34',
+                  strokeOpacity: 0.82,
+                  strokeWeight: 4.5,
+                  geodesic: true
+                }"
+              ></map-polyline>
 
-        <div class="stop-strip">
-          <button
-            *ngFor="let stop of stops"
-            type="button"
-            class="stop-pill"
-            [class.stop-pill--active]="stop.id === activeStopId"
-            (click)="openStop(stop.id)"
-          >
-            <span>#{{ stop.id }}</span>
-            <strong>{{ stop.name }}</strong>
+              <map-marker
+                *ngFor="let stop of stops; trackBy: trackByStopId"
+                [position]="{ lat: stop.lat ?? center.lat, lng: stop.lng ?? center.lng }"
+                [options]="getMarkerOptions(stop)"
+                (mapClick)="selectStop(stop.id)"
+              ></map-marker>
+            </google-map>
+          </ng-container>
+
+          <ng-template #mapUnavailable>
+            <div class="route-stage__empty-map">
+              <ion-icon name="map-outline"></ion-icon>
+              <p>Google Maps is not available for this build configuration.</p>
+            </div>
+          </ng-template>
+
+          <button class="route-stage__focus" type="button" (click)="focusRoute()" aria-label="Fit route to map">
+            <ion-icon name="locate-outline"></ion-icon>
           </button>
         </div>
+      </app-surface-card>
 
-        <div class="map-sheet__actions">
-          <ion-button fill="outline" routerLink="/deliveries">Back to List</ion-button>
-          <ion-button fill="solid" (click)="openStop(activeStop.id)">
-            Start Navigation
-            <ion-icon slot="end" name="location-outline"></ion-icon>
-          </ion-button>
+      <app-surface-card aria-label="Route summary">
+        <div class="route-stats">
+          <article class="stat-tile">
+            <span>Pending</span>
+            <strong>{{ routeStats.pendingStops }}</strong>
+          </article>
+          <article class="stat-tile stat-tile--success">
+            <span>Completed</span>
+            <strong>{{ routeStats.completedStops }}</strong>
+          </article>
+          <article class="stat-tile stat-tile--accent">
+            <span>Route order</span>
+            <strong>{{ activeStop?.routeOrder || 0 }}/{{ routeStats.totalStops }}</strong>
+          </article>
         </div>
       </app-surface-card>
+
+      <app-surface-card *ngIf="stops.length; else noStops">
+        <div class="route-sheet">
+          <app-section-header
+            title="Active Stop"
+            [meta]="activeStop ? '#' + (activeStop.routeOrder < 10 ? '0' + activeStop.routeOrder : activeStop.routeOrder) : ''"
+            subtitle="Tap any stop below or on the map to change the active destination."
+          ></app-section-header>
+
+          <article class="active-stop-card" *ngIf="activeStop">
+            <div class="active-stop-card__header">
+              <div class="active-stop-card__copy">
+                <p class="active-stop-card__eyebrow">
+                  {{ activeStop.routeLabel || (activeStop.area || 'Today\'s route') }}
+                </p>
+                <h2>{{ activeStop.customerName }}</h2>
+                <p class="active-stop-card__address">
+                  {{ activeStop.address }}
+                  <span *ngIf="activeStop.landmark"> · {{ activeStop.landmark }}</span>
+                </p>
+              </div>
+
+              <app-status-chip [kind]="'status'" [value]="activeStop.status"></app-status-chip>
+            </div>
+
+            <div class="active-stop-card__meta">
+              <div class="active-stop-card__meta-item">
+                <ion-icon name="cube-outline"></ion-icon>
+                <div>
+                  <span>Order</span>
+                  <strong>{{ activeStop.productSummary }}</strong>
+                </div>
+              </div>
+
+              <div class="active-stop-card__meta-item">
+                <ion-icon name="time-outline"></ion-icon>
+                <div>
+                  <span>Window</span>
+                  <strong>{{ activeStop.timeSlot || 'Today' }}</strong>
+                </div>
+              </div>
+
+              <div class="active-stop-card__meta-item">
+                <ion-icon name="location-outline"></ion-icon>
+                <div>
+                  <span>Area</span>
+                  <strong>{{ activeStop.area || activeStop.routeLabel || 'Chandanagar route' }}</strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="active-stop-card__actions">
+              <ion-button fill="outline" (click)="goToList()">View List</ion-button>
+              <ion-button fill="solid" (click)="openActiveStop()">
+                Open Stop
+                <ion-icon slot="end" name="navigate-outline"></ion-icon>
+              </ion-button>
+            </div>
+          </article>
+
+          <div class="stop-strip" aria-label="Route stop strip">
+            <button
+              *ngFor="let stop of stops; trackBy: trackByStopId"
+              type="button"
+              class="stop-pill"
+              [class.stop-pill--active]="stop.id === activeStopId"
+              [class.stop-pill--done]="stop.status === 'delivered'"
+              (click)="selectStop(stop.id)"
+            >
+              <span class="stop-pill__index">
+                <ion-icon *ngIf="stop.status === 'delivered'" name="checkmark-circle-outline"></ion-icon>
+                <ng-container *ngIf="stop.status !== 'delivered'">
+                  #{{ stop.routeOrder < 10 ? '0' + stop.routeOrder : stop.routeOrder }}
+                </ng-container>
+              </span>
+              <strong>{{ stop.customerName }}</strong>
+              <small>{{ stop.area || stop.routeLabel || stop.address }}</small>
+            </button>
+          </div>
+        </div>
+      </app-surface-card>
+
+      <ng-template #noStops>
+        <app-empty-state
+          icon="map-outline"
+          title="No route stops found"
+          message="There are no delivery orders available for the selected delivery date."
+          actionText="Back to list"
+          (actionPressed)="goToList()"
+        ></app-empty-state>
+      </ng-template>
+    </ng-container>
   </app-page-shell>
 </ion-content>
