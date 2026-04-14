@@ -6,10 +6,11 @@ import { AuthService } from '../services/auth.service';
 
 export const credentialsInterceptor: HttpInterceptorFn = (req, next) => {
   const auth = inject(AuthService);
+  const apiBaseUrl = environment.apiBaseUrl.trim();
 
   auth.initializeAuth();
 
-  const isApiRequest = req.url.startsWith(environment.apiBaseUrl);
+  const isApiRequest = isApiRequestUrl(req.url, apiBaseUrl);
   const isPublicAuthRequest =
     req.url.includes('/credential-login') ||
     req.url.includes('/forgot-password');
@@ -44,3 +45,11 @@ export const credentialsInterceptor: HttpInterceptorFn = (req, next) => {
     })
   );
 };
+
+function isApiRequestUrl(url: string, apiBaseUrl: string): boolean {
+  if (apiBaseUrl.length > 0 && url.startsWith(apiBaseUrl)) {
+    return true;
+  }
+
+  return url.startsWith('/api/') || url.startsWith('api/');
+}
