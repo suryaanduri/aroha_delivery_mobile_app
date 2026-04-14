@@ -28,7 +28,7 @@ import { StatusChipComponent } from 'src/app/components/status-chip/status-chip.
 import { SurfaceCardComponent } from 'src/app/components/surface-card/surface-card.component';
 import { TopHeaderComponent } from 'src/app/components/top-header/top-header.component';
 import { GoogleMapsLoaderService } from 'src/app/services/google-maps-loader.service';
-import { OrderService } from 'src/app/services/order.service';
+import { OrderService, STATIC_DELIVERY_ORDERS_QUERY } from 'src/app/services/order.service';
 import { DeliveryMapStopViewModel, RouteStatsViewModel, mapOrderToDeliveryMapStopViewModel } from 'src/app/utils/map-view.util';
 import { CHANDANAGAR_CENTER } from 'src/app/utils/mock-coordinates.util';
 import { buildRouteStats, formatDistance, formatEta, orderStopsForRoute } from 'src/app/utils/route-calc.util';
@@ -141,7 +141,7 @@ export class DeliveryMapPage implements OnInit {
 
     try {
       const [orders] = await Promise.all([
-        firstValueFrom(this.orderService.getOrders({ deliveryDate: this.deliveryDate })),
+        firstValueFrom(this.orderService.getOrders(STATIC_DELIVERY_ORDERS_QUERY)),
         this.googleMapsLoader.load().then(() => {
           this.googleMapsLoaded = true;
         }),

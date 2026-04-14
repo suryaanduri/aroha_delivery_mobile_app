@@ -14,6 +14,23 @@ interface OrderDataPayload {
   order?: DeliveryOrder;
 }
 
+export interface GetOrdersFilters {
+  status?: string;
+  deliveryDate?: string;
+  lat?: number;
+  lng?: number;
+  page?: number;
+  limit?: number;
+}
+
+export const STATIC_DELIVERY_ORDERS_QUERY: Readonly<Required<Pick<GetOrdersFilters, 'lat' | 'lng' | 'page' | 'limit'>>> =
+  {
+    lat: 17.492105,
+    lng: 78.327663,
+    page: 1,
+    limit: 20,
+  };
+
 export interface UpdateOrderStatusPayload {
   status: 'DELIVERED' | 'CANCELLED' | 'SKIPPED';
   reason?: string;
@@ -27,13 +44,25 @@ export class OrderService {
 
   constructor(private readonly http: HttpClient) {}
 
-  getOrders(filters?: { status?: string; deliveryDate?: string }): Observable<DeliveryOrder[]> {
+  getOrders(filters?: GetOrdersFilters): Observable<DeliveryOrder[]> {
     let params = new HttpParams();
     if (filters?.status) {
       params = params.set('status', filters.status);
     }
     if (filters?.deliveryDate) {
       params = params.set('deliveryDate', filters.deliveryDate);
+    }
+    if (typeof filters?.lat === 'number') {
+      params = params.set('lat', String(filters.lat));
+    }
+    if (typeof filters?.lng === 'number') {
+      params = params.set('lng', String(filters.lng));
+    }
+    if (typeof filters?.page === 'number') {
+      params = params.set('page', String(filters.page));
+    }
+    if (typeof filters?.limit === 'number') {
+      params = params.set('limit', String(filters.limit));
     }
     return this.http.get<unknown>(`${this.baseUrl}/orders`, { params }).pipe(map((res) => this.extractOrders(res)));
   }

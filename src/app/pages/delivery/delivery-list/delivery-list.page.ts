@@ -18,7 +18,7 @@ import { PageShellComponent } from 'src/app/components/page-shell/page-shell.com
 import { SectionHeaderComponent } from 'src/app/components/section-header/section-header.component';
 import { SurfaceCardComponent } from 'src/app/components/surface-card/surface-card.component';
 import { TopHeaderComponent } from 'src/app/components/top-header/top-header.component';
-import { OrderService } from 'src/app/services/order.service';
+import { OrderService, STATIC_DELIVERY_ORDERS_QUERY } from 'src/app/services/order.service';
 import { getMockDeliveryOrders } from 'src/app/mocks/delivery.mock';
 import { DeliveryStopViewModel, mapOrderToDeliveryStopViewModel } from 'src/app/utils/delivery-view.util';
 
@@ -82,14 +82,6 @@ export class DeliveryListPage implements OnInit {
       day: 'numeric',
       month: 'short',
     });
-  }
-
-  private get todayDate(): string {
-    const d = new Date();
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-    return `${yyyy}-${mm}-${dd}`;
   }
 
   get filteredDeliveries(): DeliveryStopViewModel[] {
@@ -163,7 +155,7 @@ export class DeliveryListPage implements OnInit {
   loadOrders(): void {
     this.loading = true;
     this.errorMessage = '';
-    this.orderService.getOrders({ deliveryDate: this.todayDate }).subscribe({
+    this.orderService.getOrders(STATIC_DELIVERY_ORDERS_QUERY).subscribe({
       next: (orders) => {
         const sourceOrders = orders.length ? orders : getMockDeliveryOrders();
         this.deliveries = sourceOrders.map((order, idx) => mapOrderToDeliveryStopViewModel(order, idx));
