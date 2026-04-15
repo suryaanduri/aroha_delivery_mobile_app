@@ -152,10 +152,10 @@
 
       <ng-template #emptyResult>
         <app-empty-state
-          icon="search-outline"
-          title="No deliveries found"
-          message="Try adjusting search or filter selections to find the right stop."
-          actionText="Show All"
+          [icon]="emptyStateIcon"
+          [title]="emptyStateTitle"
+          [message]="emptyStateMessage"
+          [actionText]="emptyStateActionText"
           (actionPressed)="searchTerm = ''; selectFilter('all')"
         ></app-empty-state>
       </ng-template>

@@ -18,8 +18,8 @@ import { PageShellComponent } from 'src/app/components/page-shell/page-shell.com
 import { SectionHeaderComponent } from 'src/app/components/section-header/section-header.component';
 import { SurfaceCardComponent } from 'src/app/components/surface-card/surface-card.component';
 import { TopHeaderComponent } from 'src/app/components/top-header/top-header.component';
-import { OrderService, STATIC_DELIVERY_ORDERS_QUERY } from 'src/app/services/order.service';
-import { getMockDeliveryOrders } from 'src/app/mocks/delivery.mock';
+import { OrderService, buildStaticDeliveryOrdersQuery } from 'src/app/services/order.service';
+import { getApiErrorMessage } from 'src/app/utils/api-contract.util';
 import { DeliveryStopViewModel, mapOrderToDeliveryStopViewModel } from 'src/app/utils/delivery-view.util';
 
 type FilterKey = 'all' | 'pending' | 'delivered';
@@ -84,6 +84,14 @@ export class DeliveryListPage implements OnInit {
     });
   }
 
+  private get todayDate(): string {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
   get filteredDeliveries(): DeliveryStopViewModel[] {
     const query = this.searchTerm.trim().toLowerCase();
 
@@ -140,6 +148,28 @@ export class DeliveryListPage implements OnInit {
     return Number(this.selectedFilter !== 'all') + Number(this.searchTerm.trim().length > 0);
   }
 
+  get hasActiveQuery(): boolean {
+    return this.searchTerm.trim().length > 0 || this.selectedFilter !== 'all';
+  }
+
+  get emptyStateIcon(): string {
+    return this.hasActiveQuery ? 'search-outline' : 'file-tray-outline';
+  }
+
+  get emptyStateTitle(): string {
+    return this.hasActiveQuery ? 'No deliveries found' : 'No deliveries assigned';
+  }
+
+  get emptyStateMessage(): string {
+    return this.hasActiveQuery
+      ? 'Try adjusting search or filter selections to find the right stop.'
+      : 'No delivery orders are currently available for today in this service area.';
+  }
+
+  get emptyStateActionText(): string {
+    return this.hasActiveQuery ? 'Show All' : '';
+  }
+
   selectFilter(filter: FilterKey): void {
     this.selectedFilter = filter;
   }
@@ -155,14 +185,18 @@ export class DeliveryListPage implements OnInit {
   loadOrders(): void {
     this.loading = true;
     this.errorMessage = '';
-    this.orderService.getOrders(STATIC_DELIVERY_ORDERS_QUERY).subscribe({
+    this.deliveries = [];
+
+    this.orderService.getOrders(buildStaticDeliveryOrdersQuery(this.todayDate)).subscribe({
       next: (orders) => {
-        const sourceOrders = orders.length ? orders : getMockDeliveryOrders();
-        this.deliveries = sourceOrders.map((order, idx) => mapOrderToDeliveryStopViewModel(order, idx));
+        this.deliveries = orders.map((order, idx) => mapOrderToDeliveryStopViewModel(order, idx));
         this.loading = false;
       },
-      error: () => {
-        this.deliveries = getMockDeliveryOrders().map((order, idx) => mapOrderToDeliveryStopViewModel(order, idx));
+      error: (err: unknown) => {
+        this.errorMessage = getApiErrorMessage(
+          err,
+          'Unable to load deliveries right now. Check your connection and try again.'
+        );
         this.loading = false;
       },
     });

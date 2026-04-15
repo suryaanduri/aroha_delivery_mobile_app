@@ -28,11 +28,10 @@ import { StatusChipComponent } from 'src/app/components/status-chip/status-chip.
 import { SurfaceCardComponent } from 'src/app/components/surface-card/surface-card.component';
 import { TopHeaderComponent } from 'src/app/components/top-header/top-header.component';
 import { GoogleMapsLoaderService } from 'src/app/services/google-maps-loader.service';
-import { OrderService, STATIC_DELIVERY_ORDERS_QUERY } from 'src/app/services/order.service';
+import { OrderService, buildStaticDeliveryOrdersQuery } from 'src/app/services/order.service';
 import { DeliveryMapStopViewModel, RouteStatsViewModel, mapOrderToDeliveryMapStopViewModel } from 'src/app/utils/map-view.util';
 import { CHANDANAGAR_CENTER } from 'src/app/utils/mock-coordinates.util';
-import { buildRouteStats, formatDistance, formatEta, orderStopsForRoute } from 'src/app/utils/route-calc.util';
-import { withMockCoordinates } from 'src/app/utils/mock-coordinates.util';
+import { calculateRouteDistance, estimateRouteEtaMinutes, formatDistance, formatEta, orderStopsForRoute } from 'src/app/utils/route-calc.util';
 
 @Component({
   selector: 'app-delivery-map',
@@ -110,10 +109,24 @@ export class DeliveryMapPage implements OnInit {
     return this.stops.find((stop) => stop.id === this.activeStopId) ?? null;
   }
 
+  get mappableStops(): DeliveryMapStopViewModel[] {
+    return this.stops.filter((stop) => typeof stop.lat === 'number' && typeof stop.lng === 'number');
+  }
+
+  get hasMappableStops(): boolean {
+    return this.mappableStops.length > 0;
+  }
+
+  get mapUnavailableMessage(): string {
+    return this.googleMapsLoaded
+      ? 'Live coordinates are unavailable for today’s stops.'
+      : 'Google Maps is not available for this build configuration.';
+  }
+
   get routePath(): google.maps.LatLngLiteral[] {
-    return this.stops.map((stop) => ({
-      lat: stop.lat ?? this.center.lat,
-      lng: stop.lng ?? this.center.lng,
+    return this.mappableStops.map((stop) => ({
+      lat: stop.lat as number,
+      lng: stop.lng as number,
     }));
   }
 
@@ -141,18 +154,16 @@ export class DeliveryMapPage implements OnInit {
 
     try {
       const [orders] = await Promise.all([
-        firstValueFrom(this.orderService.getOrders(STATIC_DELIVERY_ORDERS_QUERY)),
+        firstValueFrom(this.orderService.getOrders(buildStaticDeliveryOrdersQuery(this.deliveryDate))),
         this.googleMapsLoader.load().then(() => {
           this.googleMapsLoaded = true;
         }),
       ]);
 
-      const normalizedStops = orders
-        .map((order, index) => mapOrderToDeliveryMapStopViewModel(order, index))
-        .map((stop) => withMockCoordinates(stop));
+      const normalizedStops = orders.map((order, index) => mapOrderToDeliveryMapStopViewModel(order, index));
 
       this.stops = orderStopsForRoute(normalizedStops);
-      this.routeStats = buildRouteStats(this.stops);
+      this.routeStats = this.buildRouteStats(this.stops);
       this.activeStopId = this.getInitialActiveStopId();
 
       queueMicrotask(() => this.fitMapToRoute());
@@ -173,13 +184,13 @@ export class DeliveryMapPage implements OnInit {
   selectStop(stopId: string): void {
     this.activeStopId = stopId;
     const stop = this.activeStop;
-    if (!stop || !this.map) {
+    if (!stop || !this.map || typeof stop.lat !== 'number' || typeof stop.lng !== 'number') {
       return;
     }
 
     this.map.panTo({
-      lat: stop.lat ?? this.center.lat,
-      lng: stop.lng ?? this.center.lng,
+      lat: stop.lat,
+      lng: stop.lng,
     });
   }
 
@@ -221,28 +232,49 @@ export class DeliveryMapPage implements OnInit {
   }
 
   private fitMapToRoute(): void {
-    if (!this.map || this.stops.length === 0 || !window.google?.maps) {
+    if (!this.map || this.mappableStops.length === 0 || !window.google?.maps) {
       return;
     }
 
-    if (this.stops.length === 1) {
+    if (this.mappableStops.length === 1) {
       this.map.setCenter({
-        lat: this.stops[0].lat ?? this.center.lat,
-        lng: this.stops[0].lng ?? this.center.lng,
+        lat: this.mappableStops[0].lat as number,
+        lng: this.mappableStops[0].lng as number,
       });
       this.map.setZoom(14);
       return;
     }
 
     const bounds = new google.maps.LatLngBounds();
-    this.stops.forEach((stop) => {
+    this.mappableStops.forEach((stop) => {
       bounds.extend({
-        lat: stop.lat ?? this.center.lat,
-        lng: stop.lng ?? this.center.lng,
+        lat: stop.lat as number,
+        lng: stop.lng as number,
       });
     });
 
     this.map.fitBounds(bounds, 72);
+  }
+
+  private buildRouteStats(stops: DeliveryMapStopViewModel[]): RouteStatsViewModel {
+    const totalStops = stops.length;
+    const completedStops = stops.filter((stop) => stop.status === 'delivered').length;
+    const pendingStops = totalStops - completedStops;
+    const routePath = stops
+      .filter((stop) => typeof stop.lat === 'number' && typeof stop.lng === 'number')
+      .map((stop) => ({
+        lat: stop.lat as number,
+        lng: stop.lng as number,
+      }));
+    const totalDistanceKm = calculateRouteDistance(routePath);
+
+    return {
+      totalStops,
+      completedStops,
+      pendingStops,
+      totalDistanceKm,
+      estimatedEtaMinutes: estimateRouteEtaMinutes(totalDistanceKm, pendingStops),
+    };
   }
 
   private getInitialActiveStopId(): string {

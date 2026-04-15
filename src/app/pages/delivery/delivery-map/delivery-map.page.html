@@ -49,7 +49,7 @@
             </div>
           </div>
 
-          <ng-container *ngIf="googleMapsLoaded; else mapUnavailable">
+          <ng-container *ngIf="googleMapsLoaded && hasMappableStops; else mapUnavailable">
             <google-map
               class="route-stage__map"
               [options]="mapOptions"
@@ -67,8 +67,8 @@
               ></map-polyline>
 
               <map-marker
-                *ngFor="let stop of stops; trackBy: trackByStopId"
-                [position]="{ lat: stop.lat ?? center.lat, lng: stop.lng ?? center.lng }"
+                *ngFor="let stop of mappableStops; trackBy: trackByStopId"
+                [position]="{ lat: stop.lat!, lng: stop.lng! }"
                 [options]="getMarkerOptions(stop)"
                 (mapClick)="selectStop(stop.id)"
               ></map-marker>
@@ -78,7 +78,7 @@
           <ng-template #mapUnavailable>
             <div class="route-stage__empty-map">
               <ion-icon name="map-outline"></ion-icon>
-              <p>Google Maps is not available for this build configuration.</p>
+              <p>{{ mapUnavailableMessage }}</p>
             </div>
           </ng-template>
 

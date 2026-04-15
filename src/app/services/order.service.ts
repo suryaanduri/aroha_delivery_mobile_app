@@ -23,13 +23,17 @@ export interface GetOrdersFilters {
   limit?: number;
 }
 
-export const STATIC_DELIVERY_ORDERS_QUERY: Readonly<Required<Pick<GetOrdersFilters, 'lat' | 'lng' | 'page' | 'limit'>>> =
-  {
+export function buildStaticDeliveryOrdersQuery(deliveryDate: string): Readonly<
+  Required<Pick<GetOrdersFilters, 'deliveryDate' | 'lat' | 'lng' | 'page' | 'limit'>>
+> {
+  return {
+    deliveryDate,
     lat: 17.492105,
     lng: 78.327663,
     page: 1,
     limit: 20,
   };
+}
 
 export interface UpdateOrderStatusPayload {
   status: 'DELIVERED' | 'CANCELLED' | 'SKIPPED';
