@@ -1,42 +1,67 @@
 <ion-content [fullscreen]="true" class="login-content">
   <div class="login-screen">
-    <div class="login-screen__glow login-screen__glow--top" aria-hidden="true"></div>
-    <div class="login-screen__glow login-screen__glow--bottom" aria-hidden="true"></div>
-    <div class="login-screen__grain" aria-hidden="true"></div>
+    <div class="login-screen__ambient login-screen__ambient--a" aria-hidden="true"></div>
+    <div class="login-screen__ambient login-screen__ambient--b" aria-hidden="true"></div>
+    <div class="login-screen__ambient login-screen__ambient--c" aria-hidden="true"></div>
+    <div class="login-screen__mist" aria-hidden="true"></div>
 
     <main class="login-shell">
-      <section class="brand-hero" aria-label="Aroha Fresh branding">
-        <div class="brand-hero__eyebrow">
-          <span class="brand-hero__eyebrow-dot" aria-hidden="true"></span>
-          Delivery partner access
+      <section class="hero-panel" aria-label="Aroha Fresh branding">
+        <div class="hero-panel__eyebrow">
+          <span class="hero-panel__eyebrow-dot" aria-hidden="true"></span>
+          Aroha Fresh partner app
         </div>
 
-        <div class="brand-hero__header">
-          <img
-            class="brand-hero__logo"
-            src="https://arohafresh.com/assets/WhatsApp%20Image%202025-09-02%20at%2012.38.22.jpeg"
-            alt="Aroha Fresh logo"
-          />
+        <div class="hero-panel__brand">
+          <div class="hero-panel__logo-shell">
+            <img
+              class="hero-panel__logo"
+              src="https://arohafresh.com/assets/WhatsApp%20Image%202025-09-02%20at%2012.38.22.jpeg"
+              alt="Aroha Fresh logo"
+            />
+          </div>
 
-          <div class="brand-hero__copy">
-            <p class="brand-hero__name">Aroha Fresh</p>
-            <p class="brand-hero__tagline">Pure • Fresh • Natural</p>
+          <div class="hero-panel__brand-copy">
+            <p class="hero-panel__brand-name">Aroha Fresh</p>
+            <p class="hero-panel__brand-tag">Pure • Fresh • Natural</p>
           </div>
         </div>
 
-        <div class="brand-hero__intro">
-          <h1>Welcome back</h1>
-          <p>Sign in to start today’s route, deliveries, and customer updates.</p>
+        <div class="hero-panel__copy">
+          <h1>Fresh mornings start here.</h1>
+          <p>Sign in to manage routes, customer deliveries, and proof updates with calm, reliable field access.</p>
+        </div>
+
+        <div class="hero-panel__signals" aria-label="Key product values">
+          <div class="signal-pill">
+            <span class="signal-pill__label">Trusted</span>
+            <strong>Secure access</strong>
+          </div>
+          <div class="signal-pill">
+            <span class="signal-pill__label">Ready</span>
+            <strong>Today’s routes</strong>
+          </div>
         </div>
       </section>
 
       <section class="login-sheet" aria-label="Login form">
+        <div class="login-sheet__cap" aria-hidden="true"></div>
+        <div class="login-sheet__header">
+          <div>
+            <p class="login-sheet__eyebrow">Delivery partner sign in</p>
+            <h2>Welcome back</h2>
+          </div>
+          <p class="login-sheet__hint">Use your assigned account credentials to continue.</p>
+        </div>
+
         <form class="login-form" (ngSubmit)="onSubmit()" novalidate>
           <div class="login-form__group">
             <label class="field-label" for="username">Username</label>
 
             <div class="field-shell" [class.field-shell--error]="!!usernameError">
-              <ion-icon class="field-shell__icon" name="person-circle-outline" aria-hidden="true"></ion-icon>
+              <div class="field-shell__icon-wrap">
+                <ion-icon class="field-shell__icon" name="person-circle-outline" aria-hidden="true"></ion-icon>
+              </div>
               <input
                 id="username"
                 class="field-shell__input"
@@ -65,7 +90,9 @@
             <label class="field-label" for="password">Password</label>
 
             <div class="field-shell" [class.field-shell--error]="!!passwordError">
-              <ion-icon class="field-shell__icon" name="lock-closed-outline" aria-hidden="true"></ion-icon>
+              <div class="field-shell__icon-wrap">
+                <ion-icon class="field-shell__icon" name="lock-closed-outline" aria-hidden="true"></ion-icon>
+              </div>
               <input
                 id="password"
                 class="field-shell__input"
@@ -104,15 +131,19 @@
           </p>
 
           <div class="login-form__meta">
-            <button type="button" class="login-form__link" (click)="goToForgotPassword()">
-              Forgot password?
-            </button>
+            <p class="login-form__support">Need help with access?</p>
+            <button type="button" class="login-form__link" (click)="goToForgotPassword()">Reset password</button>
           </div>
 
-          <button type="submit" class="login-form__submit" [disabled]="!canSubmit" [attr.aria-busy]="loading">
-            <ion-spinner *ngIf="loading" class="login-form__spinner" name="crescent"></ion-spinner>
-            <span>{{ loading ? 'Signing in...' : 'Sign in' }}</span>
-          </button>
+          <div class="login-form__action-block">
+            <button type="submit" class="login-form__submit" [disabled]="!canSubmit" [attr.aria-busy]="loading">
+              <span class="login-form__submit-glow" aria-hidden="true"></span>
+              <ion-spinner *ngIf="loading" class="login-form__spinner" name="crescent"></ion-spinner>
+              <span>{{ loading ? 'Signing in securely...' : 'Sign in securely' }}</span>
+            </button>
+
+            <p class="login-form__footer-note">Protected access for delivery staff and daily route operations.</p>
+          </div>
         </form>
       </section>
     </main>
