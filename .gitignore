@@ -11,7 +11,8 @@ $RECYCLE.BIN/
 
 *.log
 log.txt
-
+/android
+/.firebase
 
 /.sourcemaps
 /.versions
