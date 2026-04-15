@@ -72,9 +72,9 @@ ion-content {
   max-width: 31rem;
   margin: 0 auto;
   padding:
-    calc(env(safe-area-inset-top, 0px) + 0.85rem)
+    calc(var(--app-safe-area-top) + 0.85rem)
     1rem
-    calc(env(safe-area-inset-bottom, 0px) + 0.75rem);
+    calc(var(--app-safe-area-bottom) + 0.75rem);
   display: flex;
   flex-direction: column;
   gap: 1rem;

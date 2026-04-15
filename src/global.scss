@@ -41,6 +41,12 @@
 :root {
   --app-font-family: 'Roboto', 'Segoe UI', sans-serif;
   --ion-font-family: var(--app-font-family);
+  --app-safe-area-top: env(safe-area-inset-top, 0px);
+  --app-safe-area-right: env(safe-area-inset-right, 0px);
+  --app-safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --app-safe-area-left: env(safe-area-inset-left, 0px);
+  --app-page-top-space: calc(var(--app-safe-area-top) + 16px);
+  --app-page-bottom-space: calc(var(--app-safe-area-bottom) + 16px);
 }
 
 html,
@@ -57,4 +63,10 @@ input,
 textarea,
 select {
   font-family: var(--app-font-family);
+}
+
+html,
+body,
+ion-app {
+  background: var(--app-color-secondary);
 }

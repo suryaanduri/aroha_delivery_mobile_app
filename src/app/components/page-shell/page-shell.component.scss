@@ -6,12 +6,12 @@
 .page-shell {
   position: relative;
   min-height: 100%;
-  padding: calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 28px);
+  padding: var(--app-page-top-space) 16px calc(var(--app-safe-area-bottom) + 28px);
   overflow: hidden;
 }
 
 .page-shell--with-action-bar {
-  padding-bottom: calc(env(safe-area-inset-bottom) + 136px);
+  padding-bottom: calc(var(--app-safe-area-bottom) + 136px);
 }
 
 .page-shell__backdrop {
