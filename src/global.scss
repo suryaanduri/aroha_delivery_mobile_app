@@ -41,11 +41,11 @@
 :root {
   --app-font-family: 'Roboto', 'Segoe UI', sans-serif;
   --ion-font-family: var(--app-font-family);
-  --app-safe-area-top: env(safe-area-inset-top, 0px);
+  --app-native-status-bar-height: 0px;
+  --app-safe-area-top: max(env(safe-area-inset-top, 0px), var(--app-native-status-bar-height));
   --app-safe-area-right: env(safe-area-inset-right, 0px);
   --app-safe-area-bottom: env(safe-area-inset-bottom, 0px);
   --app-safe-area-left: env(safe-area-inset-left, 0px);
-  --app-page-top-space: calc(var(--app-safe-area-top) + 16px);
   --app-page-bottom-space: calc(var(--app-safe-area-bottom) + 16px);
 }
 
@@ -69,4 +69,8 @@ html,
 body,
 ion-app {
   background: var(--app-color-secondary);
+}
+
+ion-content {
+  --padding-top: var(--app-safe-area-top);
 }

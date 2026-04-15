@@ -36,9 +36,7 @@ async function configureNativeRuntime(): Promise<void> {
 
   await Promise.all([
     disableNativeServiceWorkers(),
-    StatusBar.setOverlaysWebView({ overlay: false }).catch(() => undefined),
     StatusBar.setStyle({ style: Style.Dark }).catch(() => undefined),
-    StatusBar.setBackgroundColor({ color: '#F3F7F5' }).catch(() => undefined),
   ]);
 }
 
