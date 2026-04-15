@@ -13,7 +13,7 @@
 ion-content {
   --background: var(--route-background);
   --color: var(--route-text);
-  font-family: "SF Pro Text", "Avenir Next", "Segoe UI", sans-serif;
+  font-family: var(--app-font-family);
 }
 
 .route-header__switch,
@@ -136,7 +136,7 @@ ion-content {
 .stop-pill strong {
   margin: 0;
   color: var(--route-text);
-  font-family: "SF Pro Display", "Avenir Next", "Segoe UI", sans-serif;
+  font-family: var(--app-font-family);
 }
 
 .route-chip strong {

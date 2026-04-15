@@ -98,13 +98,11 @@ export class AuthService {
       .pipe(
         map((res) => this.mapLoginResponse(res)),
         tap((res) => {
-          if (res.success) {
-            this.setSession({
-              user: res.user,
-              mustResetPassword: res.mustResetPassword,
-              accessToken: res.accessToken,
-            });
-          }
+          this.setSession({
+            user: res.user,
+            mustResetPassword: res.mustResetPassword,
+            accessToken: res.accessToken,
+          });
         })
       );
   }
@@ -188,32 +186,38 @@ export class AuthService {
   }
 
   private mapLoginResponse(res: unknown): LoginResponse {
-    if (res && typeof res === 'object' && 'success' in (res as Record<string, unknown>)) {
+    const root = res && typeof res === 'object' ? (res as Record<string, unknown>) : {};
+
+    if ('success' in root) {
       const { data, message } = unwrapApiSuccess<LoginData | Record<string, unknown>>(res, 'Login successful');
-      const root = res as Record<string, unknown>;
-
-      const user = this.extractLoginUser(res, data);
-      if (!user) {
-        throw new Error('Invalid login response from server');
-      }
-
-      return {
-        success: true,
-        message,
-        mustResetPassword: this.extractMustResetPassword(root, data),
-        user,
-        accessToken: this.extractAccessToken(root, data),
-      };
+      return this.buildNormalizedLoginResponse(root, data, message);
     }
 
-    // Backward compatibility with old direct LoginResponse payload.
-    const response = res as LoginResponse;
+    // Backward compatibility for direct payloads that omit the envelope but still return user data.
+    return this.buildNormalizedLoginResponse(root, res, 'Login successful');
+  }
+
+  private buildNormalizedLoginResponse(
+    root: Record<string, unknown>,
+    data: unknown,
+    fallbackMessage: string
+  ): LoginResponse {
+    const user = this.extractLoginUser(root, data);
+    if (!user) {
+      throw new Error('Invalid login response from server');
+    }
+
+    const message =
+      typeof root['message'] === 'string' && root['message'].trim().length > 0
+        ? root['message']
+        : fallbackMessage;
+
     return {
-      ...response,
-      accessToken: this.extractAccessToken(
-        response as unknown as Record<string, unknown>,
-        response as unknown
-      ),
+      success: true,
+      message,
+      mustResetPassword: this.extractMustResetPassword(root, data),
+      user,
+      accessToken: this.extractAccessToken(root, data),
     };
   }
 

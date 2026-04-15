@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { IonContent, IonIcon, IonSpinner } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { eyeOffOutline, eyeOutline, lockClosedOutline, personCircleOutline } from 'ionicons/icons';
-import { finalize } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { AuthService } from 'src/app/services/auth.service';
 import { getApiErrorMessage } from 'src/app/utils/api-contract.util';
 
@@ -59,28 +59,52 @@ export class LoginPage {
     this.showPassword = !this.showPassword;
   }
 
-  onSubmit(): void {
+  onUsernameInput(value: string): void {
+    this.username = value;
+    this.clearErrorState();
+  }
+
+  onPasswordInput(value: string): void {
+    this.password = value;
+    this.clearErrorState();
+  }
+
+  async onSubmit(): Promise<void> {
     this.submitted = true;
 
-    if (!this.canSubmit) return;
+    if (!this.canSubmit) {
+      return;
+    }
 
     this.loading = true;
     this.errorMessage = '';
 
-    this.authService
-      .login({ username: this.normalizedUsername, password: this.password })
-      .pipe(finalize(() => (this.loading = false)))
-      .subscribe({
-        next: () => {
-          void this.router.navigateByUrl(this.authService.getPostAuthRedirectUrl());
-        },
-        error: (err: unknown) => {
-          this.errorMessage = getApiErrorMessage(err, 'Login failed. Please try again.');
-        },
+    try {
+      await firstValueFrom(
+        this.authService.login({ username: this.normalizedUsername, password: this.password })
+      );
+
+      const navigated = await this.router.navigateByUrl(this.authService.getPostAuthRedirectUrl(), {
+        replaceUrl: true,
       });
+
+      if (!navigated) {
+        this.errorMessage = 'Login succeeded, but the app could not open your dashboard.';
+      }
+    } catch (err: unknown) {
+      this.errorMessage = getApiErrorMessage(err, 'Login failed. Please try again.');
+    } finally {
+      this.loading = false;
+    }
   }
 
   goToForgotPassword(): void {
     void this.router.navigate(['/forgot-password']);
+  }
+
+  private clearErrorState(): void {
+    if (this.errorMessage) {
+      this.errorMessage = '';
+    }
   }
 }

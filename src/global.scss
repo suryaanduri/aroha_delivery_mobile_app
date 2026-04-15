@@ -37,3 +37,24 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+
+:root {
+  --app-font-family: 'Roboto', 'Segoe UI', sans-serif;
+  --ion-font-family: var(--app-font-family);
+}
+
+html,
+body,
+ion-app,
+ion-content,
+ion-input,
+ion-button,
+ion-title,
+ion-label,
+ion-text,
+button,
+input,
+textarea,
+select {
+  font-family: var(--app-font-family);
+}

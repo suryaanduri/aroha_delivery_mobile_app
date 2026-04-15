@@ -1,118 +1,91 @@
-<ion-content [fullscreen]="true">
-  <div class="relative min-h-full overflow-hidden">
-    <div
-      aria-hidden="true"
-      class="absolute inset-0 bg-[linear-gradient(180deg,#fcfefc_0%,#f5faf7_44%,#edf4f0_100%)]"
-    ></div>
-    <div
-      aria-hidden="true"
-      class="absolute -right-16 top-0 h-72 w-72 rounded-full bg-[rgba(var(--app-color-primary-rgb),0.12)] blur-3xl"
-    ></div>
-    <div
-      aria-hidden="true"
-      class="absolute -bottom-12 -left-12 h-52 w-52 rounded-full bg-[rgba(var(--app-color-tertiary-rgb),0.12)] blur-3xl"
-    ></div>
-    <div
-      aria-hidden="true"
-      class="absolute inset-x-0 top-0 h-64 bg-[linear-gradient(180deg,rgba(255,255,255,0.38),transparent)]"
-    ></div>
-    <div
-      aria-hidden="true"
-      class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.32),transparent_42%)]"
-    ></div>
+<ion-content [fullscreen]="true" class="login-content">
+  <div class="login-screen">
+    <div class="login-screen__glow login-screen__glow--top" aria-hidden="true"></div>
+    <div class="login-screen__glow login-screen__glow--bottom" aria-hidden="true"></div>
+    <div class="login-screen__grain" aria-hidden="true"></div>
 
-    <main class="relative z-10 mx-auto flex min-h-full max-w-[420px] flex-col justify-center px-4 py-5">
-      <section
-        aria-label="Login form"
-        class="rounded-[30px] border border-white/80 bg-white/85 p-5 shadow-[0_30px_60px_rgba(18,35,30,0.12)] backdrop-blur-xl"
-      >
-        <div class="mb-6 flex flex-col gap-5">
-          <div class="flex items-center gap-3">
+    <main class="login-shell">
+      <section class="brand-hero" aria-label="Aroha Fresh branding">
+        <div class="brand-hero__eyebrow">
+          <span class="brand-hero__eyebrow-dot" aria-hidden="true"></span>
+          Delivery partner access
+        </div>
+
+        <div class="brand-hero__header">
           <img
-            class="h-14 w-14 shrink-0 rounded-[20px] border border-white/80 object-cover shadow-[0_14px_28px_rgba(18,35,30,0.12)]"
+            class="brand-hero__logo"
             src="https://arohafresh.com/assets/WhatsApp%20Image%202025-09-02%20at%2012.38.22.jpeg"
             alt="Aroha Fresh logo"
           />
 
-          <div class="min-w-0">
-            <!-- <span class="inline-block text-[0.68rem] font-bold uppercase tracking-[0.08em] text-[var(--app-color-text-muted)]">
-              Aroha Fresh
-            </span> -->
-            <p class="m-0 text-[1.45rem] font-bold leading-none tracking-[-0.05em] text-[#173b32]">
-              Aroha Fresh
-            </p>
-            <p class="mt-1 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-[var(--app-color-text-muted)]">
-              Pure * Fresh * Natural
-            </p>
+          <div class="brand-hero__copy">
+            <p class="brand-hero__name">Aroha Fresh</p>
+            <p class="brand-hero__tagline">Pure • Fresh • Natural</p>
           </div>
         </div>
 
-          <div class="flex flex-col gap-1.5">
-          <h1 class="m-0 text-[clamp(2.15rem,8vw,2.8rem)] font-bold leading-[0.96] tracking-[-0.065em] text-[#132a24]">
-            Welcome back
-          </h1>
-          <p class="m-0 text-[0.9rem] leading-6 text-[var(--app-color-text-muted)]">
-            Continue to Aroha Fresh.
-          </p>
+        <div class="brand-hero__intro">
+          <h1>Welcome back</h1>
+          <p>Sign in to start today’s route, deliveries, and customer updates.</p>
         </div>
-        </div>
+      </section>
 
-        <form class="flex flex-col gap-4" (ngSubmit)="onSubmit()" novalidate>
-          <label class="flex flex-col gap-2">
-            <span class="text-[0.76rem] font-bold uppercase tracking-[0.06em] text-[#29423b]">Username</span>
+      <section class="login-sheet" aria-label="Login form">
+        <form class="login-form" (ngSubmit)="onSubmit()" novalidate>
+          <div class="login-form__group">
+            <label class="field-label" for="username">Username</label>
 
-            <div
-              class="flex min-h-[58px] items-center gap-3 rounded-[20px] border bg-[rgba(247,250,248,0.96)] px-4 transition focus-within:-translate-y-px focus-within:shadow-[0_0_0_4px_rgba(var(--app-color-primary-rgb),0.08)]"
-              [ngClass]="
-                usernameError
-                  ? 'border-[rgba(192,57,43,0.22)] bg-[rgba(255,248,247,0.96)]'
-                  : 'border-[rgba(var(--app-color-primary-rgb),0.20)]'
-              "
-            >
-              <ion-icon class="shrink-0 text-[1.05rem] text-[rgba(var(--app-color-primary-rgb),0.86)]" name="person-circle-outline" aria-hidden="true"></ion-icon>
+            <div class="field-shell" [class.field-shell--error]="!!usernameError">
+              <ion-icon class="field-shell__icon" name="person-circle-outline" aria-hidden="true"></ion-icon>
               <input
-                class="w-full min-w-0 border-0 bg-transparent p-0 text-[0.98rem] font-medium text-[var(--app-color-text)] outline-none placeholder:text-[#8b9a94]"
+                id="username"
+                class="field-shell__input"
                 type="text"
                 name="username"
                 inputmode="text"
                 autocomplete="username"
+                autocapitalize="none"
+                autocorrect="off"
+                spellcheck="false"
+                enterkeyhint="next"
                 placeholder="Enter username"
-                [(ngModel)]="username"
-                aria-label="Username"
+                [ngModel]="username"
+                (ngModelChange)="onUsernameInput($event)"
                 [attr.aria-invalid]="!!usernameError"
+                [attr.aria-describedby]="usernameError ? 'username-error' : null"
               />
             </div>
 
-            <span *ngIf="usernameError" class="ml-0.5 text-[0.76rem] font-semibold tracking-[0.03em] text-[#b33c2b]">
+            <p *ngIf="usernameError" id="username-error" class="field-message field-message--error">
               {{ usernameError }}
-            </span>
-          </label>
+            </p>
+          </div>
 
-          <label class="flex flex-col gap-2">
-            <span class="text-[0.76rem] font-bold uppercase tracking-[0.06em] text-[#29423b]">Password</span>
+          <div class="login-form__group">
+            <label class="field-label" for="password">Password</label>
 
-            <div
-              class="flex min-h-[58px] items-center gap-3 rounded-[20px] border bg-[rgba(247,250,248,0.96)] px-4 transition focus-within:-translate-y-px focus-within:shadow-[0_0_0_4px_rgba(var(--app-color-primary-rgb),0.08)]"
-              [ngClass]="
-                passwordError
-                  ? 'border-[rgba(192,57,43,0.22)] bg-[rgba(255,248,247,0.96)]'
-                  : 'border-[rgba(var(--app-color-primary-rgb),0.20)]'
-              "
-            >
-              <ion-icon class="shrink-0 text-[1.05rem] text-[rgba(var(--app-color-primary-rgb),0.86)]" name="lock-closed-outline" aria-hidden="true"></ion-icon>
+            <div class="field-shell" [class.field-shell--error]="!!passwordError">
+              <ion-icon class="field-shell__icon" name="lock-closed-outline" aria-hidden="true"></ion-icon>
               <input
-                class="w-full min-w-0 border-0 bg-transparent p-0 text-[0.98rem] font-medium text-[var(--app-color-text)] outline-none placeholder:text-[#8b9a94]"
+                id="password"
+                class="field-shell__input"
                 [type]="showPassword ? 'text' : 'password'"
                 name="password"
                 autocomplete="current-password"
+                autocapitalize="none"
+                autocorrect="off"
+                spellcheck="false"
+                enterkeyhint="go"
                 placeholder="Enter password"
-                [(ngModel)]="password"
-                aria-label="Password"
+                [ngModel]="password"
+                (ngModelChange)="onPasswordInput($event)"
                 [attr.aria-invalid]="!!passwordError"
+                [attr.aria-describedby]="passwordError ? 'password-error' : null"
               />
+
               <button
                 type="button"
-                class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white/80 text-[#63756f] transition hover:bg-white"
+                class="field-shell__toggle"
                 (click)="togglePasswordVisibility()"
                 [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
                 [attr.aria-pressed]="showPassword"
@@ -121,36 +94,24 @@
               </button>
             </div>
 
-            <span *ngIf="passwordError" class="ml-0.5 text-[0.76rem] font-semibold tracking-[0.03em] text-[#b33c2b]">
+            <p *ngIf="passwordError" id="password-error" class="field-message field-message--error">
               {{ passwordError }}
-            </span>
-          </label>
-
-          <div
-            *ngIf="errorMessage"
-            class="rounded-2xl border border-[rgba(220,53,69,0.16)] bg-[rgba(220,53,69,0.08)] px-4 py-3 text-[0.88rem] font-semibold leading-6 text-[#be3b2f]"
-            role="alert"
-          >
-            {{ errorMessage }}
+            </p>
           </div>
 
-          <div class="mt-0.5 flex items-center justify-end">
-            <button
-              type="button"
-              class="border-0 bg-transparent p-0 text-[0.86rem] font-bold text-[var(--app-color-primary)]"
-              (click)="goToForgotPassword()"
-            >
+          <p *ngIf="errorMessage" class="login-alert" role="alert">
+            {{ errorMessage }}
+          </p>
+
+          <div class="login-form__meta">
+            <button type="button" class="login-form__link" (click)="goToForgotPassword()">
               Forgot password?
             </button>
           </div>
 
-          <button
-            type="submit"
-            class="mt-2 inline-flex min-h-[58px] w-full items-center justify-center gap-2 rounded-[22px] bg-[linear-gradient(180deg,#2f6d5f_0%,#245f52_100%)] px-5 py-4 text-[0.98rem] font-extrabold tracking-[0.01em] text-white shadow-[0_18px_30px_rgba(var(--app-color-primary-rgb),0.22)] transition hover:-translate-y-px disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:opacity-60 disabled:shadow-none"
-            [disabled]="!canSubmit"
-          >
-            <ion-spinner *ngIf="loading" class="h-4 w-4 text-white" name="crescent"></ion-spinner>
-            {{ loading ? 'Signing in...' : 'Log In' }}
+          <button type="submit" class="login-form__submit" [disabled]="!canSubmit" [attr.aria-busy]="loading">
+            <ion-spinner *ngIf="loading" class="login-form__spinner" name="crescent"></ion-spinner>
+            <span>{{ loading ? 'Signing in...' : 'Sign in' }}</span>
           </button>
         </form>
       </section>

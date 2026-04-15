@@ -1,7 +1,7 @@
 ion-content {
   --background: var(--delivery-background, #f4f2ec);
   --color: var(--delivery-text-primary, #15231f);
-  font-family: "SF Pro Text", "Avenir Next", "Segoe UI", sans-serif;
+  font-family: var(--app-font-family);
 }
 
 :host {

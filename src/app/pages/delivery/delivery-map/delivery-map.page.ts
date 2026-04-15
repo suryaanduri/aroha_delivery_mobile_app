@@ -313,7 +313,7 @@ export class DeliveryMapPage implements OnInit {
         <path d="M24 56C24 56 42 39.615 42 23.5C42 13.835 33.941 6 24 6C14.059 6 6 13.835 6 23.5C6 39.615 24 56 24 56Z" fill="${fillColor}" />
         <path d="M24 48C24 48 37 36.172 37 23.7C37 16.403 31.18 10.5 24 10.5C16.82 10.5 11 16.403 11 23.7C11 36.172 24 48 24 48Z" fill="${fillColor}" stroke="${strokeColor}" stroke-width="2" />
         <circle cx="24" cy="23" r="10.5" fill="white" fill-opacity="0.94" />
-        <text x="24" y="27" text-anchor="middle" font-family="Arial, sans-serif" font-size="10.5" font-weight="700" fill="${fillColor}">
+        <text x="24" y="27" text-anchor="middle" font-family="Roboto, Segoe UI, sans-serif" font-size="10.5" font-weight="700" fill="${fillColor}">
           ${markerLabel}
         </text>
       </svg>

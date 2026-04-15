@@ -1,4 +1,4 @@
-ion-content{--background:var(--app-color-secondary);--color:var(--app-color-text);font-family:"SF Pro Text","Avenir Next","Segoe UI",sans-serif}
+ion-content{--background:var(--app-color-secondary);--color:var(--app-color-text);font-family:var(--app-font-family)}
 .action-selector,.proof-stack,.confirmation-summary{display:flex;flex-direction:column}
 .complete-header,.context-band,.proof-toggle,.confirmation-row,.proof-panel--placeholder{display:flex;align-items:center}
 .complete-header{gap:10px}
