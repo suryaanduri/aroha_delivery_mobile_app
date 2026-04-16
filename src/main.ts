@@ -36,7 +36,8 @@ async function configureNativeRuntime(): Promise<void> {
 
   await Promise.all([
     disableNativeServiceWorkers(),
-    StatusBar.setStyle({ style: Style.Dark }).catch(() => undefined),
+    StatusBar.setStyle({ style: Style.Light }).catch(() => undefined),
+    StatusBar.setBackgroundColor({ color: '#FCFEFC' }).catch(() => undefined),
   ]);
 }
 
