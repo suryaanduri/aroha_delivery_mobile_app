@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { AlertController } from '@ionic/angular';
 import { IonContent, IonIcon, IonSpinner } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -10,7 +9,6 @@ import {
   checkmarkCircleOutline,
   cubeOutline,
   locationOutline,
-  logOutOutline,
   mapOutline,
   refreshOutline,
   statsChartOutline,
@@ -35,8 +33,7 @@ export class DashboardPage implements OnInit {
 
   constructor(
     private readonly authService: AuthService,
-    private readonly orderService: OrderService,
-    private readonly alertController: AlertController
+    private readonly orderService: OrderService
   ) {
     addIcons({
       arrowForwardOutline,
@@ -44,7 +41,6 @@ export class DashboardPage implements OnInit {
       checkmarkCircleOutline,
       cubeOutline,
       locationOutline,
-      logOutOutline,
       mapOutline,
       refreshOutline,
       statsChartOutline,
@@ -136,31 +132,6 @@ export class DashboardPage implements OnInit {
         this.loading = false;
       },
     });
-  }
-
-  async logout(): Promise<void> {
-    const alert = await this.alertController.create({
-      cssClass: 'app-confirm-alert',
-      header: 'Logout?',
-      message: 'You will need to sign in again to view your delivery route.',
-      buttons: [
-        {
-          text: 'Cancel',
-          role: 'cancel',
-          cssClass: 'app-confirm-alert__cancel',
-        },
-        {
-          text: 'Logout',
-          role: 'destructive',
-          cssClass: 'app-confirm-alert__confirm',
-          handler: () => {
-            this.authService.logout();
-          },
-        },
-      ],
-    });
-
-    await alert.present();
   }
 
   private isDelivered(order: DeliveryOrder): boolean {

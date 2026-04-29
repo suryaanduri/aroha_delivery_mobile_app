@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import {
   IonIcon,
   IonLabel,
@@ -9,7 +9,7 @@ import {
   IonTabs,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { homeOutline, listOutline, mapOutline, statsChartOutline } from 'ionicons/icons';
+import { ellipsisHorizontalOutline, homeOutline, listOutline, mapOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-main-layout',
@@ -28,12 +28,16 @@ import { homeOutline, listOutline, mapOutline, statsChartOutline } from 'ionicon
   styleUrl: './main-layout.component.scss',
 })
 export class MainLayoutComponent {
-  constructor() {
+  constructor(private readonly router: Router) {
     addIcons({
+      ellipsisHorizontalOutline,
       homeOutline,
       listOutline,
       mapOutline,
-      statsChartOutline,
     });
+  }
+
+  get isMoreTabActive(): boolean {
+    return ['/more', '/profile', '/day-summary'].some((path) => this.router.url.startsWith(path));
   }
 }

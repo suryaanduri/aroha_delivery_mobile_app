@@ -33,13 +33,14 @@
     </ion-tab-button>
 
     <ion-tab-button
-      tab="day-summary"
-      routerLink="/day-summary"
+      tab="more"
+      routerLink="/more"
       routerLinkActive="tab-selected"
+      [class.tab-selected]="isMoreTabActive"
       [routerLinkActiveOptions]="{ exact: true }"
     >
-      <ion-icon name="stats-chart-outline" aria-hidden="true"></ion-icon>
-      <ion-label>Summary</ion-label>
+      <ion-icon name="ellipsis-horizontal-outline" aria-hidden="true"></ion-icon>
+      <ion-label>More</ion-label>
     </ion-tab-button>
   </ion-tab-bar>
 </ion-tabs>

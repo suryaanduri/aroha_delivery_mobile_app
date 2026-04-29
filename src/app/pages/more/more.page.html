@@ -1,0 +1,51 @@
+<ion-content [fullscreen]="true">
+  <app-page-shell>
+    <app-top-header eyebrow="Workspace" title="More"></app-top-header>
+
+    <section class="more-profile">
+      <div class="more-profile__avatar" aria-hidden="true">
+        <ion-icon name="person-circle-outline"></ion-icon>
+      </div>
+      <div class="more-profile__copy">
+        <p>Signed in as</p>
+        <h2>{{ agentName }}</h2>
+        <span>{{ agentRole }}</span>
+      </div>
+    </section>
+
+    <section class="more-menu" aria-label="More menu">
+      <a class="more-menu__item" routerLink="/profile">
+        <span class="more-menu__icon">
+          <ion-icon name="person-circle-outline" aria-hidden="true"></ion-icon>
+        </span>
+        <span class="more-menu__copy">
+          <strong>Profile</strong>
+          <small>Account and delivery partner details</small>
+        </span>
+        <ion-icon class="more-menu__chevron" name="chevron-forward-outline" aria-hidden="true"></ion-icon>
+      </a>
+
+      <a class="more-menu__item" routerLink="/day-summary">
+        <span class="more-menu__icon">
+          <ion-icon name="stats-chart-outline" aria-hidden="true"></ion-icon>
+        </span>
+        <span class="more-menu__copy">
+          <strong>Day Summary</strong>
+          <small>Review completed stops and route progress</small>
+        </span>
+        <ion-icon class="more-menu__chevron" name="chevron-forward-outline" aria-hidden="true"></ion-icon>
+      </a>
+
+      <button class="more-menu__item more-menu__item--danger" type="button" (click)="confirmLogout()">
+        <span class="more-menu__icon">
+          <ion-icon name="log-out-outline" aria-hidden="true"></ion-icon>
+        </span>
+        <span class="more-menu__copy">
+          <strong>Logout</strong>
+          <small>End this delivery session</small>
+        </span>
+        <ion-icon class="more-menu__chevron" name="chevron-forward-outline" aria-hidden="true"></ion-icon>
+      </button>
+    </section>
+  </app-page-shell>
+</ion-content>
