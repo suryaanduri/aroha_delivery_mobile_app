@@ -1,3 +1,45 @@
-<div class="main-layout">
-  <router-outlet></router-outlet>
-</div>
+<ion-tabs class="main-layout">
+  <ion-router-outlet></ion-router-outlet>
+
+  <ion-tab-bar slot="bottom" class="main-tabs">
+    <ion-tab-button
+      tab="dashboard"
+      routerLink="/dashboard"
+      routerLinkActive="tab-selected"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      <ion-icon name="home-outline" aria-hidden="true"></ion-icon>
+      <ion-label>Home</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button
+      tab="deliveries"
+      routerLink="/deliveries"
+      routerLinkActive="tab-selected"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      <ion-icon name="list-outline" aria-hidden="true"></ion-icon>
+      <ion-label>List View</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button
+      tab="map"
+      routerLink="/map"
+      routerLinkActive="tab-selected"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      <ion-icon name="map-outline" aria-hidden="true"></ion-icon>
+      <ion-label>Map View</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button
+      tab="day-summary"
+      routerLink="/day-summary"
+      routerLinkActive="tab-selected"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      <ion-icon name="stats-chart-outline" aria-hidden="true"></ion-icon>
+      <ion-label>Summary</ion-label>
+    </ion-tab-button>
+  </ion-tab-bar>
+</ion-tabs>

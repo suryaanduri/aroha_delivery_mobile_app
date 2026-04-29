@@ -33,13 +33,6 @@ export class DashboardPage implements OnInit {
   loading = true;
   errorMessage = '';
 
-  readonly quickActions = [
-    { label: 'List View', icon: 'calendar-outline', route: '/deliveries' },
-    { label: 'Map View', icon: 'map-outline', route: '/deliveries/map' },
-    { label: 'Completed', icon: 'checkmark-circle-outline', route: '/deliveries' },
-    { label: 'Day Summary', icon: 'stats-chart-outline', route: '/day-summary' },
-  ];
-
   constructor(
     private readonly authService: AuthService,
     private readonly orderService: OrderService,

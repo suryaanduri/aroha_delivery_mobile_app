@@ -93,47 +93,6 @@
           </div>
         </section>
 
-        <section class="actions" aria-labelledby="actions-heading">
-          <div class="section-heading">
-            <div>
-              <p class="section-heading__eyebrow">Shortcuts</p>
-              <h3 id="actions-heading">Launch fast</h3>
-            </div>
-          </div>
-
-          <div class="actions__grid">
-            <ng-container *ngFor="let action of quickActions">
-              <a
-                *ngIf="action.label !== 'Completed'"
-                class="action-tile"
-                [routerLink]="action.route"
-              >
-                <div class="action-tile__leading">
-                  <div class="action-tile__icon">
-                    <ion-icon [name]="action.icon" aria-hidden="true"></ion-icon>
-                  </div>
-
-                  <div class="action-tile__body">
-                    <span class="action-tile__label">{{ action.label }}</span>
-                    <span class="action-tile__meta">
-                      {{
-                        action.label === 'List View'
-                          ? (totalStops > 0 ? totalStops + ' stops ready' : 'No stops assigned')
-                          : action.label === 'Map View'
-                            ? (nextDelivery?.area || nextDelivery?.address || 'Open live route')
-                            : (progressPercent + '% day completion')
-                      }}
-                    </span>
-                  </div>
-                </div>
-
-                <div class="action-tile__arrow">
-                  <ion-icon name="arrow-forward-outline" aria-hidden="true"></ion-icon>
-                </div>
-              </a>
-            </ng-container>
-          </div>
-        </section>
       </ng-container>
     </main>
   </div>
