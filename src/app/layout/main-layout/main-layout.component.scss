@@ -1,6 +1,10 @@
-:host,
-.main-layout {
+:host {
   display: block;
+  height: 100%;
+}
+
+.main-layout {
+  width: 100%;
   height: 100%;
 }
 
