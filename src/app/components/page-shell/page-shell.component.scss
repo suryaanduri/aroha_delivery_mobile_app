@@ -6,7 +6,7 @@
 .page-shell {
   position: relative;
   min-height: 100%;
-  padding: 6px 16px calc(var(--app-safe-area-bottom) + 28px);
+  padding: calc(var(--app-safe-area-top) + 6px) 16px calc(var(--app-safe-area-bottom) + 28px);
   overflow: hidden;
 }
 

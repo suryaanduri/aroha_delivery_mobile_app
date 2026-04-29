@@ -3,8 +3,14 @@
     <main class="dashboard-page">
       <section class="hero" aria-label="Greeting">
         <div class="hero__meta">
-          <span class="hero__date">{{ todayLabel }}</span>
-          <span class="hero__status">{{ shiftStatus }}</span>
+          <div class="hero__meta-copy">
+            <span class="hero__date">{{ todayLabel }}</span>
+            <span class="hero__status">{{ shiftStatus }}</span>
+          </div>
+
+          <button type="button" class="hero__logout" aria-label="Logout" (click)="logout()">
+            <ion-icon name="log-out-outline" aria-hidden="true"></ion-icon>
+          </button>
         </div>
 
         <div class="hero__copy">

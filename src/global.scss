@@ -72,5 +72,59 @@ ion-app {
 }
 
 ion-content {
-  --padding-top: var(--app-safe-area-top);
+  --padding-top: 0;
+  --padding-bottom: 0;
+}
+
+.app-confirm-alert {
+  --backdrop-opacity: 0.36;
+}
+
+.app-confirm-alert .alert-wrapper {
+  width: min(92vw, 22rem);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top right, rgba(var(--app-color-tertiary-rgb), 0.14), transparent 9rem),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(246, 245, 240, 0.98));
+  box-shadow: 0 24px 48px rgba(17, 31, 27, 0.18);
+}
+
+.app-confirm-alert .alert-head {
+  padding: 24px 24px 8px;
+}
+
+.app-confirm-alert .alert-title {
+  color: var(--app-color-text);
+  font-size: 1.28rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.app-confirm-alert .alert-message {
+  padding: 0 24px 18px;
+  color: var(--app-color-text-muted);
+  font-size: 0.94rem;
+  line-height: 1.45;
+}
+
+.app-confirm-alert .alert-button-group {
+  gap: 10px;
+  padding: 0 16px 16px;
+}
+
+.app-confirm-alert .alert-button {
+  min-height: 44px;
+  margin: 0;
+  border-radius: 14px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.app-confirm-alert .app-confirm-alert__cancel {
+  color: var(--app-color-text-muted);
+}
+
+.app-confirm-alert .app-confirm-alert__confirm {
+  background: var(--app-color-primary);
+  color: #fff;
 }
