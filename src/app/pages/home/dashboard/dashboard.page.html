@@ -2,23 +2,24 @@
   <div class="dashboard-shell">
     <main class="dashboard-page">
       <section class="hero" aria-label="Greeting">
-        <div class="hero__meta">
-          <div class="hero__meta-copy">
+        <div class="hero__topline">
+          <div class="hero__date-group">
             <span class="hero__date">{{ todayLabel }}</span>
-            <span class="hero__status">{{ shiftStatus }}</span>
+            <span class="hero__route">Delivery Ops</span>
           </div>
 
+          <span class="hero__status">{{ shiftStatus }}</span>
         </div>
 
         <div class="hero__copy">
-          <h1>{{ greeting }}, {{ agentName }}</h1>
-          <p *ngIf="!loading && !errorMessage">
+          <!-- <h1>{{ greeting }}, {{ agentName }}</h1> -->
+          <!-- <p *ngIf="!loading && !errorMessage">
             {{
               totalStops > 0
                 ? (pendingStops > 0 ? pendingStops + ' stops left today.' : 'Route completed for the day.')
                 : 'No deliveries assigned for today.'
             }}
-          </p>
+          </p> -->
         </div>
       </section>
 
@@ -49,7 +50,10 @@
       <ng-container *ngIf="!loading && !errorMessage">
         <section class="route-card" aria-label="Today delivery summary">
           <div class="route-card__topline">
-            <p class="route-card__label">Today’s route</p>
+            <div>
+              <p class="route-card__label">Today’s route</p>
+              <h2>Route Progress</h2>
+            </div>
             <div class="route-card__statusline">
               <span>{{ completedStops }} done</span>
               <span>{{ pendingStops }} left</span>
@@ -58,7 +62,7 @@
 
           <div class="route-card__hero">
             <div class="route-card__metric">
-              <h2>{{ totalStops }}</h2>
+              <strong>{{ totalStops }}</strong>
               <p class="route-card__subline route-card__subline--strong">
                 {{ totalStops === 1 ? 'stop assigned' : 'stops assigned' }}
               </p>
@@ -72,6 +76,24 @@
 
           <div class="route-card__bar" *ngIf="totalStops > 0">
             <span [style.width.%]="progressPercent"></span>
+          </div>
+
+          <div class="route-card__insights">
+            <article>
+              <ion-icon name="cube-outline" aria-hidden="true"></ion-icon>
+              <span>Items</span>
+              <strong>{{ totalProducts }}</strong>
+            </article>
+            <article>
+              <ion-icon name="time-outline" aria-hidden="true"></ion-icon>
+              <span>Window</span>
+              <strong>{{ timeSlotLabel }}</strong>
+            </article>
+            <article>
+              <ion-icon name="navigate-outline" aria-hidden="true"></ion-icon>
+              <span>Next</span>
+              <strong>#{{ nextDeliverySequence }}</strong>
+            </article>
           </div>
 
           <div class="route-card__footer">
@@ -90,6 +112,29 @@
           </div>
         </section>
 
+        <section class="next-card" aria-label="Next delivery">
+          <div class="next-card__topline">
+            <div>
+              <p class="next-card__eyebrow">Next stop</p>
+              <h2>{{ nextDelivery?.customerName || 'No active stop' }}</h2>
+            </div>
+            <span *ngIf="nextDelivery">#{{ nextDeliverySequence }}</span>
+          </div>
+
+          <p class="next-card__address">
+            {{ nextDeliveryArea }}
+          </p>
+
+          <div class="next-card__summary">
+            <ion-icon name="cube-outline" aria-hidden="true"></ion-icon>
+            <span>{{ nextDeliverySummary }}</span>
+          </div>
+
+          <a class="next-card__action" routerLink="/map">
+            <ion-icon name="map-outline" aria-hidden="true"></ion-icon>
+            <span>Open route map</span>
+          </a>
+        </section>
       </ng-container>
     </main>
   </div>

@@ -10,9 +10,10 @@ import {
   cubeOutline,
   locationOutline,
   mapOutline,
+  navigateOutline,
+  timeOutline,
   refreshOutline,
   statsChartOutline,
-  timeOutline,
 } from 'ionicons/icons';
 import { AuthService } from 'src/app/services/auth.service';
 import { OrderService } from 'src/app/services/order.service';
@@ -42,6 +43,7 @@ export class DashboardPage implements OnInit {
       cubeOutline,
       locationOutline,
       mapOutline,
+      navigateOutline,
       refreshOutline,
       statsChartOutline,
       timeOutline,
@@ -109,8 +111,24 @@ export class DashboardPage implements OnInit {
 
   get nextDeliverySummary(): string {
     const order = this.nextDelivery;
-    if (!order?.items?.length) return 'No items';
-    return order.items.map((i) => `${i.quantity} ${i.name}`).join(', ');
+    if (!order) return 'No active stop';
+    if (order.productSummary) return order.productSummary;
+    if (!order.items?.length) return 'No items listed';
+    return order.items.slice(0, 2).map((i) => `${i.quantity} ${i.name}`).join(', ');
+  }
+
+  get nextDeliveryArea(): string {
+    const order = this.nextDelivery;
+    return order?.area || order?.landmark || order?.address || 'Route queue';
+  }
+
+  get nextDeliverySequence(): string {
+    const sequence = this.nextDelivery?.sequence ?? this.completedStops + 1;
+    return String(sequence).padStart(2, '0');
+  }
+
+  get timeSlotLabel(): string {
+    return this.nextDelivery?.timeSlot || 'Today';
   }
 
   get shiftStatus(): string {
