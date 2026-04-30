@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { GoogleMapsModule } from '@angular/google-maps';
 import {
@@ -53,7 +53,7 @@ import { calculateRouteDistance, estimateRouteEtaMinutes, formatDistance, format
     TopHeaderComponent,
   ],
 })
-export class DeliveryMapPage implements OnInit {
+export class DeliveryMapPage {
   private readonly router = inject(Router);
   private readonly orderService = inject(OrderService);
   private readonly googleMapsLoader = inject(GoogleMapsLoaderService);
@@ -144,7 +144,7 @@ export class DeliveryMapPage implements OnInit {
     });
   }
 
-  async ngOnInit(): Promise<void> {
+  async ionViewDidEnter(): Promise<void> {
     await this.loadRoute();
   }
 
