@@ -1,17 +1,17 @@
 <ion-content [fullscreen]="true">
   <app-page-shell [withActionBar]="true">
-      <app-surface-card *ngIf="loading" tone="muted">
-        <ion-spinner name="crescent"></ion-spinner>
-        <p>Loading delivery details...</p>
-      </app-surface-card>
+    <app-surface-card *ngIf="loading" tone="muted" class="complete-state">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Loading delivery details...</p>
+    </app-surface-card>
 
-      <app-surface-card *ngIf="!loading && errorMessage" tone="danger">
-        <p>{{ errorMessage }}</p>
-      </app-surface-card>
+    <app-surface-card *ngIf="!loading && errorMessage" tone="danger" class="complete-state">
+      <p>{{ errorMessage }}</p>
+    </app-surface-card>
 
-      <ng-container *ngIf="!loading && !errorMessage">
+    <ng-container *ngIf="!loading && !errorMessage">
       <app-top-header
-        [eyebrow]="routeLabel + ' • ' + timeSlot"
+        [eyebrow]="headerEyebrow"
         title="Complete Stop"
       >
         <button header-start class="complete-header__back" type="button" aria-label="Go back" (click)="cancel()">
@@ -165,11 +165,11 @@
           </div>
         </div>
       </app-surface-card>
-      </ng-container>
+    </ng-container>
   </app-page-shell>
 </ion-content>
 
-<app-action-bar *ngIf="!loading && !errorMessage">
+<app-action-bar *ngIf="!loading && !errorMessage" label="Outcome" [value]="selectedActionLabel">
   <button class="completion-bar__ghost" type="button" (click)="cancel()">Cancel</button>
   <ion-button class="completion-bar__primary" fill="solid" [disabled]="!canSubmit" (click)="confirm()">
     <ion-spinner *ngIf="submitting" name="crescent" slot="start"></ion-spinner>

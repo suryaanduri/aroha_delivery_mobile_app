@@ -160,7 +160,7 @@
   </app-page-shell>
 </ion-content>
 
-<app-action-bar *ngIf="!loading && !errorMessage" label="Current stop" [value]="customerName">
+<app-action-bar *ngIf="!loading && !errorMessage && canUpdateStop" label="Current stop" [value]="customerName">
   <div class="detail-action-bar__actions">
     <button class="detail-action-bar__secondary" type="button" (click)="goToComplete('CANCELLED')">Cancel</button>
     <button class="detail-action-bar__secondary" type="button" (click)="goToComplete('SKIPPED')">Skipped</button>

@@ -103,7 +103,15 @@ export class DeliveryDetailPage implements OnInit {
     return `${this.items.length} product${this.items.length !== 1 ? 's' : ''}`;
   }
 
+  get canUpdateStop(): boolean {
+    return this.status === 'assigned';
+  }
+
   goToComplete(action: 'DELIVERED' | 'CANCELLED' | 'SKIPPED' = 'DELIVERED'): void {
+    if (!this.canUpdateStop) {
+      return;
+    }
+
     void this.router.navigate(['/delivery', this.stopId, 'complete'], {
       queryParams: { action },
     });
@@ -146,7 +154,7 @@ export class DeliveryDetailPage implements OnInit {
 
     this.customerName = order.customerName ?? 'Customer';
     this.customerCode = order.customerCode ?? '';
-    this.address = order.address ?? '';
+    this.address = order.address?.trim() || 'Location not available';
     this.landmark = order.landmark ?? '';
     this.routeLabel = order.routeLabel ?? `Stop ${String(sequence).padStart(2, '0')}`;
     this.scheduleType = normalizeScheduleType(order.scheduleType);
