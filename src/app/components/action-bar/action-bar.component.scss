@@ -6,17 +6,24 @@
 
 .action-bar {
   position: fixed;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  right: 50%;
+  bottom: calc(
+    var(--main-tab-bar-height, 70px) +
+    var(--main-tab-bar-bottom, max(var(--app-safe-area-bottom), 12px)) +
+    10px
+  );
+  left: auto;
   z-index: 20;
+  width: min(calc(100% - 32px), 460px);
   flex-direction: column;
   gap: 10px;
-  padding: 14px 16px calc(var(--app-safe-area-bottom) + 14px);
-  border-top: 1px solid rgba(227, 236, 232, 0.94);
+  padding: 14px 16px 16px;
+  border: 1px solid rgba(227, 236, 232, 0.94);
+  border-radius: 24px;
   background: rgba(250, 252, 251, 0.96);
   backdrop-filter: blur(18px);
-  box-shadow: 0 -16px 40px rgba(20, 61, 49, 0.08);
+  box-shadow: 0 18px 42px rgba(20, 61, 49, 0.16);
+  transform: translateX(50%);
 }
 
 .action-bar__label,
