@@ -141,6 +141,10 @@ ion-content {
   background: rgba(25, 61, 52, 0.05);
 }
 
+.summary-pill--muted {
+  background: rgba(120, 134, 128, 0.08);
+}
+
 .control-deck__search-row,
 .control-deck__filters {
   width: 100%;
@@ -287,7 +291,11 @@ ion-content {
 }
 
 .delivery-list-stack--completed {
-  opacity: 0.92;
+  opacity: 0.96;
+}
+
+.delivery-list-stack--completed app-delivery-card {
+  filter: saturate(0.92);
 }
 
 .loading-state {

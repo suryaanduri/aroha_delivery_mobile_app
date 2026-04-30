@@ -1,4 +1,9 @@
-<article class="delivery-card" [class.delivery-card--priority]="priority" (click)="cardPressed.emit()">
+<article
+  class="delivery-card"
+  [class.delivery-card--priority]="priority"
+  [class.delivery-card--readonly]="!actionable"
+  (click)="onCardPressed()"
+>
   <div class="delivery-card__topline">
     <div class="delivery-card__left-meta">
       <div class="delivery-card__sequence" *ngIf="viewModel.sequenceLabel">{{ viewModel.sequenceLabel }}</div>
@@ -48,8 +53,8 @@
     </div>
   </div>
 
-  <div class="delivery-card__footer">
-    <ion-button class="delivery-card__action" fill="solid" (click)="actionPressed.emit(); $event.stopPropagation()">
+  <div class="delivery-card__footer" *ngIf="actionable">
+    <ion-button class="delivery-card__action" fill="solid" (click)="onActionPressed(); $event.stopPropagation()">
       {{ actionText }}
       <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
     </ion-button>

@@ -109,6 +109,10 @@ export class DeliveryMapPage {
     return this.stops.find((stop) => stop.id === this.activeStopId) ?? null;
   }
 
+  get canOpenActiveStop(): boolean {
+    return this.activeStop?.status === 'assigned';
+  }
+
   get mappableStops(): DeliveryMapStopViewModel[] {
     return this.stops.filter((stop) => typeof stop.lat === 'number' && typeof stop.lng === 'number');
   }
@@ -199,7 +203,7 @@ export class DeliveryMapPage {
   }
 
   openActiveStop(): void {
-    if (!this.activeStop) {
+    if (!this.activeStop || !this.canOpenActiveStop) {
       return;
     }
     void this.router.navigate(['/delivery', this.activeStop.id]);
@@ -259,7 +263,7 @@ export class DeliveryMapPage {
   private buildRouteStats(stops: DeliveryMapStopViewModel[]): RouteStatsViewModel {
     const totalStops = stops.length;
     const completedStops = stops.filter((stop) => stop.status === 'delivered').length;
-    const pendingStops = totalStops - completedStops;
+    const pendingStops = stops.filter((stop) => stop.status === 'assigned').length;
     const routePath = stops
       .filter((stop) => typeof stop.lat === 'number' && typeof stop.lng === 'number')
       .map((stop) => ({
@@ -280,7 +284,7 @@ export class DeliveryMapPage {
   private getInitialActiveStopId(): string {
     return (
       this.stops.find((stop) => stop.status === 'in-progress')?.id ??
-      this.stops.find((stop) => stop.status !== 'delivered')?.id ??
+      this.stops.find((stop) => stop.status === 'assigned')?.id ??
       this.stops[0]?.id ??
       ''
     );

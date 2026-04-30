@@ -40,12 +40,16 @@
 
         <div class="control-deck__stats">
           <article class="summary-pill">
-            <span>Pending</span>
+            <span>Assigned</span>
             <strong>{{ pendingCount }}</strong>
           </article>
           <article class="summary-pill summary-pill--soft">
             <span>Completed</span>
             <strong>{{ completedCount }}</strong>
+          </article>
+          <article class="summary-pill summary-pill--muted">
+            <span>Closed</span>
+            <strong>{{ resolvedCount }}</strong>
           </article>
         </div>
 
@@ -99,7 +103,7 @@
             <div class="next-stop-intro__row">
               <div>
                 <h2>Open next delivery</h2>
-                <p>{{ nextStop.sequenceLabel }} in your active route</p>
+                <p>{{ nextStop.sequenceLabel }} assigned in route order</p>
               </div>
             </div>
           </div>
@@ -107,6 +111,7 @@
           <app-delivery-card
             [stop]="nextStop"
             [priority]="true"
+            [actionable]="isAssignedStop(nextStop)"
             actionText="Open Stop"
             (cardPressed)="openDelivery(nextStop.id)"
             (actionPressed)="openDelivery(nextStop.id)"
@@ -115,7 +120,7 @@
 
         <section *ngIf="remainingActiveStops.length" class="list-section">
           <app-section-header
-            title="Active stops"
+            title="Assigned stops"
             [meta]="remainingActiveStops.length + ' remaining'"
           ></app-section-header>
 
@@ -123,6 +128,7 @@
             <app-delivery-card
               [stop]="stop"
               *ngFor="let stop of remainingActiveStops"
+              [actionable]="isAssignedStop(stop)"
               actionText="Open Stop"
               (cardPressed)="openDelivery(stop.id)"
               (actionPressed)="openDelivery(stop.id)"
@@ -130,19 +136,17 @@
           </div>
         </section>
 
-        <section *ngIf="completedStops.length" class="list-section list-section--completed">
+        <section *ngIf="resolvedStops.length" class="list-section list-section--completed">
           <app-section-header
-            title="Completed"
-            [meta]="completedStops.length + ' done'"
+            title="Closed stops"
+            [meta]="resolvedStops.length + ' total'"
           ></app-section-header>
 
           <div class="delivery-list-stack delivery-list-stack--completed">
             <app-delivery-card
               [stop]="stop"
-              *ngFor="let stop of completedStops"
-              actionText="View Stop"
-              (cardPressed)="openDelivery(stop.id)"
-              (actionPressed)="openDelivery(stop.id)"
+              *ngFor="let stop of resolvedStops"
+              [actionable]="false"
             ></app-delivery-card>
           </div>
         </section>

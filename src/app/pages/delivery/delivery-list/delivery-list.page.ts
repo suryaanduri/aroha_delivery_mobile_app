@@ -22,7 +22,7 @@ import { OrderService, buildStaticDeliveryOrdersQuery } from 'src/app/services/o
 import { getApiErrorMessage } from 'src/app/utils/api-contract.util';
 import { DeliveryStopViewModel, mapOrderToDeliveryStopViewModel } from 'src/app/utils/delivery-view.util';
 
-type FilterKey = 'all' | 'pending' | 'delivered';
+type FilterKey = 'all' | 'assigned' | 'delivered';
 
 @Component({
   selector: 'app-delivery-list',
@@ -54,7 +54,7 @@ export class DeliveryListPage {
 
   readonly filterOptions: { key: FilterKey; label: string }[] = [
     { key: 'all', label: 'All' },
-    { key: 'pending', label: 'Pending' },
+    { key: 'assigned', label: 'Assigned' },
     { key: 'delivered', label: 'Delivered' },
   ];
 
@@ -105,7 +105,7 @@ export class DeliveryListPage {
 
       const matchesFilter =
         this.selectedFilter === 'all' ||
-        (this.selectedFilter === 'pending' && stop.status !== 'delivered') ||
+        (this.selectedFilter === 'assigned' && this.isAssignedStop(stop)) ||
         (this.selectedFilter === 'delivered' && stop.status === 'delivered');
 
       return matchesSearch && matchesFilter;
@@ -113,7 +113,7 @@ export class DeliveryListPage {
   }
 
   get activeStops(): DeliveryStopViewModel[] {
-    return this.filteredDeliveries.filter((stop) => stop.status !== 'delivered');
+    return this.filteredDeliveries.filter((stop) => this.isAssignedStop(stop));
   }
 
   get nextStop(): DeliveryStopViewModel | null {
@@ -128,6 +128,10 @@ export class DeliveryListPage {
     return this.filteredDeliveries.filter((stop) => stop.status === 'delivered');
   }
 
+  get resolvedStops(): DeliveryStopViewModel[] {
+    return this.filteredDeliveries.filter((stop) => !this.isAssignedStop(stop));
+  }
+
   get totalStops(): number {
     return this.deliveries.length;
   }
@@ -137,11 +141,15 @@ export class DeliveryListPage {
   }
 
   get pendingCount(): number {
-    return this.deliveries.filter((stop) => stop.status !== 'delivered').length;
+    return this.deliveries.filter((stop) => this.isAssignedStop(stop)).length;
   }
 
   get completedCount(): number {
     return this.deliveries.filter((stop) => stop.status === 'delivered').length;
+  }
+
+  get resolvedCount(): number {
+    return this.deliveries.length - this.pendingCount;
   }
 
   get activeFilterCount(): number {
@@ -200,5 +208,9 @@ export class DeliveryListPage {
         this.loading = false;
       },
     });
+  }
+
+  isAssignedStop(stop: DeliveryStopViewModel): boolean {
+    return stop.status === 'assigned';
   }
 }
