@@ -1,17 +1,17 @@
 <ion-content [fullscreen]="true">
   <app-page-shell [withActionBar]="true">
-      <app-surface-card *ngIf="loading" tone="muted">
-        <ion-spinner name="crescent"></ion-spinner>
-        <p>Loading delivery details...</p>
-      </app-surface-card>
+    <app-surface-card *ngIf="loading" tone="muted">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Loading delivery details...</p>
+    </app-surface-card>
 
-      <app-surface-card *ngIf="!loading && errorMessage" tone="danger">
-        <p>{{ errorMessage }}</p>
-      </app-surface-card>
+    <app-surface-card *ngIf="!loading && errorMessage" tone="danger">
+      <p>{{ errorMessage }}</p>
+    </app-surface-card>
 
-      <ng-container *ngIf="!loading && !errorMessage">
+    <ng-container *ngIf="!loading && !errorMessage">
       <app-top-header
-        [eyebrow]="routeLabel + ' • ' + timeSlot"
+        [eyebrow]="routeLabel + (timeSlot ? ' · ' + timeSlot : '')"
         title="Complete Stop"
       >
         <button header-start class="complete-header__back" type="button" aria-label="Go back" (click)="cancel()">
@@ -20,7 +20,8 @@
         <app-status-chip header-end [kind]="'status'" [value]="currentStatus"></app-status-chip>
       </app-top-header>
 
-      <app-surface-card class="surface-card surface-card--context">
+      <!-- Customer context -->
+      <app-surface-card class="surface-card--context">
         <div class="context-band">
           <div class="context-band__copy">
             <strong>{{ customerName }}</strong>
@@ -28,7 +29,6 @@
           </div>
           <app-status-chip [kind]="'schedule'" [value]="scheduleType"></app-status-chip>
         </div>
-
         <app-customer-info-card
           [name]="customerName"
           [customerCode]="customerCode"
@@ -38,122 +38,120 @@
         ></app-customer-info-card>
       </app-surface-card>
 
-      <app-surface-card class="surface-card surface-card--action">
+      <!-- Action selector -->
+      <app-surface-card class="surface-card--action">
         <app-section-header
           title="Select Outcome"
           subtitle="Choose the final status before attaching proof."
         ></app-section-header>
-
         <div class="action-selector">
-          <button
-            type="button"
-            class="action-option"
+          <button type="button" class="action-option"
             [class.action-option--active]="selectedAction === 'DELIVERED'"
-            (click)="selectAction('DELIVERED')"
-          >
-            <strong>Delivered</strong>
-            <span>Successful handoff</span>
+            (click)="selectAction('DELIVERED')">
+            <ion-icon name="checkmark-circle-outline"></ion-icon>
+            <div><strong>Delivered</strong><span>Successful handoff</span></div>
           </button>
-
-          <button
-            type="button"
-            class="action-option action-option--warning"
+          <button type="button" class="action-option action-option--warning"
             [class.action-option--active]="selectedAction === 'CANCELLED'"
-            (click)="selectAction('CANCELLED')"
-          >
-            <strong>Cancelled</strong>
-            <span>Could not complete</span>
+            (click)="selectAction('CANCELLED')">
+            <ion-icon name="close-circle-outline"></ion-icon>
+            <div><strong>Cancelled</strong><span>Could not complete</span></div>
           </button>
-
-          <button
-            type="button"
-            class="action-option action-option--neutral"
+          <button type="button" class="action-option action-option--neutral"
             [class.action-option--active]="selectedAction === 'SKIPPED'"
-            (click)="selectAction('SKIPPED')"
-          >
-            <strong>Skipped</strong>
-            <span>Deferred to later</span>
+            (click)="selectAction('SKIPPED')">
+            <ion-icon name="time-outline"></ion-icon>
+            <div><strong>Skipped</strong><span>Deferred to later</span></div>
           </button>
         </div>
       </app-surface-card>
 
-      <app-surface-card class="surface-card surface-card--items">
+      <!-- Items -->
+      <app-surface-card class="surface-card--items">
         <app-section-header
           title="Items Confirmed"
           subtitle="Review the delivery contents before submission."
         ></app-section-header>
-
-        <app-product-list
-          [items]="items"
-          [layout]="'expanded'"
-        ></app-product-list>
+        <app-product-list [items]="items" [layout]="'expanded'"></app-product-list>
       </app-surface-card>
 
-      <app-surface-card class="surface-card">
+      <!-- Proof & Notes -->
+      <app-surface-card>
         <app-section-header
-          title="Proof & Notes"
-          subtitle="Only capture what is needed for this outcome."
+          title="Proof &amp; Notes"
+          subtitle="Attach photo proof or a delivery note."
           actionText="Reset"
           (actionPressed)="resetProof()"
         ></app-section-header>
 
-        <div class="proof-toggle-grid">
-          <button
-            type="button"
-            class="proof-toggle"
-            *ngFor="let option of proofOptions"
-            [class.proof-toggle--active]="proofState[option.key]"
-            (click)="toggleProof(option.key)"
-          >
-            <ion-icon [name]="option.icon" aria-hidden="true"></ion-icon>
-            <div class="proof-toggle__copy">
-              <strong>{{ option.label }}</strong>
-              <span>{{ option.helper }}</span>
+        <!-- Photo proof -->
+        <div class="proof-section">
+          <!-- No photo yet -->
+          <ng-container *ngIf="!hasPhoto">
+            <button type="button" class="photo-btn" (click)="capturePhoto()">
+              <ion-icon name="camera-outline"></ion-icon>
+              <span>Take Photo Proof</span>
+            </button>
+          </ng-container>
+
+          <!-- Photo captured -->
+          <ng-container *ngIf="hasPhoto">
+            <div class="photo-preview">
+              <img [src]="'data:' + capturedPhotoMime + ';base64,' + capturedPhotoBase64" alt="Proof photo" class="photo-preview__img" />
+              <div class="photo-preview__overlay">
+                <div *ngIf="uploadingPhoto" class="photo-preview__uploading">
+                  <ion-spinner name="crescent"></ion-spinner>
+                  <span>Uploading…</span>
+                </div>
+                <div *ngIf="!uploadingPhoto && uploadedPhotoUrl" class="photo-preview__done">
+                  <ion-icon name="checkmark-circle-outline"></ion-icon>
+                  <span>Uploaded</span>
+                </div>
+                <div *ngIf="!uploadingPhoto && !uploadedPhotoUrl" class="photo-preview__pending">
+                  <ion-icon name="image-outline"></ion-icon>
+                  <span>Will upload on submit</span>
+                </div>
+              </div>
+              <button type="button" class="photo-preview__remove" (click)="removePhoto()" aria-label="Remove photo">
+                <ion-icon name="trash-outline"></ion-icon>
+              </button>
             </div>
+          </ng-container>
+        </div>
+
+        <!-- Reason chips (cancelled/skipped only) -->
+        <div *ngIf="reasonRequired" class="proof-panel">
+          <label class="proof-panel__label">Reason *</label>
+          <div class="reason-grid">
+            <button type="button" class="reason-chip"
+              *ngFor="let reason of reasons"
+              [class.reason-chip--active]="selectedReason === reason"
+              (click)="selectedReason = reason">
+              {{ reason }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Note toggle -->
+        <div class="note-toggle-row">
+          <button type="button" class="note-toggle-btn" (click)="noteOpen = !noteOpen">
+            <ion-icon [name]="noteOpen ? 'close-outline' : 'chatbubble-ellipses-outline'"></ion-icon>
+            {{ noteOpen ? 'Close note' : 'Add delivery note' }}
           </button>
         </div>
 
-        <div class="proof-stack">
-          <div *ngIf="proofState.photo" class="proof-panel proof-panel--placeholder">
-            <ion-icon name="camera-outline" aria-hidden="true"></ion-icon>
-            <div>
-              <strong>Photo Proof</strong>
-              <p>Capture doorstep handoff or delivery placement.</p>
-            </div>
-          </div>
-
-          <div *ngIf="reasonRequired" class="proof-panel">
-            <label class="proof-panel__label">Reason *</label>
-            <div class="reason-grid">
-              <button
-                type="button"
-                class="reason-chip"
-                *ngFor="let reason of reasons"
-                [class.reason-chip--active]="selectedReason === reason"
-                (click)="selectedReason = reason"
-              >
-                {{ reason }}
-              </button>
-            </div>
-          </div>
-
-          <div *ngIf="proofState.note || reasonRequired" class="proof-panel">
-            <label class="proof-panel__label">Delivery Note</label>
-            <textarea
-              rows="3"
-              placeholder="Add any handoff or failure note"
-              [(ngModel)]="deliveryNote"
-            ></textarea>
-          </div>
+        <div *ngIf="noteOpen" class="proof-panel">
+          <label class="proof-panel__label">Note</label>
+          <textarea rows="3" placeholder="Add any handoff or failure note…" [(ngModel)]="deliveryNote"></textarea>
         </div>
       </app-surface-card>
 
-      <app-surface-card class="surface-card">
+      <!-- Confirmation summary -->
+      <app-surface-card>
         <app-section-header
           title="Confirmation Summary"
-          subtitle="Review the final outcome before submission."
+          subtitle="Review before submitting."
         ></app-section-header>
-
         <div class="confirmation-summary">
           <div class="confirmation-row">
             <span>Status</span>
@@ -161,24 +159,22 @@
           </div>
           <div class="confirmation-row">
             <span>Proof</span>
-            <strong>{{ proofSummary.length ? proofSummary.join(' • ') : 'No proof attached' }}</strong>
+            <strong>{{ proofSummaryItems.length ? proofSummaryItems.join(' · ') : 'No proof attached' }}</strong>
           </div>
         </div>
       </app-surface-card>
-      </ng-container>
+    </ng-container>
   </app-page-shell>
 </ion-content>
 
 <app-action-bar *ngIf="!loading && !errorMessage">
   <button class="completion-bar__ghost" type="button" (click)="cancel()">Cancel</button>
   <ion-button class="completion-bar__primary" fill="solid" [disabled]="!canSubmit" (click)="confirm()">
-    <ion-spinner *ngIf="submitting" name="crescent" slot="start"></ion-spinner>
-    <ion-icon
-      *ngIf="!submitting"
-      slot="start"
-      [name]="selectedAction === 'DELIVERED' ? 'checkmark-circle-outline' : 'alert-circle-outline'"
-    ></ion-icon>
-    {{ submitting ? 'Submitting...' : finalCtaLabel }}
+    <ion-spinner *ngIf="submitting || uploadingPhoto" name="crescent" slot="start"></ion-spinner>
+    <ion-icon *ngIf="!submitting && !uploadingPhoto" slot="start"
+      [name]="selectedAction === 'DELIVERED' ? 'checkmark-circle-outline' : 'alert-circle-outline'">
+    </ion-icon>
+    {{ uploadingPhoto ? 'Uploading…' : submitting ? 'Submitting…' : finalCtaLabel }}
   </ion-button>
 </app-action-bar>
 
@@ -186,6 +182,6 @@
   [isOpen]="toastOpen"
   [message]="toastMessage"
   [color]="toastColor"
-  [duration]="2200"
+  [duration]="2400"
   (didDismiss)="toastOpen = false"
 ></ion-toast>

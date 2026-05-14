@@ -27,19 +27,14 @@
 @import "@ionic/angular/css/text-transformation.css";
 @import "@ionic/angular/css/flex-utils.css";
 
-/**
- * Ionic Dark Mode
- * -----------------------------------------------------
- * For more info, please see:
- * https://ionicframework.com/docs/theming/dark-mode
+/*
+ * Dark mode is intentionally disabled — the app is designed for outdoor
+ * delivery use with a fixed light-mode brand palette. Enabling system dark
+ * mode would invert all hardcoded brand colours.
  */
 
-/* @import "@ionic/angular/css/palettes/dark.always.css"; */
-/* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import '@ionic/angular/css/palettes/dark.system.css';
-
 :root {
-  --app-font-family: 'Roboto', 'Segoe UI', sans-serif;
+  --app-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --ion-font-family: var(--app-font-family);
   --app-native-status-bar-height: 0px;
   --app-safe-area-top: max(env(safe-area-inset-top, 0px), var(--app-native-status-bar-height));
@@ -74,6 +69,25 @@ ion-app {
 ion-content {
   --padding-top: 0;
   --padding-bottom: 0;
+}
+
+/* Force light mode — brand palette only works in light. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ion-background-color: #f3f7f5;
+    --ion-background-color-rgb: 243, 247, 245;
+    --ion-text-color: #16231f;
+    --ion-text-color-rgb: 22, 35, 31;
+    --ion-color-step-50: #f3f7f5;
+    --ion-color-step-100: #edf4f0;
+    --ion-color-step-150: #e7f0ea;
+    --ion-color-step-200: #e1ece5;
+    --ion-item-background: #ffffff;
+    --ion-card-background: #ffffff;
+    --ion-toolbar-background: #f3f7f5;
+    --ion-tab-bar-background: rgba(255,255,255,0.92);
+    color-scheme: light;
+  }
 }
 
 .app-confirm-alert {

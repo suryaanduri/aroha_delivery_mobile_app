@@ -6,12 +6,19 @@
 .page-shell {
   position: relative;
   min-height: 100%;
-  padding: calc(var(--app-safe-area-top) + 6px) 16px calc(var(--app-safe-area-bottom) + 28px);
+  /* 16px side gutters on all phones; bumps to 20px on wider devices */
+  padding: calc(var(--app-safe-area-top) + 8px) clamp(12px, 4vw, 20px) calc(var(--app-safe-area-bottom) + 28px);
   overflow: hidden;
 }
 
 .page-shell--with-action-bar {
-  padding-bottom: calc(var(--app-safe-area-bottom) + 136px);
+  /*
+   * 88px  = action-bar content (label + buttons)
+   * 16px  = internal top padding inside the bar
+   * 16px  = bottom padding inside the bar (before safe-area)
+   * safe-area = device notch/home bar
+   */
+  padding-bottom: calc(var(--app-safe-area-bottom) + 120px);
 }
 
 .page-shell__backdrop {
@@ -33,7 +40,7 @@
   z-index: 1;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: clamp(10px, 3vw, 14px);
   width: 100%;
   max-width: var(--page-shell-max-width, 440px);
   margin: 0 auto;

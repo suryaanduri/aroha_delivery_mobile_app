@@ -145,3 +145,40 @@ ion-content {
 .more-menu__item--danger .more-menu__chevron {
   color: var(--app-color-warning);
 }
+
+@media (max-width: 360px) {
+  .more-profile {
+    padding: 14px;
+    gap: 10px;
+  }
+
+  .more-profile__avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+  }
+
+  .more-profile__copy h2 {
+    font-size: 1.08rem;
+  }
+
+  .more-menu__item {
+    min-height: 68px;
+    padding: 12px 14px;
+    gap: 12px;
+  }
+
+  .more-menu__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 13px;
+  }
+
+  .more-menu__copy strong {
+    font-size: 0.92rem;
+  }
+
+  .more-menu__copy small {
+    font-size: 0.78rem;
+  }
+}

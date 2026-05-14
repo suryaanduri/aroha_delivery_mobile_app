@@ -8,7 +8,7 @@ import {
   IonTabs,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { ellipsisHorizontalOutline, homeOutline, listOutline, mapOutline } from 'ionicons/icons';
+import { ellipsisHorizontalOutline, homeOutline, listOutline, mapOutline, navigateOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-main-layout',
@@ -32,10 +32,15 @@ export class MainLayoutComponent {
       homeOutline,
       listOutline,
       mapOutline,
+      navigateOutline,
     });
   }
 
   get isMoreTabActive(): boolean {
     return ['/more', '/profile', '/day-summary'].some((path) => this.router.url.startsWith(path));
+  }
+
+  get isListTabActive(): boolean {
+    return this.router.url.startsWith('/deliveries') || this.router.url.startsWith('/delivery/');
   }
 }

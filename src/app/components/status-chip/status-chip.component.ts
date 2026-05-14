@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 
-export type DeliveryStatus = 'pending' | 'in-progress' | 'delivered' | 'skipped' | 'failed';
+export type DeliveryStatus = 'pending' | 'in-progress' | 'delivered' | 'skipped' | 'cancelled' | 'failed';
 export type ScheduleType = 'daily' | 'one-time' | 'alternate-day';
 export type StatusChipKind = 'status' | 'schedule' | 'neutral';
 
@@ -32,6 +32,8 @@ export class StatusChipComponent {
     if (value === 'pending' || value === 'alternate-day') {
       return 'neutral';
     }
-    return value === 'failed' ? 'danger' : 'muted';
+    if (value === 'cancelled' || value === 'failed') return 'danger';
+    if (value === 'skipped') return 'warning';
+    return 'muted';
   }
 }

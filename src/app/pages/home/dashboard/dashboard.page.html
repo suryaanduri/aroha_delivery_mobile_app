@@ -1,45 +1,32 @@
 <ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content pullingText="Pull to refresh" refreshingSpinner="crescent"></ion-refresher-content>
+  </ion-refresher>
+
   <div class="dashboard-shell">
     <main class="dashboard-page">
+
+      <!-- Hero -->
       <section class="hero" aria-label="Greeting">
         <div class="hero__meta">
-          <div class="hero__meta-copy">
-            <span class="hero__date">{{ todayLabel }}</span>
-            <span class="hero__status">{{ shiftStatus }}</span>
-          </div>
-
+          <span class="hero__date">{{ todayLabel }}</span>
+          <span class="hero__status" [class]="shiftStatusClass">{{ shiftStatus }}</span>
         </div>
-
-        <div class="hero__copy">
-          <h1>{{ greeting }}, {{ agentName }}</h1>
-          <p *ngIf="!loading && !errorMessage">
-            {{
-              totalStops > 0
-                ? (pendingStops > 0 ? pendingStops + ' stops left today.' : 'Route completed for the day.')
-                : 'No deliveries assigned for today.'
-            }}
-          </p>
-        </div>
+        <h1 class="hero__title">{{ greeting }},<br>{{ agentName }}</h1>
       </section>
 
+      <!-- Loading -->
       <section *ngIf="loading" class="state-card state-card--loading" aria-label="Loading">
-        <div class="state-card__icon">
-          <ion-spinner name="crescent"></ion-spinner>
-        </div>
-        <div class="state-card__copy">
-          <p class="state-card__title">Loading dashboard</p>
-          <p class="state-card__text">Fetching today’s route overview.</p>
-        </div>
+        <div class="state-card__icon"><ion-spinner name="crescent"></ion-spinner></div>
+        <p class="state-card__title">Loading your route</p>
+        <p class="state-card__text">Fetching today's delivery overview…</p>
       </section>
 
+      <!-- Error -->
       <section *ngIf="!loading && errorMessage" class="state-card state-card--error" aria-label="Error">
-        <div class="state-card__icon">
-          <ion-icon name="refresh-outline" aria-hidden="true"></ion-icon>
-        </div>
-        <div class="state-card__copy">
-          <p class="state-card__title">Unable to load dashboard</p>
-          <p class="state-card__text">{{ errorMessage }}</p>
-        </div>
+        <div class="state-card__icon"><ion-icon name="refresh-outline" aria-hidden="true"></ion-icon></div>
+        <p class="state-card__title">Unable to load</p>
+        <p class="state-card__text">{{ errorMessage }}</p>
         <button type="button" class="state-card__button" (click)="loadOrders()">
           <ion-icon name="refresh-outline" aria-hidden="true"></ion-icon>
           Retry
@@ -47,9 +34,11 @@
       </section>
 
       <ng-container *ngIf="!loading && !errorMessage">
+
+        <!-- Route summary card -->
         <section class="route-card" aria-label="Today delivery summary">
           <div class="route-card__topline">
-            <p class="route-card__label">Today’s route</p>
+            <span class="route-card__label">Today's route</span>
             <div class="route-card__statusline">
               <span>{{ completedStops }} done</span>
               <span>{{ pendingStops }} left</span>
@@ -63,7 +52,6 @@
                 {{ totalStops === 1 ? 'stop assigned' : 'stops assigned' }}
               </p>
             </div>
-
             <div class="route-card__progress-pill" *ngIf="totalStops > 0">
               <span>{{ progressPercent }}%</span>
               <small>complete</small>
@@ -74,20 +62,59 @@
             <span [style.width.%]="progressPercent"></span>
           </div>
 
-          <div class="route-card__footer">
-            <p class="route-card__summary">
-              {{
-                totalProducts > 0
-                  ? (totalProducts + ' ' + (totalProducts === 1 ? 'item' : 'items') + ' on the route')
-                  : (pendingStops > 0 ? pendingStops + ' stops remaining' : 'All stops completed')
-              }}
-            </p>
+          <!-- Status breakdown chips -->
+          <div class="route-card__chips" *ngIf="totalStops > 0">
+            <div class="stat-chip stat-chip--delivered">
+              <ion-icon name="checkmark-circle-outline"></ion-icon>
+              <span>{{ completedStops }}</span>
+              <small>Delivered</small>
+            </div>
+            <div class="stat-chip stat-chip--pending">
+              <ion-icon name="time-outline"></ion-icon>
+              <span>{{ pendingStops }}</span>
+              <small>Pending</small>
+            </div>
+            <div class="stat-chip stat-chip--cancelled" *ngIf="cancelledStops > 0">
+              <ion-icon name="close-circle-outline"></ion-icon>
+              <span>{{ cancelledStops }}</span>
+              <small>Cancelled</small>
+            </div>
+            <div class="stat-chip stat-chip--skipped" *ngIf="skippedStops > 0">
+              <ion-icon name="play-skip-forward-outline"></ion-icon>
+              <span>{{ skippedStops }}</span>
+              <small>Skipped</small>
+            </div>
+          </div>
 
-            <a class="route-card__cta" routerLink="/deliveries">
-              <span>View Today’s Deliveries</span>
+          <a class="route-card__cta" routerLink="/deliveries">
+            <span>View All Deliveries</span>
+            <ion-icon name="arrow-forward-outline" aria-hidden="true"></ion-icon>
+          </a>
+        </section>
+
+        <!-- Next Stop card -->
+        <section class="next-card" *ngIf="nextDelivery" aria-label="Next stop">
+          <div class="next-card__eyebrow">
+            <ion-icon name="location-outline" aria-hidden="true"></ion-icon>
+            <span>Next Stop</span>
+          </div>
+          <div class="next-card__body">
+            <div class="next-card__info">
+              <strong class="next-card__name">{{ nextDelivery.customerName }}</strong>
+              <p class="next-card__address">{{ nextDelivery.address }}<span *ngIf="nextDelivery.landmark"> · {{ nextDelivery.landmark }}</span></p>
+              <p class="next-card__items" *ngIf="nextStopItems">{{ nextStopItems }}</p>
+            </div>
+            <a class="next-card__btn" [routerLink]="['/delivery', nextDelivery.id]">
               <ion-icon name="arrow-forward-outline" aria-hidden="true"></ion-icon>
             </a>
           </div>
+        </section>
+
+        <!-- Empty state -->
+        <section class="state-card state-card--empty" *ngIf="totalStops === 0">
+          <div class="state-card__icon"><ion-icon name="cube-outline" aria-hidden="true"></ion-icon></div>
+          <p class="state-card__title">No deliveries today</p>
+          <p class="state-card__text">No delivery orders assigned for today in your area.</p>
         </section>
 
       </ng-container>

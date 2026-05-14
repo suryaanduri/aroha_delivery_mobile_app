@@ -5,6 +5,7 @@ import { environment } from 'src/environments/environment';
 import { DeliveryOrder } from '../models/order.model';
 import { ApiSuccessResponse } from '../models/auth.model';
 import { unwrapApiSuccess } from '../utils/api-contract.util';
+import { CHANDANAGAR_CENTER } from '../utils/mock-coordinates.util';
 
 interface OrdersDataPayload {
   orders?: DeliveryOrder[];
@@ -28,8 +29,8 @@ export function buildStaticDeliveryOrdersQuery(deliveryDate: string): Readonly<
 > {
   return {
     deliveryDate,
-    lat: 17.492105,
-    lng: 78.327663,
+    lat: CHANDANAGAR_CENTER.lat,
+    lng: CHANDANAGAR_CENTER.lng,
     page: 1,
     limit: 20,
   };
@@ -40,6 +41,16 @@ export interface UpdateOrderStatusPayload {
   reason?: string;
   proofImage?: string;
   notes?: string;
+}
+
+export interface DeliveryAnalytics {
+  date: string;
+  total: number;
+  delivered: number;
+  cancelled: number;
+  skipped: number;
+  pending: number;
+  completionRate: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -75,6 +86,17 @@ export class OrderService {
     return this.http
       .get<unknown>(`${this.baseUrl}/orders/${orderId}`)
       .pipe(map((res) => this.extractOrder(res)));
+  }
+
+  getMyAnalytics(date?: string): Observable<DeliveryAnalytics> {
+    let params = new HttpParams();
+    if (date) params = params.set('date', date);
+    return this.http.get<unknown>(`${this.baseUrl}/analytics`, { params }).pipe(
+      map((res) => {
+        const { data } = unwrapApiSuccess<DeliveryAnalytics>(res, 'Analytics loaded');
+        return data ?? { date: date ?? '', total: 0, delivered: 0, cancelled: 0, skipped: 0, pending: 0, completionRate: 0 };
+      })
+    );
   }
 
   updateOrderStatus(orderId: string, payload: UpdateOrderStatusPayload): Observable<ApiSuccessResponse> {

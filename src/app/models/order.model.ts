@@ -30,4 +30,7 @@ export interface DeliveryOrder {
   items?: OrderItem[];
   notes?: string;
   sequence?: number;
+  cancelReason?: string;
+  deliveryProofImage?: string;
+  deliveryNotes?: string;
 }

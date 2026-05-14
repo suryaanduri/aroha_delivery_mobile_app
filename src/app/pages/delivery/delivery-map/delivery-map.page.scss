@@ -146,7 +146,8 @@ ion-content {
 
 .route-stage__map,
 .route-stage__empty-map {
-  height: 404px;
+  /* Responsive: 52 vw keeps it proportional; clamp prevents collapse on SE or overflow on tablets */
+  height: clamp(220px, 52vw, 420px);
   border-radius: 22px;
 }
 
@@ -358,15 +359,10 @@ ion-content {
 }
 
 @media (max-width: 420px) {
-  .route-stage__map,
-  .route-stage__empty-map {
-    height: 382px;
-  }
-
   .route-stage__topbar {
-    top: 22px;
-    left: 22px;
-    right: 70px;
+    top: 14px;
+    left: 14px;
+    right: 14px;
   }
 
   .active-stop-card__meta,
@@ -382,6 +378,10 @@ ion-content {
 
 @media (max-width: 360px) {
   .route-stats {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .route-chip strong {
+    font-size: 0.74rem;
   }
 }

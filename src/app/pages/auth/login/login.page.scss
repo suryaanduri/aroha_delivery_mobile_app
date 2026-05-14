@@ -580,3 +580,50 @@ ion-content {
     padding-right: 1.15rem;
   }
 }
+
+/* Very short phones (iPhone SE 1st gen: 568px height) */
+@media (max-height: 640px) {
+  .hero-panel__brand {
+    margin-top: 0.6rem;
+  }
+
+  .hero-panel__copy {
+    margin-top: 0.8rem;
+  }
+
+  .hero-panel__copy h1 {
+    font-size: clamp(1.9rem, 8vw, 2.4rem);
+  }
+
+  .hero-panel__copy p {
+    display: none; /* hide tagline on very small screens to save space */
+  }
+
+  .hero-panel__signals {
+    margin-top: 0.7rem;
+  }
+}
+
+/* 360px wide (Galaxy A-series, Pixel 4a) */
+@media (max-width: 360px) {
+  .login-shell {
+    padding-left: 0.85rem;
+    padding-right: 0.85rem;
+  }
+
+  .hero-panel__brand-name {
+    font-size: 1.35rem;
+  }
+
+  .hero-panel__copy h1 {
+    font-size: clamp(1.8rem, 8.5vw, 2.2rem);
+  }
+
+  .field-shell {
+    min-height: 3.4rem;
+  }
+
+  .login-form__submit {
+    min-height: 3.4rem;
+  }
+}

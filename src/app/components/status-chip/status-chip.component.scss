@@ -55,3 +55,9 @@
   background: rgba(120, 134, 128, 0.1);
   color: #7a8881;
 }
+
+.status-chip[data-tone="warning"] {
+  border-color: rgba(90, 110, 160, 0.2);
+  background: rgba(90, 110, 160, 0.12);
+  color: #4a5a8a;
+}

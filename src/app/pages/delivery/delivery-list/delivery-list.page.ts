@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { IonButton, IonContent, IonIcon, IonSpinner } from '@ionic/angular/standalone';
+import { IonButton, IonContent, IonIcon, IonRefresher, IonRefresherContent, IonSpinner } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
   arrowBackOutline,
@@ -18,11 +18,13 @@ import { PageShellComponent } from 'src/app/components/page-shell/page-shell.com
 import { SectionHeaderComponent } from 'src/app/components/section-header/section-header.component';
 import { SurfaceCardComponent } from 'src/app/components/surface-card/surface-card.component';
 import { TopHeaderComponent } from 'src/app/components/top-header/top-header.component';
+import { DeliveryOrder } from 'src/app/models/order.model';
 import { OrderService, buildStaticDeliveryOrdersQuery } from 'src/app/services/order.service';
 import { getApiErrorMessage } from 'src/app/utils/api-contract.util';
+import { formatLocalISODate } from 'src/app/utils/date.util';
 import { DeliveryStopViewModel, mapOrderToDeliveryStopViewModel } from 'src/app/utils/delivery-view.util';
 
-type FilterKey = 'all' | 'pending' | 'delivered';
+type FilterKey = 'all' | 'pending' | 'delivered' | 'cancelled' | 'skipped';
 
 @Component({
   selector: 'app-delivery-list',
@@ -33,6 +35,8 @@ type FilterKey = 'all' | 'pending' | 'delivered';
     IonButton,
     IonContent,
     IonIcon,
+    IonRefresher,
+    IonRefresherContent,
     IonSpinner,
     CommonModule,
     FormsModule,
@@ -56,6 +60,8 @@ export class DeliveryListPage implements OnInit {
     { key: 'all', label: 'All' },
     { key: 'pending', label: 'Pending' },
     { key: 'delivered', label: 'Delivered' },
+    { key: 'cancelled', label: 'Cancelled' },
+    { key: 'skipped', label: 'Skipped' },
   ];
 
   constructor(
@@ -85,11 +91,7 @@ export class DeliveryListPage implements OnInit {
   }
 
   private get todayDate(): string {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    return formatLocalISODate();
   }
 
   get filteredDeliveries(): DeliveryStopViewModel[] {
@@ -105,15 +107,19 @@ export class DeliveryListPage implements OnInit {
 
       const matchesFilter =
         this.selectedFilter === 'all' ||
-        (this.selectedFilter === 'pending' && stop.status !== 'delivered') ||
-        (this.selectedFilter === 'delivered' && stop.status === 'delivered');
+        (this.selectedFilter === 'pending' && (stop.status === 'pending' || stop.status === 'in-progress')) ||
+        (this.selectedFilter === 'delivered' && stop.status === 'delivered') ||
+        (this.selectedFilter === 'cancelled' && stop.status === 'cancelled') ||
+        (this.selectedFilter === 'skipped' && stop.status === 'skipped');
 
       return matchesSearch && matchesFilter;
     });
   }
 
   get activeStops(): DeliveryStopViewModel[] {
-    return this.filteredDeliveries.filter((stop) => stop.status !== 'delivered');
+    return this.filteredDeliveries.filter(
+      (stop) => stop.status === 'pending' || stop.status === 'in-progress'
+    );
   }
 
   get nextStop(): DeliveryStopViewModel | null {
@@ -128,6 +134,14 @@ export class DeliveryListPage implements OnInit {
     return this.filteredDeliveries.filter((stop) => stop.status === 'delivered');
   }
 
+  get cancelledStops(): DeliveryStopViewModel[] {
+    return this.filteredDeliveries.filter((stop) => stop.status === 'cancelled');
+  }
+
+  get skippedStops(): DeliveryStopViewModel[] {
+    return this.filteredDeliveries.filter((stop) => stop.status === 'skipped');
+  }
+
   get totalStops(): number {
     return this.deliveries.length;
   }
@@ -137,11 +151,19 @@ export class DeliveryListPage implements OnInit {
   }
 
   get pendingCount(): number {
-    return this.deliveries.filter((stop) => stop.status !== 'delivered').length;
+    return this.deliveries.filter((stop) => stop.status === 'pending' || stop.status === 'in-progress').length;
   }
 
   get completedCount(): number {
     return this.deliveries.filter((stop) => stop.status === 'delivered').length;
+  }
+
+  get cancelledCount(): number {
+    return this.deliveries.filter((stop) => stop.status === 'cancelled').length;
+  }
+
+  get skippedCount(): number {
+    return this.deliveries.filter((stop) => stop.status === 'skipped').length;
   }
 
   get activeFilterCount(): number {
@@ -182,6 +204,20 @@ export class DeliveryListPage implements OnInit {
     void this.router.navigate(['/delivery', stopId]);
   }
 
+  handleRefresh(event: CustomEvent): void {
+    this.orderService.getOrders(buildStaticDeliveryOrdersQuery(this.todayDate)).subscribe({
+      next: (orders) => {
+        this.setDeliveriesFromOrders(orders);
+        this.errorMessage = '';
+        (event.target as HTMLIonRefresherElement).complete();
+      },
+      error: (err: unknown) => {
+        this.errorMessage = getApiErrorMessage(err, 'Unable to refresh deliveries.');
+        (event.target as HTMLIonRefresherElement).complete();
+      },
+    });
+  }
+
   loadOrders(): void {
     this.loading = true;
     this.errorMessage = '';
@@ -189,7 +225,7 @@ export class DeliveryListPage implements OnInit {
 
     this.orderService.getOrders(buildStaticDeliveryOrdersQuery(this.todayDate)).subscribe({
       next: (orders) => {
-        this.deliveries = orders.map((order, idx) => mapOrderToDeliveryStopViewModel(order, idx));
+        this.setDeliveriesFromOrders(orders);
         this.loading = false;
       },
       error: (err: unknown) => {
@@ -200,5 +236,9 @@ export class DeliveryListPage implements OnInit {
         this.loading = false;
       },
     });
+  }
+
+  private setDeliveriesFromOrders(orders: DeliveryOrder[]): void {
+    this.deliveries = orders.map((order, idx) => mapOrderToDeliveryStopViewModel(order, idx));
   }
 }

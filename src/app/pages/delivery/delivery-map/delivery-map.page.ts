@@ -29,6 +29,7 @@ import { SurfaceCardComponent } from 'src/app/components/surface-card/surface-ca
 import { TopHeaderComponent } from 'src/app/components/top-header/top-header.component';
 import { GoogleMapsLoaderService } from 'src/app/services/google-maps-loader.service';
 import { OrderService, buildStaticDeliveryOrdersQuery } from 'src/app/services/order.service';
+import { formatLocalISODate } from 'src/app/utils/date.util';
 import { DeliveryMapStopViewModel, RouteStatsViewModel, mapOrderToDeliveryMapStopViewModel } from 'src/app/utils/map-view.util';
 import { CHANDANAGAR_CENTER } from 'src/app/utils/mock-coordinates.util';
 import { calculateRouteDistance, estimateRouteEtaMinutes, formatDistance, formatEta, orderStopsForRoute } from 'src/app/utils/route-calc.util';
@@ -58,8 +59,11 @@ export class DeliveryMapPage implements OnInit {
   private readonly orderService = inject(OrderService);
   private readonly googleMapsLoader = inject(GoogleMapsLoaderService);
 
-  readonly deliveryDate = this.getTodayDate();
   readonly center = CHANDANAGAR_CENTER;
+
+  get deliveryDate(): string {
+    return formatLocalISODate();
+  }
 
   mapOptions: google.maps.MapOptions = {
     center: CHANDANAGAR_CENTER,
@@ -168,7 +172,6 @@ export class DeliveryMapPage implements OnInit {
 
       queueMicrotask(() => this.fitMapToRoute());
     } catch (error) {
-      console.error('Failed to load delivery map', error);
       this.googleMapsLoaded = false;
       this.errorMessage = this.getRouteLoadErrorMessage(error);
     } finally {
@@ -318,13 +321,5 @@ export class DeliveryMapPage implements OnInit {
         </text>
       </svg>
     `;
-  }
-
-  private getTodayDate(): string {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
   }
 }

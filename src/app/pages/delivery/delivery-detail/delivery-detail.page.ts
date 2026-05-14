@@ -6,11 +6,11 @@ import { addIcons } from 'ionicons';
 import {
   alertCircleOutline,
   arrowBackOutline,
-  cameraOutline,
   callOutline,
   checkmarkCircleOutline,
-  chatbubbleEllipsesOutline,
+  closeCircleOutline,
   cubeOutline,
+  imageOutline,
   locationOutline,
   navigateOutline,
   timeOutline,
@@ -23,14 +23,15 @@ import { DeliveryStatus, ScheduleType, StatusChipComponent } from 'src/app/compo
 import { SurfaceCardComponent } from 'src/app/components/surface-card/surface-card.component';
 import { TopHeaderComponent } from 'src/app/components/top-header/top-header.component';
 import { DeliveryOrder } from 'src/app/models/order.model';
-import { getMockDeliveryOrderById } from 'src/app/mocks/delivery.mock';
 import { OrderService } from 'src/app/services/order.service';
 import { getApiErrorMessage } from 'src/app/utils/api-contract.util';
 import {
   formatDeliveryStatusLabel,
+  isTerminalStatus,
   mapOrderItems,
   normalizeDeliveryStatus,
   normalizeScheduleType,
+  formatProductCountLabel,
 } from 'src/app/utils/delivery-view.util';
 
 @Component({
@@ -59,6 +60,7 @@ export class DeliveryDetailPage implements OnInit {
 
   customerName = '';
   customerCode = '';
+  customerPhone = '';
   address = '';
   landmark = '';
   routeLabel = '';
@@ -67,13 +69,11 @@ export class DeliveryDetailPage implements OnInit {
   timeSlot = '';
   sequenceLabel = '';
   deliveryStatusLabel = '';
-  orderStatusLabel = '';
-  deliveryNotes: string[] = [];
-  readonly proofOptions = [
-    { label: 'Photo Capture', helper: 'Record doorstep placement', icon: 'camera-outline' },
-    { label: 'Delivery Note', helper: 'Add delivery remarks', icon: 'chatbubble-ellipses-outline' },
-  ];
   items: DeliveryProductItem[] = [];
+  deliveryNotes: string[] = [];
+  cancelReason = '';
+  proofImageUrl = '';
+  isTerminal = false;
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -84,11 +84,11 @@ export class DeliveryDetailPage implements OnInit {
     addIcons({
       alertCircleOutline,
       arrowBackOutline,
-      cameraOutline,
       callOutline,
       checkmarkCircleOutline,
-      chatbubbleEllipsesOutline,
+      closeCircleOutline,
       cubeOutline,
+      imageOutline,
       locationOutline,
       navigateOutline,
       timeOutline,
@@ -100,13 +100,19 @@ export class DeliveryDetailPage implements OnInit {
   }
 
   get productSummary(): string {
-    return `${this.items.length} product${this.items.length !== 1 ? 's' : ''}`;
+    return formatProductCountLabel(this.items.length);
+  }
+
+  callCustomer(): void {
+    if (!this.customerPhone) return;
+    const tel = this.customerPhone.startsWith('+') || this.customerPhone.startsWith('0')
+      ? this.customerPhone
+      : `+91${this.customerPhone}`;
+    window.open(`tel:${tel}`, '_system');
   }
 
   goToComplete(action: 'DELIVERED' | 'CANCELLED' | 'SKIPPED' = 'DELIVERED'): void {
-    void this.router.navigate(['/delivery', this.stopId, 'complete'], {
-      queryParams: { action },
-    });
+    void this.router.navigate(['/delivery', this.stopId, 'complete'], { queryParams: { action } });
   }
 
   private loadOrder(): void {
@@ -115,25 +121,15 @@ export class DeliveryDetailPage implements OnInit {
 
     this.orderService.getOrderById(this.stopId).subscribe({
       next: (order) => {
-        const resolvedOrder = order ?? getMockDeliveryOrderById(this.stopId);
-        if (!resolvedOrder) {
+        if (!order) {
           this.errorMessage = 'Delivery not found.';
           this.loading = false;
           return;
         }
-
-        this.applyOrder(resolvedOrder);
+        this.applyOrder(order);
         this.loading = false;
       },
       error: (err: unknown) => {
-        const fallbackOrder = getMockDeliveryOrderById(this.stopId);
-        if (fallbackOrder) {
-          this.applyOrder(fallbackOrder);
-          this.errorMessage = '';
-          this.loading = false;
-          return;
-        }
-
         this.errorMessage = getApiErrorMessage(err, 'Unable to load delivery details.');
         this.loading = false;
       },
@@ -146,16 +142,19 @@ export class DeliveryDetailPage implements OnInit {
 
     this.customerName = order.customerName ?? 'Customer';
     this.customerCode = order.customerCode ?? '';
+    this.customerPhone = order.customerPhone ?? '';
     this.address = order.address ?? '';
     this.landmark = order.landmark ?? '';
     this.routeLabel = order.routeLabel ?? `Stop ${String(sequence).padStart(2, '0')}`;
     this.scheduleType = normalizeScheduleType(order.scheduleType);
     this.status = normalizeDeliveryStatus(deliveryStatusValue);
     this.deliveryStatusLabel = formatDeliveryStatusLabel(deliveryStatusValue);
-    this.orderStatusLabel = formatDeliveryStatusLabel(order.orderStatus);
     this.timeSlot = order.timeSlot ?? '';
     this.sequenceLabel = sequence ? `#${String(sequence).padStart(2, '0')}` : '';
     this.items = mapOrderItems(order);
     this.deliveryNotes = order.notes ? [order.notes] : [];
+    this.cancelReason = order.cancelReason ?? '';
+    this.proofImageUrl = order.deliveryProofImage ?? '';
+    this.isTerminal = isTerminalStatus(deliveryStatusValue);
   }
 }

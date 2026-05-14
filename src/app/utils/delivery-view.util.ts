@@ -24,10 +24,16 @@ export function normalizeDeliveryStatus(status?: string): DeliveryStatus {
 
   if (normalized === 'DELIVERED' || normalized === 'COMPLETED') return 'delivered';
   if (normalized === 'IN_PROGRESS' || normalized === 'IN-PROGRESS' || normalized === 'STARTED') return 'in-progress';
-  if (normalized === 'CANCELLED' || normalized === 'CANCELED' || normalized === 'FAILED') return 'failed';
+  if (normalized === 'CANCELLED' || normalized === 'CANCELED') return 'cancelled';
+  if (normalized === 'FAILED') return 'failed';
   if (normalized === 'SKIPPED') return 'skipped';
 
   return 'pending';
+}
+
+export function isTerminalStatus(status?: string): boolean {
+  const s = normalizeDeliveryStatus(status);
+  return s === 'delivered' || s === 'cancelled' || s === 'failed' || s === 'skipped';
 }
 
 export function normalizeScheduleType(type?: string): ScheduleType {
@@ -41,7 +47,7 @@ export function normalizeScheduleType(type?: string): ScheduleType {
 }
 
 export function formatDeliveryStatusLabel(status?: string): string {
-  if (!status || !status.trim()) return 'N/A';
+  if (!status || !status.trim()) return '';
 
   return status
     .toLowerCase()
@@ -70,13 +76,31 @@ export function mapOrderToDeliveryStopViewModel(order: DeliveryOrder, index = 0)
     routeLabel: order.routeLabel ?? `Stop ${String(sequence).padStart(2, '0')}`,
     scheduleType: normalizeScheduleType(order.scheduleType),
     status: normalizeDeliveryStatus(deliveryStatusValue),
-    deliveryStatusLabel: deliveryStatusValue.trim() || 'N/A',
-    orderStatusLabel: order.orderStatus?.trim() || 'N/A',
+    deliveryStatusLabel: formatDeliveryStatusLabel(deliveryStatusValue),
+    orderStatusLabel: formatDeliveryStatusLabel(order.orderStatus),
     productSummary: getProductSummary(order, items.length),
     timeSlot: order.timeSlot ?? '',
     sequenceLabel: `#${String(sequence).padStart(2, '0')}`,
     items,
   };
+}
+
+export function formatProductCountLabel(count: number): string {
+  return `${count} product${count !== 1 ? 's' : ''}`;
+}
+
+/** Short line items preview for lists ("2 Milk, 1 Bread +3 more"). */
+export function formatOrderItemsPreview(order: DeliveryOrder): string {
+  const items = order.items;
+  if (!items?.length) {
+    return order.productSummary?.trim() ?? '';
+  }
+  const head = items
+    .slice(0, 2)
+    .map((i) => `${i.quantity} ${i.name}`)
+    .join(', ');
+  const more = items.length - 2;
+  return more > 0 ? `${head} +${more} more` : head;
 }
 
 function getProductSummary(order: DeliveryOrder, itemCountFromItems: number): string {
@@ -85,8 +109,8 @@ function getProductSummary(order: DeliveryOrder, itemCountFromItems: number): st
   }
 
   if (typeof order.itemCount === 'number') {
-    return `${order.itemCount} product${order.itemCount !== 1 ? 's' : ''}`;
+    return formatProductCountLabel(order.itemCount);
   }
 
-  return `${itemCountFromItems} product${itemCountFromItems !== 1 ? 's' : ''}`;
+  return formatProductCountLabel(itemCountFromItems);
 }

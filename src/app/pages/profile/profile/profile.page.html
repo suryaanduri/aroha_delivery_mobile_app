@@ -1,13 +1,157 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>profile</ion-title>
-  </ion-toolbar>
-</ion-header>
-
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">profile</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <app-page-shell>
+    <app-top-header eyebrow="Account" title="My Profile"></app-top-header>
+
+    <!-- Loading -->
+    <app-surface-card *ngIf="loading" tone="muted">
+      <div class="center-state">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>Loading profile…</p>
+      </div>
+    </app-surface-card>
+
+    <!-- Error -->
+    <app-surface-card *ngIf="!loading && errorMessage" tone="danger">
+      <p class="error-text">{{ errorMessage }}</p>
+      <button class="retry-btn" (click)="loadProfile()">
+        <ion-icon name="refresh-outline"></ion-icon> Retry
+      </button>
+    </app-surface-card>
+
+    <ng-container *ngIf="!loading && !errorMessage && profile">
+
+      <!-- Avatar + name card -->
+      <app-surface-card>
+        <div class="avatar-row">
+          <div class="avatar">{{ initials }}</div>
+          <div class="avatar-copy">
+            <h2 class="avatar-copy__name">{{ profile.name }}</h2>
+            <p class="avatar-copy__role">Delivery Partner</p>
+            <p class="avatar-copy__since" *ngIf="memberSince">Since {{ memberSince }}</p>
+          </div>
+          <div class="status-badge" [class.status-badge--active]="profile.status === 'Active'">
+            <ion-icon name="shield-checkmark-outline"></ion-icon>
+            {{ profile.status }}
+          </div>
+        </div>
+      </app-surface-card>
+
+      <!-- View mode -->
+      <ng-container *ngIf="!isEditing">
+        <app-surface-card>
+          <app-section-header
+            title="Details"
+            subtitle="Your account information"
+            actionText="Edit"
+            (actionPressed)="startEdit()"
+          ></app-section-header>
+
+          <div class="info-list">
+            <div class="info-row">
+              <div class="info-row__icon"><ion-icon name="person-outline"></ion-icon></div>
+              <div class="info-row__copy">
+                <small>Full Name</small>
+                <strong>{{ profile.name }}</strong>
+              </div>
+            </div>
+
+            <div class="info-row">
+              <div class="info-row__icon"><ion-icon name="mail-outline"></ion-icon></div>
+              <div class="info-row__copy">
+                <small>Email</small>
+                <strong>{{ profile.email }}</strong>
+              </div>
+            </div>
+
+            <div class="info-row">
+              <div class="info-row__icon"><ion-icon name="phone-portrait-outline"></ion-icon></div>
+              <div class="info-row__copy">
+                <small>Mobile</small>
+                <strong>{{ profile.mobile }}</strong>
+              </div>
+              <div class="info-row__lock">
+                <ion-icon name="lock-closed-outline"></ion-icon>
+                <span>Admin only</span>
+              </div>
+            </div>
+
+            <div class="info-row">
+              <div class="info-row__icon"><ion-icon name="location-outline"></ion-icon></div>
+              <div class="info-row__copy">
+                <small>Assigned Area</small>
+                <strong>{{ profile.assignedArea }}</strong>
+              </div>
+            </div>
+
+            <div class="info-row">
+              <div class="info-row__icon"><ion-icon name="person-outline"></ion-icon></div>
+              <div class="info-row__copy">
+                <small>Username</small>
+                <strong>{{ profile.username }}</strong>
+              </div>
+            </div>
+          </div>
+        </app-surface-card>
+      </ng-container>
+
+      <!-- Edit mode -->
+      <ng-container *ngIf="isEditing">
+        <app-surface-card>
+          <app-section-header
+            title="Edit Profile"
+            subtitle="Update your name and email address."
+          ></app-section-header>
+
+          <div class="edit-form">
+            <div class="field" [class.field--error]="nameError">
+              <label class="field__label">Full Name</label>
+              <div class="field__input-wrap">
+                <ion-icon name="person-outline" class="field__icon"></ion-icon>
+                <input type="text" class="field__input" [(ngModel)]="editName" placeholder="Your name" autocomplete="name" />
+              </div>
+              <small class="field__error" *ngIf="nameError">{{ nameError }}</small>
+            </div>
+
+            <div class="field" [class.field--error]="emailError">
+              <label class="field__label">Email</label>
+              <div class="field__input-wrap">
+                <ion-icon name="mail-outline" class="field__icon"></ion-icon>
+                <input type="email" class="field__input" [(ngModel)]="editEmail" placeholder="your@email.com" autocomplete="email" />
+              </div>
+              <small class="field__error" *ngIf="emailError">{{ emailError }}</small>
+            </div>
+
+            <!-- Mobile locked -->
+            <div class="field field--locked">
+              <label class="field__label">Mobile <span class="lock-tag"><ion-icon name="lock-closed-outline"></ion-icon> Admin only</span></label>
+              <div class="field__input-wrap">
+                <ion-icon name="phone-portrait-outline" class="field__icon"></ion-icon>
+                <input type="text" class="field__input" [value]="profile.mobile" disabled />
+              </div>
+            </div>
+
+            <div class="edit-actions">
+              <button class="edit-actions__cancel" type="button" (click)="cancelEdit()">
+                <ion-icon name="close-outline"></ion-icon> Cancel
+              </button>
+              <button class="edit-actions__save" type="button" [disabled]="saving" (click)="saveProfile()">
+                <ion-spinner *ngIf="saving" name="crescent" class="btn-spinner"></ion-spinner>
+                <ion-icon *ngIf="!saving" name="checkmark-outline"></ion-icon>
+                {{ saving ? 'Saving…' : 'Save Changes' }}
+              </button>
+            </div>
+          </div>
+        </app-surface-card>
+      </ng-container>
+
+    </ng-container>
+  </app-page-shell>
 </ion-content>
+
+<ion-toast
+  [isOpen]="toastOpen"
+  [message]="toastMessage"
+  [color]="toastColor"
+  [duration]="2400"
+  (didDismiss)="toastOpen = false"
+></ion-toast>

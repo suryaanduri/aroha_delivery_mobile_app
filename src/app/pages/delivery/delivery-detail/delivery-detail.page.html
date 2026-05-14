@@ -1,169 +1,156 @@
 <ion-content [fullscreen]="true">
-  <app-page-shell [withActionBar]="true" [maxWidth]="460">
-    <div class="pointer-events-none absolute inset-0 overflow-hidden">
-      <div class="absolute -left-20 top-28 h-64 w-64 rounded-full bg-[radial-gradient(circle,_rgba(47,174,143,0.12),_transparent_72%)]"></div>
-      <div class="absolute right-[-76px] top-8 h-72 w-72 rounded-full bg-[radial-gradient(circle,_rgba(31,122,99,0.14),_transparent_70%)]"></div>
-      <div class="absolute bottom-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-[radial-gradient(circle,_rgba(255,255,255,0.72),_transparent_72%)]"></div>
-    </div>
+  <app-page-shell [withActionBar]="!isTerminal" [maxWidth]="460">
 
-    <app-surface-card *ngIf="loading" tone="muted" class="rounded-[28px] bg-white/95 px-6 py-10">
-      <div class="flex flex-col items-center gap-4 text-center">
-        <div class="flex h-16 w-16 items-center justify-center rounded-[22px] border border-[#DDEAE4] bg-[#F7FBF9] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
-          <ion-spinner name="crescent" class="h-8 w-8 text-[#1F7A63]"></ion-spinner>
-        </div>
-        <div class="space-y-1">
-          <h2 class="text-[19px] font-semibold tracking-[-0.03em] text-[#0F2A24]">Loading stop details</h2>
-          <p class="text-[14px] leading-6 text-[#5F746E]">Preparing customer and delivery information.</p>
-        </div>
+    <app-surface-card *ngIf="loading" tone="muted">
+      <div class="center-loader">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>Loading stop details…</p>
       </div>
     </app-surface-card>
 
-    <app-surface-card *ngIf="!loading && errorMessage" tone="danger" class="rounded-[28px] px-5 py-5">
-      <div class="flex items-start gap-3">
-        <div class="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#FDEAE5] text-[#E76F51] shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]">
-          <ion-icon name="alert-circle-outline" class="text-[18px]"></ion-icon>
-        </div>
-        <div class="space-y-1">
-          <h2 class="text-[18px] font-semibold tracking-[-0.03em] text-[#0F2A24]">Delivery unavailable</h2>
-          <p class="text-[14px] leading-6 text-[#7A645D]">{{ errorMessage }}</p>
+    <app-surface-card *ngIf="!loading && errorMessage" tone="danger">
+      <div class="error-state">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        <div>
+          <h2>Delivery unavailable</h2>
+          <p>{{ errorMessage }}</p>
         </div>
       </div>
     </app-surface-card>
 
     <ng-container *ngIf="!loading && !errorMessage">
-      <section class="detail-page">
-        <app-surface-card tone="success" class="detail-hero" aria-label="Delivery header">
-          <app-top-header
-            backRoute="/deliveries"
-            backAriaLabel="Go back to deliveries"
-            [eyebrow]="sequenceLabel || 'Delivery stop'"
-            [title]="customerName"
-            [subtitle]="routeLabel"
-          >
-            <app-status-chip header-end [kind]="'status'" [value]="status"></app-status-chip>
-          </app-top-header>
 
-          <div class="detail-hero__meta">
-            <div class="detail-hero__pill" *ngIf="sequenceLabel || timeSlot">
-              <span *ngIf="sequenceLabel">{{ sequenceLabel }}</span>
-              <span *ngIf="sequenceLabel && timeSlot">•</span>
-              <span *ngIf="timeSlot">{{ timeSlot }}</span>
+      <!-- Header -->
+      <app-surface-card tone="success" class="detail-hero" aria-label="Delivery header">
+        <app-top-header
+          backRoute="/deliveries"
+          backAriaLabel="Go back to deliveries"
+          [eyebrow]="sequenceLabel || 'Delivery stop'"
+          [title]="customerName"
+          [subtitle]="routeLabel"
+        >
+          <app-status-chip header-end [kind]="'status'" [value]="status"></app-status-chip>
+        </app-top-header>
+
+        <div class="detail-hero__meta">
+          <div class="detail-hero__pill" *ngIf="sequenceLabel || timeSlot">
+            <span *ngIf="sequenceLabel">{{ sequenceLabel }}</span>
+            <span *ngIf="sequenceLabel && timeSlot">•</span>
+            <span *ngIf="timeSlot">{{ timeSlot }}</span>
+          </div>
+          <app-status-chip [kind]="'schedule'" [value]="scheduleType"></app-status-chip>
+        </div>
+      </app-surface-card>
+
+      <!-- Overview -->
+      <app-surface-card tone="success" class="detail-section detail-section--hero">
+        <app-section-header title="Stop Overview" [meta]="sequenceLabel"></app-section-header>
+
+        <div class="overview-card">
+          <div class="overview-card__header">
+            <div class="overview-card__identity">
+              <h2>{{ customerName }}</h2>
+              <p *ngIf="routeLabel" class="overview-card__route">
+                <ion-icon name="navigate-outline" aria-hidden="true"></ion-icon>
+                <span>{{ routeLabel }}</span>
+              </p>
             </div>
-            <app-status-chip [kind]="'schedule'" [value]="scheduleType"></app-status-chip>
-          </div>
-        </app-surface-card>
-
-        <app-surface-card tone="success" class="detail-section detail-section--hero">
-          <div class="detail-section__header detail-section__header--hero">
-            <app-section-header title="Stop Overview" [meta]="sequenceLabel"></app-section-header>
-          </div>
-
-          <div class="overview-card">
-            <div class="overview-card__header">
-              <div class="overview-card__identity">
-                <h2>{{ customerName }}</h2>
-                <p *ngIf="routeLabel" class="overview-card__route">
-                  <ion-icon name="navigate-outline" aria-hidden="true"></ion-icon>
-                  <span>{{ routeLabel }}</span>
-                </p>
-              </div>
-
-              <button class="overview-card__call" type="button" aria-label="Call customer">
-                <ion-icon name="call-outline" aria-hidden="true"></ion-icon>
-              </button>
-            </div>
-
-            <div class="overview-card__location">
-              <ion-icon name="location-outline" aria-hidden="true"></ion-icon>
-              <div class="overview-card__location-copy">
-                <p>{{ address }}</p>
-                <span *ngIf="landmark">{{ landmark }}</span>
-              </div>
-            </div>
-
-            <div class="overview-card__chips">
-              <app-status-chip [kind]="'schedule'" [value]="scheduleType"></app-status-chip>
-              <app-status-chip [kind]="'status'" [value]="status"></app-status-chip>
-            </div>
-
-            <div class="overview-card__meta-grid">
-              <article class="meta-tile" *ngIf="timeSlot">
-                <span class="meta-tile__label">Time Slot</span>
-                <strong class="meta-tile__value">{{ timeSlot }}</strong>
-              </article>
-              <article class="meta-tile">
-                <span class="meta-tile__label">Products</span>
-                <strong class="meta-tile__value">{{ productSummary }}</strong>
-              </article>
-              <article class="meta-tile">
-                <span class="meta-tile__label">Delivery</span>
-                <strong class="meta-tile__value">{{ deliveryStatusLabel }}</strong>
-              </article>
-            </div>
-          </div>
-        </app-surface-card>
-
-        <app-surface-card tone="success" class="detail-section">
-          <div class="detail-section__header">
-            <app-section-header title="Items to Deliver"></app-section-header>
-          </div>
-
-          <div class="item-list">
-            <article class="item-row" *ngFor="let item of items">
-              <div class="item-row__copy">
-                <span class="item-row__icon">
-                  <ion-icon name="cube-outline" aria-hidden="true"></ion-icon>
-                </span>
-                <div>
-                  <strong>{{ item.name }}</strong>
-                </div>
-              </div>
-              <span class="item-row__qty">{{ item.quantity }}</span>
-            </article>
-          </div>
-        </app-surface-card>
-
-        <app-surface-card *ngIf="deliveryNotes.length" tone="warning" class="detail-section detail-section--notes">
-          <div class="detail-section__header">
-            <app-section-header title="Delivery Notes"></app-section-header>
-          </div>
-
-          <ul class="note-list">
-            <li *ngFor="let note of deliveryNotes" class="note-row">
-              <span class="note-row__icon">
-                <ion-icon name="alert-circle-outline" aria-hidden="true"></ion-icon>
-              </span>
-              <span>{{ note }}</span>
-            </li>
-          </ul>
-        </app-surface-card>
-
-        <app-surface-card class="detail-section">
-          <div class="detail-section__header">
-            <app-section-header title="Proof of Delivery"></app-section-header>
-          </div>
-
-          <div class="proof-list">
-            <button class="proof-option" type="button" *ngFor="let option of proofOptions">
-              <span class="proof-option__icon">
-                <ion-icon [name]="option.icon" aria-hidden="true"></ion-icon>
-              </span>
-              <span class="proof-option__copy">
-                <strong>{{ option.label }}</strong>
-                <span>{{ option.helper }}</span>
-              </span>
+            <!-- Call button — only shown when phone is available -->
+            <button
+              *ngIf="customerPhone"
+              class="overview-card__call"
+              type="button"
+              aria-label="Call customer"
+              (click)="callCustomer()"
+            >
+              <ion-icon name="call-outline" aria-hidden="true"></ion-icon>
             </button>
           </div>
-        </app-surface-card>
-      </section>
+
+          <div class="overview-card__location">
+            <ion-icon name="location-outline" aria-hidden="true"></ion-icon>
+            <div class="overview-card__location-copy">
+              <p>{{ address }}</p>
+              <span *ngIf="landmark">{{ landmark }}</span>
+            </div>
+          </div>
+
+          <div class="overview-card__chips">
+            <app-status-chip [kind]="'schedule'" [value]="scheduleType"></app-status-chip>
+            <app-status-chip [kind]="'status'" [value]="status"></app-status-chip>
+          </div>
+
+          <div class="overview-card__meta-grid">
+            <article class="meta-tile" *ngIf="timeSlot">
+              <span class="meta-tile__label">Time Slot</span>
+              <strong class="meta-tile__value">{{ timeSlot }}</strong>
+            </article>
+            <article class="meta-tile">
+              <span class="meta-tile__label">Products</span>
+              <strong class="meta-tile__value">{{ productSummary }}</strong>
+            </article>
+            <article class="meta-tile">
+              <span class="meta-tile__label">Status</span>
+              <strong class="meta-tile__value">{{ deliveryStatusLabel }}</strong>
+            </article>
+          </div>
+        </div>
+      </app-surface-card>
+
+      <!-- Items -->
+      <app-surface-card tone="success" class="detail-section">
+        <app-section-header title="Items to Deliver"></app-section-header>
+
+        <div class="item-list">
+          <article class="item-row" *ngFor="let item of items">
+            <span class="item-row__icon">
+              <ion-icon name="cube-outline" aria-hidden="true"></ion-icon>
+            </span>
+            <div class="item-row__copy">
+              <strong>{{ item.name }}</strong>
+            </div>
+            <span class="item-row__qty">{{ item.quantity }}</span>
+          </article>
+        </div>
+      </app-surface-card>
+
+      <!-- Delivery notes (from order) -->
+      <app-surface-card *ngIf="deliveryNotes.length" tone="warning" class="detail-section">
+        <app-section-header title="Delivery Instructions"></app-section-header>
+        <ul class="note-list">
+          <li *ngFor="let note of deliveryNotes" class="note-row">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+            <span>{{ note }}</span>
+          </li>
+        </ul>
+      </app-surface-card>
+
+      <!-- Cancel reason — shown only when cancelled/skipped -->
+      <app-surface-card *ngIf="cancelReason" tone="danger" class="detail-section">
+        <app-section-header title="Cancellation Reason"></app-section-header>
+        <div class="cancel-reason">
+          <ion-icon name="close-circle-outline"></ion-icon>
+          <span>{{ cancelReason }}</span>
+        </div>
+      </app-surface-card>
+
+      <!-- Proof image — shown when delivered with photo proof -->
+      <app-surface-card *ngIf="proofImageUrl" tone="success" class="detail-section">
+        <app-section-header title="Delivery Proof"></app-section-header>
+        <div class="proof-image-wrap">
+          <img [src]="proofImageUrl" alt="Delivery proof" class="proof-image" />
+        </div>
+      </app-surface-card>
+
     </ng-container>
   </app-page-shell>
 </ion-content>
 
-<app-action-bar *ngIf="!loading && !errorMessage" label="Current stop" [value]="customerName">
+<!-- Action bar — hidden once order is in terminal state -->
+<app-action-bar *ngIf="!loading && !errorMessage && !isTerminal" label="Current stop" [value]="customerName">
   <div class="detail-action-bar__actions">
     <button class="detail-action-bar__secondary" type="button" (click)="goToComplete('CANCELLED')">Cancel</button>
-    <button class="detail-action-bar__secondary" type="button" (click)="goToComplete('SKIPPED')">Skipped</button>
+    <button class="detail-action-bar__secondary" type="button" (click)="goToComplete('SKIPPED')">Skip</button>
     <ion-button class="detail-action-bar__primary" fill="solid" (click)="goToComplete('DELIVERED')">
       <ion-icon slot="start" name="checkmark-circle-outline"></ion-icon>
       Mark Delivered

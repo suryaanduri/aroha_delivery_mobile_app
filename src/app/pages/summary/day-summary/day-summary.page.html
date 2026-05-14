@@ -1,13 +1,155 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>day-summary</ion-title>
-  </ion-toolbar>
-</ion-header>
-
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">day-summary</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <app-page-shell>
+    <app-top-header eyebrow="Today" [title]="todayLabel"></app-top-header>
+
+    <!-- Loading -->
+    <app-surface-card *ngIf="loading" tone="muted">
+      <div class="center-state">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>Loading summary…</p>
+      </div>
+    </app-surface-card>
+
+    <ng-container *ngIf="!loading">
+
+      <!-- Analytics overview card -->
+      <app-surface-card *ngIf="analytics">
+        <div class="overview-header">
+          <div class="overview-header__copy">
+            <p class="overview-header__label">Route Performance</p>
+            <p class="overview-header__sub">{{ performanceLabel }}</p>
+          </div>
+          <div class="progress-ring">
+            <svg viewBox="0 0 44 44" class="progress-ring__svg">
+              <circle cx="22" cy="22" r="17" class="progress-ring__track"></circle>
+              <circle cx="22" cy="22" r="17" class="progress-ring__fill"
+                [style.stroke-dashoffset]="106.8 - (106.8 * (analytics.completionRate / 100))">
+              </circle>
+            </svg>
+            <span class="progress-ring__label">{{ analytics.completionRate }}%</span>
+          </div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-item">
+            <div class="stat-item__icon stat-item__icon--total">
+              <ion-icon name="list-outline"></ion-icon>
+            </div>
+            <strong class="stat-item__value">{{ analytics.total }}</strong>
+            <small class="stat-item__label">Total</small>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-item__icon stat-item__icon--delivered">
+              <ion-icon name="checkmark-circle-outline"></ion-icon>
+            </div>
+            <strong class="stat-item__value">{{ analytics.delivered }}</strong>
+            <small class="stat-item__label">Delivered</small>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-item__icon stat-item__icon--pending">
+              <ion-icon name="time-outline"></ion-icon>
+            </div>
+            <strong class="stat-item__value">{{ analytics.pending }}</strong>
+            <small class="stat-item__label">Pending</small>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-item__icon stat-item__icon--cancelled">
+              <ion-icon name="close-circle-outline"></ion-icon>
+            </div>
+            <strong class="stat-item__value">{{ analytics.cancelled }}</strong>
+            <small class="stat-item__label">Cancelled</small>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-item__icon stat-item__icon--skipped">
+              <ion-icon name="play-skip-forward-outline"></ion-icon>
+            </div>
+            <strong class="stat-item__value">{{ analytics.skipped }}</strong>
+            <small class="stat-item__label">Skipped</small>
+          </div>
+        </div>
+      </app-surface-card>
+
+      <!-- Analytics error -->
+      <app-surface-card *ngIf="analyticsError" tone="danger">
+        <p class="error-text">{{ analyticsError }}</p>
+      </app-surface-card>
+
+      <!-- Delivered orders -->
+      <app-surface-card *ngIf="deliveredOrders.length > 0">
+        <div class="section-title section-title--delivered">
+          <ion-icon name="checkmark-circle-outline"></ion-icon>
+          <span>Delivered ({{ deliveredOrders.length }})</span>
+        </div>
+        <div class="order-list">
+          <a class="order-row" *ngFor="let order of deliveredOrders" [routerLink]="['/delivery', order.id]">
+            <div class="order-row__dot order-row__dot--delivered"></div>
+            <div class="order-row__copy">
+              <strong>{{ order.customerName }}</strong>
+              <span>{{ order.address }}</span>
+              <small *ngIf="orderItemSummary(order)">{{ orderItemSummary(order) }}</small>
+            </div>
+            <ion-icon name="arrow-forward-outline" class="order-row__chevron"></ion-icon>
+          </a>
+        </div>
+      </app-surface-card>
+
+      <!-- Cancelled orders -->
+      <app-surface-card *ngIf="cancelledOrders.length > 0">
+        <div class="section-title section-title--cancelled">
+          <ion-icon name="close-circle-outline"></ion-icon>
+          <span>Cancelled ({{ cancelledOrders.length }})</span>
+        </div>
+        <div class="order-list">
+          <a class="order-row" *ngFor="let order of cancelledOrders" [routerLink]="['/delivery', order.id]">
+            <div class="order-row__dot order-row__dot--cancelled"></div>
+            <div class="order-row__copy">
+              <strong>{{ order.customerName }}</strong>
+              <span>{{ order.address }}</span>
+            </div>
+            <ion-icon name="arrow-forward-outline" class="order-row__chevron"></ion-icon>
+          </a>
+        </div>
+      </app-surface-card>
+
+      <!-- Skipped orders -->
+      <app-surface-card *ngIf="skippedOrders.length > 0">
+        <div class="section-title section-title--skipped">
+          <ion-icon name="play-skip-forward-outline"></ion-icon>
+          <span>Skipped ({{ skippedOrders.length }})</span>
+        </div>
+        <div class="order-list">
+          <a class="order-row" *ngFor="let order of skippedOrders" [routerLink]="['/delivery', order.id]">
+            <div class="order-row__dot order-row__dot--skipped"></div>
+            <div class="order-row__copy">
+              <strong>{{ order.customerName }}</strong>
+              <span>{{ order.address }}</span>
+            </div>
+            <ion-icon name="arrow-forward-outline" class="order-row__chevron"></ion-icon>
+          </a>
+        </div>
+      </app-surface-card>
+
+      <!-- Empty state -->
+      <app-surface-card *ngIf="!analytics && !analyticsError && orders.length === 0">
+        <div class="center-state">
+          <ion-icon name="trophy-outline" class="center-state__icon"></ion-icon>
+          <p class="center-state__title">No data yet</p>
+          <p class="center-state__text">Complete deliveries to see your day summary here.</p>
+        </div>
+      </app-surface-card>
+
+      <!-- Orders error -->
+      <app-surface-card *ngIf="ordersError" tone="danger">
+        <p class="error-text">{{ ordersError }}</p>
+        <button class="retry-btn" (click)="loadData()">
+          <ion-icon name="refresh-outline"></ion-icon> Retry
+        </button>
+      </app-surface-card>
+
+    </ng-container>
+  </app-page-shell>
 </ion-content>

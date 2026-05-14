@@ -1,58 +1,84 @@
-// For information on how to create your own theme, please refer to:
+// For information on how to create your own theme, please see:
 // https://ionicframework.com/docs/theming/
 
 :root {
-  /* Core brand tokens for future dynamic theming */
-  --app-color-primary: #245f52;
-  --app-color-primary-rgb: 36, 95, 82;
-  --app-color-secondary: #f3f7f5;
-  --app-color-secondary-rgb: 243, 247, 245;
-  --app-color-tertiary: #caa36a;
-  --app-color-tertiary-rgb: 202, 163, 106;
+  /* ── Brand palette ───────────────────────────────────── */
+  --app-color-primary:        #1a4d3f;
+  --app-color-primary-rgb:    26, 77, 63;
+  --app-color-secondary:      #f2f6f3;
+  --app-color-secondary-rgb:  242, 246, 243;
+  --app-color-tertiary:       #c09454;
+  --app-color-tertiary-rgb:   192, 148, 84;
 
-  /* Surface and text system */
-  --app-color-surface: #ffffff;
-  --app-color-surface-muted: #f7faf8;
-  --app-color-border: rgba(24, 39, 34, 0.09);
-  --app-color-border-strong: rgba(36, 95, 82, 0.18);
-  --app-color-text: #16231f;
-  --app-color-text-muted: #66756f;
-  --app-color-shadow: rgba(18, 35, 30, 0.08);
+  /* ── Semantic greens ─────────────────────────────────── */
+  --app-color-success:        #2a7a5e;
+  --app-color-success-rgb:    42, 122, 94;
+  --app-color-accent:         #3d9970;
+  --app-color-accent-rgb:     61, 153, 112;
 
-  /* Spatial and motion tokens */
-  --app-radius-sm: 14px;
-  --app-radius-md: 20px;
-  --app-radius-lg: 28px;
-  --app-space-1: 4px;
-  --app-space-2: 8px;
-  --app-space-3: 12px;
-  --app-space-4: 16px;
-  --app-space-5: 20px;
-  --app-space-6: 24px;
-  --app-space-8: 32px;
+  /* ── Semantic danger / warning ───────────────────────── */
+  --app-color-danger:         #c0392b;
+  --app-color-danger-rgb:     192, 57, 43;
+  --app-color-warning:        #b07030;
+  --app-color-warning-rgb:    176, 112, 48;
+
+  /* ── Skipped (indigo-slate) ──────────────────────────── */
+  --app-color-skip:           #4a5a8a;
+  --app-color-skip-rgb:       74, 90, 138;
+
+  /* ── Surfaces + text ─────────────────────────────────── */
+  --app-color-surface:        #ffffff;
+  --app-color-surface-muted:  #f7faf8;
+  --app-color-border:         rgba(20, 38, 33, 0.09);
+  --app-color-border-strong:  rgba(26, 77, 63, 0.22);
+  --app-color-text:           #14201c;
+  --app-color-text-muted:     #607068;
+  --app-color-shadow:         rgba(14, 32, 26, 0.08);
+
+  /* ── Radius + spacing ────────────────────────────────── */
+  --app-radius-xs:  10px;
+  --app-radius-sm:  14px;
+  --app-radius-md:  20px;
+  --app-radius-lg:  28px;
+  --app-radius-xl:  36px;
+
+  --app-space-1:  4px;
+  --app-space-2:  8px;
+  --app-space-3:  12px;
+  --app-space-4:  16px;
+  --app-space-5:  20px;
+  --app-space-6:  24px;
+  --app-space-8:  32px;
   --app-space-10: 40px;
-  --app-shadow-soft: 0 16px 40px rgba(18, 35, 30, 0.08);
-  --app-shadow-focus: 0 0 0 4px rgba(var(--app-color-primary-rgb), 0.12);
 
-  /* Ionic token bridge */
-  --ion-color-primary: var(--app-color-primary);
-  --ion-color-primary-rgb: var(--app-color-primary-rgb);
-  --ion-color-primary-contrast: #ffffff;
+  /* ── Shadows ─────────────────────────────────────────── */
+  --app-shadow-soft:  0 16px 40px rgba(14, 32, 26, 0.08);
+  --app-shadow-card:  0 12px 28px rgba(14, 32, 26, 0.07);
+  --app-shadow-focus: 0 0 0 4px rgba(var(--app-color-primary-rgb), 0.14);
+
+  /* ── Ionic token bridge ──────────────────────────────── */
+  --ion-color-primary:              var(--app-color-primary);
+  --ion-color-primary-rgb:          var(--app-color-primary-rgb);
+  --ion-color-primary-contrast:     #ffffff;
   --ion-color-primary-contrast-rgb: 255, 255, 255;
-  --ion-color-primary-shade: #205447;
-  --ion-color-primary-tint: #3a6f63;
+  --ion-color-primary-shade:        #163f34;
+  --ion-color-primary-tint:         #2d5e4e;
 
-  --ion-color-secondary: var(--app-color-secondary);
-  --ion-color-secondary-rgb: var(--app-color-secondary-rgb);
-  --ion-color-secondary-contrast: #16231f;
-  --ion-color-secondary-contrast-rgb: 22, 35, 31;
-  --ion-color-secondary-shade: #d6dad9;
-  --ion-color-secondary-tint: #f4f8f6;
+  --ion-color-secondary:              var(--app-color-secondary);
+  --ion-color-secondary-rgb:          var(--app-color-secondary-rgb);
+  --ion-color-secondary-contrast:     var(--app-color-text);
+  --ion-color-secondary-contrast-rgb: 20, 32, 28;
+  --ion-color-secondary-shade:        #d5d9d6;
+  --ion-color-secondary-tint:         #f3f7f4;
 
-  --ion-color-tertiary: var(--app-color-tertiary);
-  --ion-color-tertiary-rgb: var(--app-color-tertiary-rgb);
-  --ion-color-tertiary-contrast: #16231f;
-  --ion-color-tertiary-contrast-rgb: 22, 35, 31;
-  --ion-color-tertiary-shade: #b28f5d;
-  --ion-color-tertiary-tint: #d1ae79;
+  --ion-color-tertiary:              var(--app-color-tertiary);
+  --ion-color-tertiary-rgb:          var(--app-color-tertiary-rgb);
+  --ion-color-tertiary-contrast:     var(--app-color-text);
+  --ion-color-tertiary-contrast-rgb: 20, 32, 28;
+  --ion-color-tertiary-shade:        #a87e48;
+  --ion-color-tertiary-tint:         #c9a065;
+
+  --ion-background-color:     var(--app-color-secondary);
+  --ion-text-color:           var(--app-color-text);
+  --ion-font-family:          'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }

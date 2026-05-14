@@ -15,6 +15,7 @@
       routerLink="/deliveries"
       routerLinkActive="tab-selected"
       [routerLinkActiveOptions]="{ exact: true }"
+      [class.tab-selected]="isListTabActive"
     >
       <ion-icon name="list-outline" aria-hidden="true"></ion-icon>
       <ion-label>List View</ion-label>
