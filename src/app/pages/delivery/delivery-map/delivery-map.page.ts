@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { GoogleMapsModule } from '@angular/google-maps';
 import {
@@ -54,7 +54,7 @@ import { calculateRouteDistance, estimateRouteEtaMinutes, formatDistance, format
     TopHeaderComponent,
   ],
 })
-export class DeliveryMapPage implements OnInit {
+export class DeliveryMapPage {
   private readonly router = inject(Router);
   private readonly orderService = inject(OrderService);
   private readonly googleMapsLoader = inject(GoogleMapsLoaderService);
@@ -113,6 +113,10 @@ export class DeliveryMapPage implements OnInit {
     return this.stops.find((stop) => stop.id === this.activeStopId) ?? null;
   }
 
+  get canOpenActiveStop(): boolean {
+    return this.activeStop?.status === 'assigned';
+  }
+
   get mappableStops(): DeliveryMapStopViewModel[] {
     return this.stops.filter((stop) => typeof stop.lat === 'number' && typeof stop.lng === 'number');
   }
@@ -148,7 +152,7 @@ export class DeliveryMapPage implements OnInit {
     });
   }
 
-  async ngOnInit(): Promise<void> {
+  async ionViewDidEnter(): Promise<void> {
     await this.loadRoute();
   }
 
@@ -202,7 +206,7 @@ export class DeliveryMapPage implements OnInit {
   }
 
   openActiveStop(): void {
-    if (!this.activeStop) {
+    if (!this.activeStop || !this.canOpenActiveStop) {
       return;
     }
     void this.router.navigate(['/delivery', this.activeStop.id]);
@@ -262,7 +266,7 @@ export class DeliveryMapPage implements OnInit {
   private buildRouteStats(stops: DeliveryMapStopViewModel[]): RouteStatsViewModel {
     const totalStops = stops.length;
     const completedStops = stops.filter((stop) => stop.status === 'delivered').length;
-    const pendingStops = totalStops - completedStops;
+    const pendingStops = stops.filter((stop) => stop.status === 'assigned').length;
     const routePath = stops
       .filter((stop) => typeof stop.lat === 'number' && typeof stop.lng === 'number')
       .map((stop) => ({
@@ -283,7 +287,7 @@ export class DeliveryMapPage implements OnInit {
   private getInitialActiveStopId(): string {
     return (
       this.stops.find((stop) => stop.status === 'in-progress')?.id ??
-      this.stops.find((stop) => stop.status !== 'delivered')?.id ??
+      this.stops.find((stop) => stop.status === 'assigned')?.id ??
       this.stops[0]?.id ??
       ''
     );

@@ -310,7 +310,11 @@ ion-content {
 }
 
 .delivery-list-stack--completed {
-  opacity: 0.92;
+  opacity: 0.96;
+}
+
+.delivery-list-stack--completed app-delivery-card {
+  filter: saturate(0.92);
 }
 
 .loading-state {

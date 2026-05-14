@@ -35,6 +35,7 @@ export class DeliveryCardComponent {
   @Input() timeSlot = '';
   @Input() sequenceLabel = '';
   @Input() actionText = 'Open Stop';
+  @Input() actionable = true;
   @Input() items: DeliveryProductItem[] = [];
   @Output() cardPressed = new EventEmitter<void>();
   @Output() actionPressed = new EventEmitter<void>();
@@ -60,5 +61,17 @@ export class DeliveryCardComponent {
       sequenceLabel: this.stop?.sequenceLabel ?? this.sequenceLabel,
       items: this.stop?.items ?? this.items,
     };
+  }
+
+  onCardPressed(): void {
+    if (this.actionable) {
+      this.cardPressed.emit();
+    }
+  }
+
+  onActionPressed(): void {
+    if (this.actionable) {
+      this.actionPressed.emit();
+    }
   }
 }

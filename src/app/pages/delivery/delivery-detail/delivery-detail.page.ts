@@ -111,6 +111,10 @@ export class DeliveryDetailPage implements OnInit {
     window.open(`tel:${tel}`, '_system');
   }
 
+  get canUpdateStop(): boolean {
+    return this.status === 'assigned';
+  }
+
   goToComplete(action: 'DELIVERED' | 'CANCELLED' | 'SKIPPED' = 'DELIVERED'): void {
     void this.router.navigate(['/delivery', this.stopId, 'complete'], { queryParams: { action } });
   }

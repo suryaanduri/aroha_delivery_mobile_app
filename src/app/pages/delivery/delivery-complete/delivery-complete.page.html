@@ -167,7 +167,7 @@
   </app-page-shell>
 </ion-content>
 
-<app-action-bar *ngIf="!loading && !errorMessage">
+<app-action-bar *ngIf="!loading && !errorMessage" label="Outcome" [value]="selectedActionLabel">
   <button class="completion-bar__ghost" type="button" (click)="cancel()">Cancel</button>
   <ion-button class="completion-bar__primary" fill="solid" [disabled]="!canSubmit" (click)="confirm()">
     <ion-spinner *ngIf="submitting || uploadingPhoto" name="crescent" slot="start"></ion-spinner>

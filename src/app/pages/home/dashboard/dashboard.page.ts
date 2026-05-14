@@ -14,7 +14,6 @@ import {
   playSkipForwardOutline,
   refreshOutline,
   statsChartOutline,
-  timeOutline,
 } from 'ionicons/icons';
 import { AuthService } from 'src/app/services/auth.service';
 import { OrderService, buildStaticDeliveryOrdersQuery } from 'src/app/services/order.service';

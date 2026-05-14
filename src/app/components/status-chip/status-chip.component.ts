@@ -26,7 +26,7 @@ export class StatusChipComponent {
     if (value === 'delivered' || value === 'daily') {
       return 'positive';
     }
-    if (value === 'in-progress' || value === 'one-time') {
+    if (value === 'assigned' || value === 'in-progress' || value === 'one-time') {
       return 'accent';
     }
     if (value === 'pending' || value === 'alternate-day') {

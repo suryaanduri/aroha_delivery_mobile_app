@@ -155,7 +155,7 @@
 
             <div class="active-stop-card__actions">
               <ion-button fill="outline" (click)="goToList()">View List</ion-button>
-              <ion-button fill="solid" (click)="openActiveStop()">
+              <ion-button *ngIf="canOpenActiveStop" fill="solid" (click)="openActiveStop()">
                 Open Stop
                 <ion-icon slot="end" name="navigate-outline"></ion-icon>
               </ion-button>

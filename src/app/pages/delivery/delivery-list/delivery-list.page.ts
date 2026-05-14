@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -49,7 +49,7 @@ type FilterKey = 'all' | 'pending' | 'delivered' | 'cancelled' | 'skipped';
     TopHeaderComponent,
   ],
 })
-export class DeliveryListPage implements OnInit {
+export class DeliveryListPage {
   searchTerm = '';
   selectedFilter: FilterKey = 'all';
   deliveries: DeliveryStopViewModel[] = [];
@@ -58,7 +58,7 @@ export class DeliveryListPage implements OnInit {
 
   readonly filterOptions: { key: FilterKey; label: string }[] = [
     { key: 'all', label: 'All' },
-    { key: 'pending', label: 'Pending' },
+    { key: 'assigned', label: 'Assigned' },
     { key: 'delivered', label: 'Delivered' },
     { key: 'cancelled', label: 'Cancelled' },
     { key: 'skipped', label: 'Skipped' },
@@ -78,7 +78,7 @@ export class DeliveryListPage implements OnInit {
     });
   }
 
-  ngOnInit(): void {
+  ionViewDidEnter(): void {
     this.loadOrders();
   }
 

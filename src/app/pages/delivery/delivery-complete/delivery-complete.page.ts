@@ -122,6 +122,10 @@ export class DeliveryCompletePage implements OnInit {
     return formatProductCountLabel(this.items.length);
   }
 
+  get headerEyebrow(): string {
+    return [this.routeLabel, this.timeSlot].filter(Boolean).join(' • ') || 'Delivery stop';
+  }
+
   get selectedActionLabel(): string {
     return this.selectedAction.charAt(0) + this.selectedAction.slice(1).toLowerCase();
   }
@@ -269,7 +273,7 @@ export class DeliveryCompletePage implements OnInit {
     this.customerName = order.customerName ?? 'Customer';
     this.customerCode = order.customerCode ?? '';
     this.routeLabel = order.routeLabel ?? '';
-    this.address = order.address ?? '';
+    this.address = order.address?.trim() || 'Location not available';
     this.landmark = order.landmark ?? '';
     this.scheduleType = normalizeScheduleType(order.scheduleType);
     this.currentStatus = normalizeDeliveryStatus(order.deliveryStatus ?? order.status);

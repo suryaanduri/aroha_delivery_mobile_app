@@ -22,6 +22,7 @@ export interface DeliveryStopViewModel {
 export function normalizeDeliveryStatus(status?: string): DeliveryStatus {
   const normalized = (status ?? '').toUpperCase();
 
+  if (normalized === 'ASSIGNED') return 'assigned';
   if (normalized === 'DELIVERED' || normalized === 'COMPLETED') return 'delivered';
   if (normalized === 'IN_PROGRESS' || normalized === 'IN-PROGRESS' || normalized === 'STARTED') return 'in-progress';
   if (normalized === 'CANCELLED' || normalized === 'CANCELED') return 'cancelled';
@@ -71,7 +72,7 @@ export function mapOrderToDeliveryStopViewModel(order: DeliveryOrder, index = 0)
     id: order.id ?? order.orderId ?? String(index),
     customerName: order.customerName ?? '',
     customerCode: order.customerCode ?? '',
-    address: order.address ?? '',
+    address: order.address?.trim() || 'Location not available',
     landmark: order.landmark ?? '',
     routeLabel: order.routeLabel ?? `Stop ${String(sequence).padStart(2, '0')}`,
     scheduleType: normalizeScheduleType(order.scheduleType),
