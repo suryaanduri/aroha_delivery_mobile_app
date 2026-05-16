@@ -13,7 +13,7 @@
         class="delivery-list-header__map"
         fill="solid"
         aria-label="Open route map"
-        routerLink="/map"
+        (click)="goToMap()"
       >
         <ion-icon name="location-outline"></ion-icon>
       </ion-button>
@@ -32,7 +32,39 @@
       </ion-button>
     </app-surface-card>
 
+    <!-- Offline banner -->
+    <div class="status-banner status-banner--offline" *ngIf="isOffline" role="alert">
+      <ion-icon name="wifi-outline" aria-hidden="true"></ion-icon>
+      <span>No internet connection — showing available data</span>
+    </div>
+
+    <!-- Cached data banner -->
+    <div class="status-banner status-banner--cached" *ngIf="usingCachedData && !isOffline" role="status">
+      <ion-icon name="refresh-outline" aria-hidden="true"></ion-icon>
+      <span>Showing cached data from {{ cachedAtLabel }}</span>
+    </div>
+
     <ng-container *ngIf="!loading && !errorMessage">
+
+      <!-- Route optimized banner -->
+      <div class="route-optimized-banner" *ngIf="routeOptimized" aria-label="Route optimized">
+        <ion-icon name="flash-outline" aria-hidden="true"></ion-icon>
+        <span>Route optimized &nbsp;·&nbsp; <strong>~{{ routeDistanceLabel }}</strong> &nbsp;·&nbsp; ~{{ routeEtaLabel }}</span>
+      </div>
+
+      <!-- All deliveries done celebration -->
+      <div class="all-done" *ngIf="allDone" aria-label="All deliveries complete">
+        <div class="all-done__icon">
+          <ion-icon name="checkmark-circle-outline"></ion-icon>
+        </div>
+        <h2 class="all-done__title">Route Complete!</h2>
+        <p class="all-done__sub">
+          {{ completedCount }} delivered
+          <ng-container *ngIf="cancelledCount > 0"> · {{ cancelledCount }} cancelled</ng-container>
+          <ng-container *ngIf="skippedCount > 0"> · {{ skippedCount }} skipped</ng-container>
+        </p>
+      </div>
+
       <app-surface-card class="control-deck" aria-label="Route summary and filters">
         <div class="control-deck__summary">
           <div class="control-deck__lead">
@@ -140,16 +172,15 @@
           </div>
         </section>
 
-        <section *ngIf="resolvedStops.length" class="list-section list-section--completed">
+        <section *ngIf="deliveredStops.length" class="list-section list-section--completed">
           <app-section-header
-            title="Closed stops"
-            [meta]="resolvedStops.length + ' total'"
+            title="Delivered"
+            [meta]="deliveredStops.length + ' stop(s)'"
           ></app-section-header>
-
           <div class="delivery-list-stack delivery-list-stack--completed">
             <app-delivery-card
               [stop]="stop"
-              *ngFor="let stop of completedStops"
+              *ngFor="let stop of deliveredStops"
               actionText="View Details"
               (cardPressed)="openDelivery(stop.id)"
               (actionPressed)="openDelivery(stop.id)"
@@ -162,7 +193,6 @@
             title="Cancelled"
             [meta]="cancelledStops.length + ' stop(s)'"
           ></app-section-header>
-
           <div class="delivery-list-stack">
             <app-delivery-card
               [stop]="stop"
@@ -179,7 +209,6 @@
             title="Skipped"
             [meta]="skippedStops.length + ' stop(s)'"
           ></app-section-header>
-
           <div class="delivery-list-stack">
             <app-delivery-card
               [stop]="stop"

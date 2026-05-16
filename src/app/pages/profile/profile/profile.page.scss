@@ -57,3 +57,15 @@ ion-content{--background:var(--app-color-secondary);font-family:var(--app-font-f
   .edit-actions__cancel,
   .edit-actions__save { min-height: 2.6rem; font-size: .86rem; }
 }
+
+@media (max-width: 320px) {
+  .avatar { width: 2.8rem; height: 2.8rem; border-radius: 1rem; font-size: 1rem; }
+  .avatar-copy__name { font-size: .9rem; }
+  .avatar-copy__role { font-size: .72rem; }
+  .info-row { gap: .6rem; padding: .6rem 0; }
+  .info-row__copy strong { font-size: .84rem; }
+  .field__input { font-size: .82rem; padding: .66rem .8rem .66rem 2rem; }
+  .edit-actions { gap: .5rem; }
+  .edit-actions__cancel,
+  .edit-actions__save { min-height: 2.4rem; font-size: .82rem; }
+}

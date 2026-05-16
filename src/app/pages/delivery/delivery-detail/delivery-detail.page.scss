@@ -22,7 +22,7 @@ ion-content {
 .overview-card__route,
 .overview-card__location,
 .overview-card__chips,
-.detail-action-bar__actions,
+.action-card__row,
 .proof-option,
 .proof-option__copy,
 .item-row,
@@ -141,14 +141,30 @@ ion-content {
   font-weight: 750;
 }
 
-.overview-card__call {
-  display: grid;
-  width: 52px;
-  height: 52px;
-  place-items: center;
+.overview-card__actions {
+  display: flex;
+  gap: 8px;
   flex-shrink: 0;
+}
+
+.overview-card__action-btn {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
   border: 0;
-  border-radius: 18px;
+  border-radius: 16px;
+  cursor: pointer;
+  font-size: 1.1rem;
+}
+
+.overview-card__action-btn--nav {
+  background: var(--delivery-primary);
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(25, 61, 52, 0.22);
+}
+
+.overview-card__action-btn--call {
   background: rgba(25, 61, 52, 0.08);
   color: var(--delivery-primary);
 }
@@ -159,6 +175,37 @@ ion-content {
   padding: 16px;
   border-radius: 20px;
   background: rgba(25, 61, 52, 0.045);
+}
+
+.overview-card__location--tappable {
+  width: 100%;
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  transition: background 0.14s ease;
+}
+
+.overview-card__location--tappable:active {
+  background: rgba(25, 61, 52, 0.09);
+}
+
+.overview-card__location--tappable ion-icon {
+  color: var(--delivery-primary);
+  font-size: 1.15rem;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.overview-card__location-hint {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.72rem;
+  color: var(--delivery-primary);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.75;
 }
 
 .overview-card__location ion-icon,
@@ -235,6 +282,7 @@ ion-content {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  margin-top: 12px;
 }
 
 .note-list {
@@ -333,32 +381,48 @@ ion-content {
   line-height: 1.34;
 }
 
-.detail-action-bar__actions {
-  width: 100%;
-  gap: 10px;
-  flex-wrap: wrap;
+.action-card {
+  background:
+    radial-gradient(circle at top right, rgba(69, 134, 111, 0.08), transparent 9rem),
+    rgba(255, 255, 255, 0.96);
 }
 
-.detail-action-bar__secondary {
-  min-height: 46px;
+.action-card__row {
+  align-items: stretch;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.action-card__btn {
+  min-height: 50px;
   flex: 1;
-  border: 1px solid #d9e7e1;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.96);
-  color: #23453c;
   font: inherit;
   font-size: 0.92rem;
   font-weight: 800;
-  box-shadow: 0 10px 24px rgba(20, 61, 49, 0.05);
+  cursor: pointer;
 }
 
-.detail-action-bar__primary {
+.action-card__btn--secondary {
+  border: 1.5px solid #d0e6de;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #23453c;
+  box-shadow: 0 4px 12px rgba(20, 61, 49, 0.04);
+  transition: background 0.14s ease;
+}
+
+.action-card__btn--secondary:active {
+  background: rgba(220, 238, 231, 0.9);
+}
+
+.action-card__btn--primary {
   --background: linear-gradient(180deg, #1f7a63, #176652);
-  --border-radius: 18px;
-  --padding-top: 15px;
-  --padding-bottom: 15px;
-  flex: 1.25;
-  min-width: 12rem;
+  --border-radius: 16px;
+  --padding-top: 14px;
+  --padding-bottom: 14px;
+  flex: 1.5;
+  min-width: 10rem;
   margin: 0;
   font-weight: 850;
   letter-spacing: -0.01em;
@@ -391,6 +455,33 @@ ion-content {
   .overview-card__meta-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.4rem;
+  }
+}
+
+@media (max-width: 320px) {
+  .detail-section {
+    padding: 14px;
+    border-radius: 22px;
+  }
+
+  .overview-card {
+    padding: 14px;
+  }
+
+  .overview-card__identity h2 {
+    font-size: 1.1rem;
+  }
+
+  .overview-card__meta-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .action-card__row {
+    flex-wrap: wrap;
+  }
+
+  .action-card__btn {
+    min-width: calc(50% - 5px);
   }
 }
 

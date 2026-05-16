@@ -1,6 +1,6 @@
-import { DeliveryStatus, ScheduleType } from '../components/status-chip/status-chip.component';
+import { DeliveryStatus } from '../components/status-chip/status-chip.component';
 import { DeliveryOrder } from '../models/order.model';
-import { formatDeliveryStatusLabel, normalizeDeliveryStatus, normalizeScheduleType } from './delivery-view.util';
+import { formatDeliveryStatusLabel, normalizeDeliveryStatus } from './delivery-view.util';
 
 export interface DeliveryMapStopViewModel {
   id: string;
@@ -13,7 +13,6 @@ export interface DeliveryMapStopViewModel {
   sequence: number | null;
   routeOrder: number;
   timeSlot: string;
-  scheduleType: ScheduleType;
   status: DeliveryStatus;
   deliveryStatusLabel: string;
   orderStatusLabel: string;
@@ -46,7 +45,6 @@ export function mapOrderToDeliveryMapStopViewModel(order: DeliveryOrder, index =
     sequence: routeSequence,
     routeOrder: routeSequence ?? index + 1,
     timeSlot: order.timeSlot?.trim() || '',
-    scheduleType: normalizeScheduleType(order.scheduleType),
     status: normalizeDeliveryStatus(deliveryStatusValue),
     deliveryStatusLabel: formatDeliveryStatusLabel(deliveryStatusValue),
     orderStatusLabel: formatDeliveryStatusLabel(order.orderStatus),

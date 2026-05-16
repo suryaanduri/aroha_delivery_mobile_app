@@ -200,6 +200,29 @@
   line-height: 1.28;
 }
 
+.delivery-card__eta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  background: rgba(var(--app-color-primary-rgb), 0.04);
+}
+
+.delivery-card__eta-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--app-color-primary);
+  font-size: 0.76rem;
+  font-weight: 700;
+
+  ion-icon {
+    font-size: 0.82rem;
+    flex-shrink: 0;
+  }
+}
+
 .delivery-card__summary {
   gap: 8px;
   align-items: center;
@@ -233,6 +256,7 @@
   --padding-start: 14px;
   --padding-end: 10px;
   --box-shadow: 0 6px 16px rgba(var(--app-color-primary-rgb), 0.2);
+  --min-height: 44px;
   margin-left: auto;
   font-weight: 700;
   font-size: 0.86rem;
@@ -273,5 +297,34 @@
     --padding-top: 7px;
     --padding-bottom: 7px;
     font-size: 0.82rem;
+  }
+}
+
+@media (max-width: 320px) {
+  .delivery-card {
+    padding: 10px 10px 10px 14px;
+    gap: 8px;
+    border-radius: 16px;
+  }
+
+  .delivery-card__name-row h3 {
+    font-size: 0.88rem;
+  }
+
+  .delivery-card__code {
+    font-size: 0.62rem;
+    padding: 2px 5px;
+  }
+
+  .delivery-card__location {
+    padding: 7px 8px;
+  }
+
+  .delivery-card__location-copy p {
+    font-size: 0.76rem;
+  }
+
+  .delivery-card__location-copy span {
+    font-size: 0.7rem;
   }
 }

@@ -14,6 +14,11 @@ import {
 } from '../models/auth.model';
 import { unwrapApiSuccess } from '../utils/api-contract.util';
 
+interface RefreshResponse {
+  accessToken: string;
+  refreshToken: string;
+}
+
 interface LoginData {
   user?: AuthUser;
   mustResetPassword?: boolean;
@@ -29,6 +34,7 @@ export class AuthService {
   private currentUser: AuthUser | null = null;
   private _mustResetPassword = false;
   private accessToken: string | null = null;
+  private refreshToken: string | null = null;
   private initialized = false;
 
   constructor(
@@ -54,6 +60,10 @@ export class AuthService {
 
   get token(): string | null {
     return this.accessToken;
+  }
+
+  get storedRefreshToken(): string | null {
+    return this.refreshToken;
   }
 
   initializeAuth(): void {
@@ -87,6 +97,9 @@ export class AuthService {
       this.accessToken = typeof stored.accessToken === 'string' && stored.accessToken.trim().length > 0
         ? stored.accessToken
         : null;
+      this.refreshToken = typeof stored.refreshToken === 'string' && stored.refreshToken.trim().length > 0
+        ? stored.refreshToken
+        : null;
     } catch {
       this.clearPersistedSession();
     }
@@ -102,6 +115,7 @@ export class AuthService {
             user: res.user,
             mustResetPassword: res.mustResetPassword,
             accessToken: res.accessToken,
+            refreshToken: res.refreshToken,
           });
         })
       );
@@ -151,10 +165,30 @@ export class AuthService {
     return this.mustResetPassword ? '/reset-password' : '/dashboard';
   }
 
+  refreshAccessToken(): Observable<RefreshResponse> {
+    return this.http
+      .post<unknown>(`${this.baseUrl}/refreshToken`, { refreshToken: this.refreshToken })
+      .pipe(
+        map((res) => {
+          const root = res && typeof res === 'object' ? (res as Record<string, unknown>) : {};
+          const accessToken = typeof root['accessToken'] === 'string' ? root['accessToken'] : '';
+          const refreshToken = typeof root['refreshToken'] === 'string' ? root['refreshToken'] : '';
+          if (!accessToken) throw new Error('Invalid refresh response');
+          return { accessToken, refreshToken };
+        }),
+        tap(({ accessToken, refreshToken }) => {
+          this.accessToken = accessToken;
+          this.refreshToken = refreshToken || this.refreshToken;
+          this.persistSession();
+        }),
+      );
+  }
+
   private setSession(session: StoredAuthSession): void {
     this.currentUser = session.user;
     this._mustResetPassword = session.mustResetPassword;
     this.accessToken = session.accessToken?.trim() ? session.accessToken : null;
+    this.refreshToken = session.refreshToken?.trim() ? session.refreshToken : null;
     this.persistSession();
   }
 
@@ -168,6 +202,7 @@ export class AuthService {
       user: this.currentUser,
       mustResetPassword: this._mustResetPassword,
       accessToken: this.accessToken ?? undefined,
+      refreshToken: this.refreshToken ?? undefined,
     };
 
     storage.setItem(AuthService.STORAGE_KEY, JSON.stringify(session));
@@ -177,6 +212,7 @@ export class AuthService {
     this.currentUser = null;
     this._mustResetPassword = false;
     this.accessToken = null;
+    this.refreshToken = null;
     this.clearPersistedSession();
   }
 
@@ -218,6 +254,7 @@ export class AuthService {
       mustResetPassword: this.extractMustResetPassword(root, data),
       user,
       accessToken: this.extractAccessToken(root, data),
+      refreshToken: this.extractRefreshToken(root, data),
     };
   }
 
@@ -254,17 +291,24 @@ export class AuthService {
   }
 
   private extractAccessToken(root: Record<string, unknown>, data: unknown): string | undefined {
-    const token = this.findTokenValue(data) ?? this.findTokenValue(root);
+    const token = this.findTokenValue(data, ['token', 'accessToken', 'jwt'])
+      ?? this.findTokenValue(root, ['token', 'accessToken', 'jwt']);
     return token?.trim() ? token : undefined;
   }
 
-  private findTokenValue(source: unknown): string | null {
+  private extractRefreshToken(root: Record<string, unknown>, data: unknown): string | undefined {
+    const token = this.findTokenValue(data, ['refreshToken', 'refresh_token'])
+      ?? this.findTokenValue(root, ['refreshToken', 'refresh_token']);
+    return token?.trim() ? token : undefined;
+  }
+
+  private findTokenValue(source: unknown, keys: string[]): string | null {
     if (!source || typeof source !== 'object') {
       return null;
     }
 
     const record = source as Record<string, unknown>;
-    for (const key of ['token', 'accessToken', 'jwt']) {
+    for (const key of keys) {
       const value = record[key];
       if (typeof value === 'string' && value.trim().length > 0) {
         return value;

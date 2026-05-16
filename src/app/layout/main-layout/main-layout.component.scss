@@ -1,85 +1,137 @@
 :host {
   display: block;
   height: 100%;
+
+  --tab-h: 68px;
+  --tab-bottom: max(var(--app-safe-area-bottom, 0px), 10px);
+  --tab-w: min(calc(100% - 28px), 430px);
+  --tab-bg: rgba(255, 255, 255, 0.94);
+  --tab-border: rgba(20, 38, 33, 0.08);
+  --tab-active: var(--app-color-primary, #1a4d3f);
+  --tab-muted: var(--app-color-text-muted, #607068);
 }
 
-.main-layout {
-  width: 100%;
+.app-shell {
+  display: flex;
+  flex-direction: column;
   height: 100%;
+  position: relative;
 }
 
-:host {
-  --main-tab-bar-height: 70px;
-  --main-tab-bar-bottom: max(var(--app-safe-area-bottom), 12px);
-  --main-tab-bar-width: min(calc(100% - 32px), 430px);
-  --main-tab-bar-background: rgba(255, 255, 255, 0.92);
-  --main-tab-bar-border: rgba(21, 35, 31, 0.08);
-  --main-tab-active: var(--app-color-primary, #193d34);
-  --main-tab-muted: var(--app-color-text-muted, #64716d);
+.app-outlet {
+  flex: 1;
+  overflow: hidden;
 }
 
-.main-tabs {
+/* ── Custom tab bar ───────────────────────────────────── */
+.app-tab-bar {
   position: fixed;
-  top: auto;
-  right: auto;
   left: 50%;
-  bottom: var(--main-tab-bar-bottom);
+  bottom: var(--tab-bottom);
+  transform: translateX(-50%);
   z-index: 1000;
-  width: var(--main-tab-bar-width);
-  height: var(--main-tab-bar-height);
-  padding: 7px;
-  border: 1px solid var(--main-tab-bar-border);
+  width: var(--tab-w);
+  height: var(--tab-h);
+  display: flex;
+  align-items: stretch;
+  padding: 6px;
+  gap: 4px;
+  border: 1px solid var(--tab-border);
   border-radius: 22px;
   background:
-    radial-gradient(circle at top right, rgba(var(--app-color-tertiary-rgb), 0.1), transparent 9rem),
-    var(--main-tab-bar-background);
+    radial-gradient(circle at top right, rgba(202, 163, 106, 0.1), transparent 9rem),
+    var(--tab-bg);
   box-shadow:
-    0 22px 42px rgba(17, 31, 27, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.78);
-  transform: translateX(-50%);
-  contain: layout paint;
-  backdrop-filter: blur(18px);
+    0 20px 42px rgba(14, 32, 26, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
-ion-tab-button {
-  --background: transparent;
-  --background-focused: transparent;
-  --background-focused-opacity: 0;
-  --color: var(--main-tab-muted);
-  --color-selected: #fff;
+.app-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
   min-width: 0;
-  min-height: 54px;
+  padding: 4px 2px;
+  border: 0;
   border-radius: 16px;
-  letter-spacing: 0;
-  transition:
-    background-color 0.18s ease,
-    box-shadow 0.18s ease,
-    color 0.18s ease;
+  background: transparent;
+  color: var(--tab-muted);
+  font-family: var(--app-font-family);
+  cursor: pointer;
+  transition: background-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
-ion-tab-button ion-icon {
-  margin-bottom: 4px;
-  font-size: 1.16rem;
+.app-tab ion-icon {
+  font-size: 1.18rem;
+  flex-shrink: 0;
+  transition: transform 0.16s ease;
 }
 
-ion-tab-button ion-label {
-  max-width: 100%;
-  font-size: 0.67rem;
-  line-height: 1.05;
+.app-tab__label {
+  font-size: 0.64rem;
   font-weight: 800;
   letter-spacing: -0.01em;
-  white-space: normal;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
-ion-tab-button.tab-selected {
-  --background: linear-gradient(180deg, rgba(25, 61, 52, 0.98), rgba(31, 101, 84, 0.94));
-  box-shadow: 0 12px 22px rgba(25, 61, 52, 0.18);
+/* Active state */
+.app-tab--active {
+  background: linear-gradient(180deg, rgba(26, 77, 63, 0.97), rgba(22, 64, 52, 0.94));
+  color: #ffffff;
+  box-shadow: 0 10px 22px rgba(26, 77, 63, 0.22);
 }
 
-ion-tab-button:not(.tab-selected)::part(native) {
-  color: var(--main-tab-muted);
+.app-tab--active ion-icon {
+  transform: scale(1.08);
 }
 
+/* Add safe-area padding to page content so it doesn't hide behind the tab bar */
 :host ::ng-deep ion-content {
-  --padding-bottom: calc(var(--main-tab-bar-height) + var(--main-tab-bar-bottom) + 18px);
+  --padding-bottom: calc(var(--tab-h) + var(--tab-bottom) + 14px);
+}
+
+@media (max-width: 360px) {
+  :host {
+    --tab-w: min(calc(100% - 20px), 430px);
+  }
+
+  .app-tab {
+    padding: 4px 1px;
+    gap: 2px;
+  }
+
+  .app-tab__label {
+    font-size: 0.6rem;
+  }
+}
+
+@media (max-width: 320px) {
+  :host {
+    --tab-w: calc(100% - 16px);
+    --tab-h: 62px;
+  }
+
+  .app-tab-bar {
+    padding: 5px;
+    gap: 3px;
+    border-radius: 18px;
+  }
+
+  .app-tab ion-icon {
+    font-size: 1.1rem;
+  }
+
+  .app-tab__label {
+    font-size: 0.56rem;
+  }
 }

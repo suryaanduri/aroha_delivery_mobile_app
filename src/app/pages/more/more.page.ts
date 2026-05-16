@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { AlertController } from '@ionic/angular';
+import { AlertController, NavController } from '@ionic/angular';
 import { IonContent, IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -24,14 +23,14 @@ import { AuthService } from 'src/app/services/auth.service';
     IonContent,
     IonIcon,
     PageShellComponent,
-    RouterLink,
     TopHeaderComponent,
   ],
 })
 export class MorePage {
   constructor(
     private readonly authService: AuthService,
-    private readonly alertController: AlertController
+    private readonly alertController: AlertController,
+    private readonly navCtrl: NavController
   ) {
     addIcons({
       chevronForwardOutline,
@@ -47,6 +46,14 @@ export class MorePage {
 
   get agentRole(): string {
     return this.authService.user?.role ?? 'Route Operations';
+  }
+
+  goToProfile(): void {
+    void this.navCtrl.navigateForward('/profile');
+  }
+
+  goToDaySummary(): void {
+    void this.navCtrl.navigateForward('/day-summary');
   }
 
   async confirmLogout(): Promise<void> {

@@ -82,7 +82,7 @@ export class OrderService {
     return this.http.get<unknown>(`${this.baseUrl}/orders`, { params }).pipe(map((res) => this.extractOrders(res)));
   }
 
-  getOrderById(orderId: string, filters?: { deliveryDate?: string }): Observable<DeliveryOrder | null> {
+  getOrderById(orderId: string): Observable<DeliveryOrder | null> {
     return this.http
       .get<unknown>(`${this.baseUrl}/orders/${orderId}`)
       .pipe(map((res) => this.extractOrder(res)));

@@ -20,7 +20,7 @@ ion-content{--background:var(--app-color-secondary);--color:var(--app-color-text
 .action-selector,.proof-stack,.confirmation-summary{display:flex;flex-direction:column}
 .complete-header,.context-band,.proof-toggle,.confirmation-row,.proof-panel--placeholder{display:flex;align-items:center}
 .complete-header{gap:10px}
-.complete-header__back{display:grid;width:42px;height:42px;place-items:center;border:1px solid rgba(20,38,33,.08);border-radius:14px;background:rgba(255,255,255,.92)}
+.complete-header__back{display:grid;width:44px;height:44px;place-items:center;border:1px solid rgba(20,38,33,.08);border-radius:14px;background:rgba(255,255,255,.92)}
 .complete-header__copy{flex:1}
 .complete-header__eyebrow,.context-band__copy span,.proof-toggle__copy span,.proof-panel__label,.proof-panel p,.confirmation-row span,.action-option span{color:var(--app-color-text-muted)}
 .complete-header__eyebrow{margin:0 0 4px;font-size:.74rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
@@ -49,6 +49,75 @@ ion-content{--background:var(--app-color-secondary);--color:var(--app-color-text
 .completion-bar__ghost{min-height:44px;border-radius:14px;font-weight:700}
 .completion-bar__primary{--border-radius:16px;--padding-top:15px;--padding-bottom:15px;font-weight:800;flex:1}
 
+/* ── Confetti celebration ─────────────────────────────────────────────── */
+
+.confetti-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.confetti-badge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  animation: badge-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+
+  ion-icon {
+    font-size: 5rem;
+    color: #fff;
+    filter:
+      drop-shadow(0 0 18px rgba(25, 61, 52, 0.6))
+      drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+  }
+
+  span {
+    font-size: 1.55rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.04em;
+    text-shadow:
+      0 2px 12px rgba(25, 61, 52, 0.55),
+      0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+}
+
+@keyframes badge-pop {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.4); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -18px;
+  will-change: transform, opacity;
+  animation: confetti-fall linear forwards;
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(0) translateX(0) rotate(0deg);
+    opacity: 1;
+  }
+  15% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(108vh) translateX(var(--sway, 20px)) rotate(540deg);
+    opacity: 0;
+  }
+}
+
 /* Compact layout for small phones */
 @media (max-width: 360px) {
   .action-selector { gap: 7px; }
@@ -57,4 +126,13 @@ ion-content{--background:var(--app-color-secondary);--color:var(--app-color-text
   .reason-chip { min-height: 38px; font-size: .8rem; }
   .proof-toggle-grid { grid-template-columns: 1fr; }
   .completion-bar__ghost { min-height: 42px; font-size: .84rem; }
+}
+
+@media (max-width: 320px) {
+  .action-option { padding: 9px; font-size: .88rem; }
+  .action-option strong { font-size: .88rem; }
+  .context-band { padding-bottom: 10px; margin-bottom: 10px; }
+  .complete-header h1 { font-size: 1.24rem; }
+  .reason-chip { min-height: 36px; font-size: .76rem; padding: 0 9px; }
+  .note-toggle-btn { font-size: .76rem; padding: .38rem .7rem; }
 }

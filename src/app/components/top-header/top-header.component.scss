@@ -69,9 +69,9 @@
 
 .top-header__back {
   display: grid;
-  /* Minimum 40px tap target (Apple HIG) */
-  width: clamp(40px, 10vw, 44px);
-  height: clamp(40px, 10vw, 44px);
+  /* 44px minimum tap target per Apple HIG / Material Design */
+  width: 44px;
+  height: 44px;
   place-items: center;
   flex-shrink: 0;
   border: 1px solid rgba(20, 38, 33, 0.08);

@@ -86,10 +86,10 @@
             </div>
           </div>
 
-          <a class="route-card__cta" routerLink="/deliveries">
+          <button type="button" class="route-card__cta" (click)="goToDeliveries()">
             <span>View All Deliveries</span>
             <ion-icon name="arrow-forward-outline" aria-hidden="true"></ion-icon>
-          </a>
+          </button>
         </section>
 
         <!-- Next Stop card -->
@@ -104,9 +104,9 @@
               <p class="next-card__address">{{ nextDelivery.address }}<span *ngIf="nextDelivery.landmark"> · {{ nextDelivery.landmark }}</span></p>
               <p class="next-card__items" *ngIf="nextStopItems">{{ nextStopItems }}</p>
             </div>
-            <a class="next-card__btn" [routerLink]="['/delivery', nextDelivery.id]">
+            <button type="button" class="next-card__btn" (click)="goToNextStop()">
               <ion-icon name="arrow-forward-outline" aria-hidden="true"></ion-icon>
-            </a>
+            </button>
           </div>
         </section>
 

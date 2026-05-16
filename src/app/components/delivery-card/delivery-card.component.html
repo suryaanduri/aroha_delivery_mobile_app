@@ -6,7 +6,10 @@
 >
   <div class="delivery-card__topline">
     <div class="delivery-card__left-meta">
-      <div class="delivery-card__sequence" *ngIf="viewModel.sequenceLabel">{{ viewModel.sequenceLabel }}</div>
+      <!-- Show optimized route order when available, fallback to original sequence -->
+      <div class="delivery-card__sequence" *ngIf="viewModel.routeOrder > 0">
+        #{{ viewModel.routeOrder < 10 ? '0' + viewModel.routeOrder : viewModel.routeOrder }}
+      </div>
       <div class="delivery-card__priority" *ngIf="priority">Next Stop</div>
     </div>
 
@@ -30,7 +33,6 @@
     </div>
 
     <div class="delivery-card__chips">
-      <app-status-chip [kind]="'schedule'" [value]="viewModel.scheduleType"></app-status-chip>
       <app-status-chip [kind]="'status'" [value]="viewModel.status"></app-status-chip>
     </div>
   </div>
@@ -40,6 +42,19 @@
     <div class="delivery-card__location-copy">
       <p>{{ viewModel.address }}</p>
       <span *ngIf="viewModel.landmark">{{ viewModel.landmark }}</span>
+    </div>
+  </div>
+
+  <!-- ETA + distance row — only for pending stops with route data -->
+  <div class="delivery-card__eta"
+       *ngIf="viewModel.estimatedArrival && viewModel.status !== 'delivered' && viewModel.status !== 'cancelled' && viewModel.status !== 'skipped'">
+    <div class="delivery-card__eta-item">
+      <ion-icon name="time-outline" aria-hidden="true"></ion-icon>
+      <span>ETA {{ viewModel.estimatedArrival }}</span>
+    </div>
+    <div class="delivery-card__eta-item" *ngIf="viewModel.distanceFromPrev">
+      <ion-icon name="navigate-outline" aria-hidden="true"></ion-icon>
+      <span>{{ viewModel.distanceFromPrev }}</span>
     </div>
   </div>
 

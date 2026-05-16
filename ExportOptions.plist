@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>method</key>
+  <string>app-store-connect</string>
+  <key>teamID</key>
+  <string>85JCT62UG6</string>
+  <key>signingStyle</key>
+  <string>manual</string>
+  <key>signingCertificate</key>
+  <string>Apple Distribution: Srinivasulu Andhuri (85JCT62UG6)</string>
+  <key>provisioningProfiles</key>
+  <dict>
+    <key>com.arohafresh.delivery</key>
+    <string>ArohaFresh Delivery AppStore</string>
+  </dict>
+  <key>uploadBitcode</key>
+  <false/>
+  <key>uploadSymbols</key>
+  <true/>
+</dict>
+</plist>

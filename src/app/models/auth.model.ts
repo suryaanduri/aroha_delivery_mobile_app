@@ -17,6 +17,7 @@ export interface LoginResponse {
   mustResetPassword: boolean;
   user: AuthUser;
   accessToken?: string;
+  refreshToken?: string;
 }
 
 export interface ResetPasswordRequest {
@@ -43,4 +44,5 @@ export interface StoredAuthSession {
   user: AuthUser;
   mustResetPassword: boolean;
   accessToken?: string;
+  refreshToken?: string;
 }

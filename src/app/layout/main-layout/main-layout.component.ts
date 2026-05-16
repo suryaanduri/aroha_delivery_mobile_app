@@ -1,46 +1,57 @@
 import { Component } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import {
-  IonIcon,
-  IonLabel,
-  IonTabBar,
-  IonTabButton,
-  IonTabs,
-} from '@ionic/angular/standalone';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { IonIcon, IonRouterOutlet } from '@ionic/angular/standalone';
+import { NavController } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { ellipsisHorizontalOutline, homeOutline, listOutline, mapOutline, navigateOutline } from 'ionicons/icons';
+import {
+  ellipsisHorizontalOutline,
+  homeOutline,
+  listOutline,
+  mapOutline,
+} from 'ionicons/icons';
+
+interface TabItem {
+  label: string;
+  icon: string;
+  path: string;
+}
 
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [
-    IonIcon,
-    IonLabel,
-    IonTabBar,
-    IonTabButton,
-    IonTabs,
-    RouterLink,
-    RouterLinkActive,
-  ],
+  imports: [CommonModule, IonIcon, IonRouterOutlet],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss',
 })
 export class MainLayoutComponent {
-  constructor(private readonly router: Router) {
-    addIcons({
-      ellipsisHorizontalOutline,
-      homeOutline,
-      listOutline,
-      mapOutline,
-      navigateOutline,
-    });
+  readonly tabs: TabItem[] = [
+    { label: 'Home',      icon: 'home-outline',               path: '/dashboard' },
+    { label: 'List View', icon: 'list-outline',               path: '/deliveries' },
+    { label: 'Map View',  icon: 'map-outline',                path: '/map' },
+    { label: 'More',      icon: 'ellipsis-horizontal-outline', path: '/more' },
+  ];
+
+  constructor(
+    private readonly router: Router,
+    private readonly navCtrl: NavController,
+  ) {
+    addIcons({ ellipsisHorizontalOutline, homeOutline, listOutline, mapOutline });
   }
 
-  get isMoreTabActive(): boolean {
-    return ['/more', '/profile', '/day-summary'].some((path) => this.router.url.startsWith(path));
+  isActive(path: string): boolean {
+    const url = this.router.url;
+    if (path === '/deliveries') {
+      // /delivery/:id (detail page) should not force-highlight any tab
+      return url === '/deliveries' || url.startsWith('/deliveries?') || url.startsWith('/deliveries/');
+    }
+    if (path === '/more') {
+      return url.startsWith('/more') || url.startsWith('/profile') || url.startsWith('/day-summary');
+    }
+    return url.startsWith(path);
   }
 
-  get isListTabActive(): boolean {
-    return this.router.url.startsWith('/deliveries') || this.router.url.startsWith('/delivery/');
+  navigate(path: string): void {
+    void this.navCtrl.navigateRoot(path, { animated: false });
   }
 }

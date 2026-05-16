@@ -21,6 +21,8 @@ export class ForgotPasswordPage {
   errorMessage = '';
   successMessage = '';
 
+  private static readonly EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
   constructor(
     private readonly router: Router,
     private readonly authService: AuthService
@@ -28,8 +30,12 @@ export class ForgotPasswordPage {
     addIcons({ arrowBackOutline, mailOutline });
   }
 
+  get isEmailValid(): boolean {
+    return ForgotPasswordPage.EMAIL_REGEX.test(this.email.trim());
+  }
+
   get canSubmit(): boolean {
-    return this.email.trim().length > 0 && !this.loading;
+    return this.isEmailValid && !this.loading;
   }
 
   onSubmit(): void {

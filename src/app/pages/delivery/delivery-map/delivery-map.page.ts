@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { NavController } from '@ionic/angular';
 import { GoogleMapsModule } from '@angular/google-maps';
 import {
   IonButton,
@@ -10,6 +10,7 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
+  arrowForwardOutline,
   calendarOutline,
   checkmarkCircleOutline,
   cubeOutline,
@@ -31,8 +32,8 @@ import { GoogleMapsLoaderService } from 'src/app/services/google-maps-loader.ser
 import { OrderService, buildStaticDeliveryOrdersQuery } from 'src/app/services/order.service';
 import { formatLocalISODate } from 'src/app/utils/date.util';
 import { DeliveryMapStopViewModel, RouteStatsViewModel, mapOrderToDeliveryMapStopViewModel } from 'src/app/utils/map-view.util';
-import { CHANDANAGAR_CENTER } from 'src/app/utils/mock-coordinates.util';
-import { calculateRouteDistance, estimateRouteEtaMinutes, formatDistance, formatEta, orderStopsForRoute } from 'src/app/utils/route-calc.util';
+import { CHANDANAGAR_CENTER, LatLngLiteral } from 'src/app/utils/mock-coordinates.util';
+import { buildRouteStats, formatDistance, formatEta, getDriverLocation, orderStopsForRoute } from 'src/app/utils/route-calc.util';
 
 @Component({
   selector: 'app-delivery-map',
@@ -55,7 +56,7 @@ import { calculateRouteDistance, estimateRouteEtaMinutes, formatDistance, format
   ],
 })
 export class DeliveryMapPage {
-  private readonly router = inject(Router);
+  private readonly navCtrl = inject(NavController);
   private readonly orderService = inject(OrderService);
   private readonly googleMapsLoader = inject(GoogleMapsLoaderService);
 
@@ -71,12 +72,8 @@ export class DeliveryMapPage {
     disableDefaultUI: true,
     clickableIcons: false,
     gestureHandling: 'greedy',
-    styles: [
-      { featureType: 'poi', stylers: [{ visibility: 'off' }] },
-      { featureType: 'transit', stylers: [{ visibility: 'off' }] },
-      { featureType: 'road', elementType: 'geometry', stylers: [{ saturation: -10 }, { lightness: 8 }] },
-      { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#b7d9cf' }] },
-    ],
+    // mapId required for AdvancedMarkerElement — register a real Map ID in Google Cloud Console for production
+    mapId: 'AROHA_DELIVERY_ROUTE_MAP',
   };
 
   map?: google.maps.Map;
@@ -85,6 +82,8 @@ export class DeliveryMapPage {
   errorMessage = '';
   stops: DeliveryMapStopViewModel[] = [];
   activeStopId = '';
+  driverLocation: LatLngLiteral = CHANDANAGAR_CENTER;
+  routeOptimized = false;
   routeStats: RouteStatsViewModel = {
     totalStops: 0,
     completedStops: 0,
@@ -127,7 +126,7 @@ export class DeliveryMapPage {
 
   get mapUnavailableMessage(): string {
     return this.googleMapsLoaded
-      ? 'Live coordinates are unavailable for today’s stops.'
+      ? "Live coordinates are unavailable for today's stops."
       : 'Google Maps is not available for this build configuration.';
   }
 
@@ -138,8 +137,23 @@ export class DeliveryMapPage {
     }));
   }
 
+  get driverMarkerOptions(): google.maps.marker.AdvancedMarkerElementOptions {
+    const pin = document.createElement('div');
+    pin.innerHTML = `
+      <svg width="28" height="28" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="14" cy="14" r="13" fill="#1a6bff" stroke="#fff" stroke-width="3"/>
+        <circle cx="14" cy="14" r="5" fill="#fff"/>
+      </svg>`;
+    return {
+      title: 'Your location',
+      zIndex: 50,
+      content: pin.firstElementChild as HTMLElement,
+    };
+  }
+
   constructor() {
     addIcons({
+      arrowForwardOutline,
       calendarOutline,
       checkmarkCircleOutline,
       cubeOutline,
@@ -161,18 +175,26 @@ export class DeliveryMapPage {
     this.errorMessage = '';
 
     try {
-      const [orders] = await Promise.all([
+      const [orders, driverLocation] = await Promise.all([
         firstValueFrom(this.orderService.getOrders(buildStaticDeliveryOrdersQuery(this.deliveryDate))),
-        this.googleMapsLoader.load().then(() => {
-          this.googleMapsLoaded = true;
-        }),
+        getDriverLocation(),
+        this.googleMapsLoader.load().then(() => { this.googleMapsLoaded = true; }),
       ]);
 
-      const normalizedStops = orders.map((order, index) => mapOrderToDeliveryMapStopViewModel(order, index));
+      this.driverLocation = driverLocation;
 
-      this.stops = orderStopsForRoute(normalizedStops);
-      this.routeStats = this.buildRouteStats(this.stops);
+      const normalizedStops = orders.map((order, index) =>
+        mapOrderToDeliveryMapStopViewModel(order, index),
+      );
+
+      // Nearest-neighbor optimization starting from driver's current GPS
+      this.stops = orderStopsForRoute(normalizedStops, driverLocation);
+      this.routeStats = buildRouteStats(this.stops);
+      this.routeOptimized = true;
       this.activeStopId = this.getInitialActiveStopId();
+
+      // Update map centre to driver's location
+      this.mapOptions = { ...this.mapOptions, center: driverLocation };
 
       queueMicrotask(() => this.fitMapToRoute());
     } catch (error) {
@@ -209,28 +231,64 @@ export class DeliveryMapPage {
     if (!this.activeStop || !this.canOpenActiveStop) {
       return;
     }
-    void this.router.navigate(['/delivery', this.activeStop.id]);
+    void this.navCtrl.navigateForward(['/delivery', this.activeStop.id]);
   }
 
   goToList(): void {
-    void this.router.navigate(['/deliveries']);
+    void this.navCtrl.navigateRoot('/deliveries');
   }
 
-  getMarkerOptions(stop: DeliveryMapStopViewModel): google.maps.MarkerOptions {
+  navigateToStop(stop: DeliveryMapStopViewModel | null): void {
+    if (!stop) return;
+    this.openMapsNavigation(stop.lat, stop.lng, stop.address);
+  }
+
+  private openMapsNavigation(
+    destLat: number | null,
+    destLng: number | null,
+    destAddress: string
+  ): void {
+    const destination = typeof destLat === 'number' && typeof destLng === 'number'
+      ? `${destLat},${destLng}`
+      : encodeURIComponent(destAddress);
+
+    if (!navigator.geolocation) {
+      // No geolocation — open Maps with destination only
+      window.open(`https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving`, '_system');
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        // Use real GPS as origin so Maps starts from the actual device location
+        const origin = `${pos.coords.latitude},${pos.coords.longitude}`;
+        window.open(
+          `https://www.google.com/maps/dir/${origin}/${destination}`,
+          '_system'
+        );
+      },
+      () => {
+        // Permission denied or timeout — fall back to destination-only
+        window.open(`https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving`, '_system');
+      },
+      { enableHighAccuracy: true, timeout: 6000, maximumAge: 30000 }
+    );
+  }
+
+  getAdvancedMarkerOptions(stop: DeliveryMapStopViewModel): google.maps.marker.AdvancedMarkerElementOptions {
     const isActive = stop.id === this.activeStopId;
     const isDelivered = stop.status === 'delivered';
     const fill = isActive ? '#163c34' : isDelivered ? '#6e9f84' : '#d08c49';
     const stroke = isActive ? '#dff3eb' : '#ffffff';
-    const scale = isActive ? 1.08 : 0.94;
+
+    const pin = document.createElement('div');
+    pin.innerHTML = this.buildMarkerSvg(stop.routeOrder, fill, stroke, isDelivered);
+    pin.style.cursor = 'pointer';
 
     return {
       title: `${stop.routeOrder}. ${stop.customerName}`,
       zIndex: isActive ? 30 : isDelivered ? 10 : 20,
-      icon: {
-        url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(this.buildMarkerSvg(stop.routeOrder, fill, stroke, isDelivered))}`,
-        scaledSize: new google.maps.Size(48 * scale, 58 * scale),
-        anchor: new google.maps.Point(24 * scale, 54 * scale),
-      },
+      content: pin.firstElementChild as HTMLElement,
     };
   }
 
@@ -263,27 +321,6 @@ export class DeliveryMapPage {
     this.map.fitBounds(bounds, 72);
   }
 
-  private buildRouteStats(stops: DeliveryMapStopViewModel[]): RouteStatsViewModel {
-    const totalStops = stops.length;
-    const completedStops = stops.filter((stop) => stop.status === 'delivered').length;
-    const pendingStops = stops.filter((stop) => stop.status === 'assigned').length;
-    const routePath = stops
-      .filter((stop) => typeof stop.lat === 'number' && typeof stop.lng === 'number')
-      .map((stop) => ({
-        lat: stop.lat as number,
-        lng: stop.lng as number,
-      }));
-    const totalDistanceKm = calculateRouteDistance(routePath);
-
-    return {
-      totalStops,
-      completedStops,
-      pendingStops,
-      totalDistanceKm,
-      estimatedEtaMinutes: estimateRouteEtaMinutes(totalDistanceKm, pendingStops),
-    };
-  }
-
   private getInitialActiveStopId(): string {
     return (
       this.stops.find((stop) => stop.status === 'in-progress')?.id ??
@@ -294,17 +331,22 @@ export class DeliveryMapPage {
   }
 
   private getRouteLoadErrorMessage(error: unknown): string {
-    const message = error instanceof Error ? error.message : '';
+    const message = error instanceof Error ? error.message : String(error ?? '');
+    const lower = message.toLowerCase();
 
-    if (message.toLowerCase().includes('google maps api did not become ready')) {
-      return 'Google Maps is not available for this API key. Enable the Maps JavaScript API and billing in Google Cloud, then reload the page.';
+    if (lower.includes('failed to load google maps') || lower.includes('err_blocked') || lower.includes('blocked')) {
+      return 'Google Maps is blocked by an ad blocker or browser extension. Disable it for this page and reload.';
     }
 
-    if (message.toLowerCase().includes('api key is missing')) {
+    if (lower.includes('google maps api did not become ready')) {
+      return 'Google Maps took too long to load. Check your internet connection and retry.';
+    }
+
+    if (lower.includes('api key is missing')) {
       return 'Google Maps API key is missing from the environment configuration.';
     }
 
-    return 'Unable to load today’s route right now.';
+    return 'Unable to load route right now. Check your connection and retry.';
   }
 
   private buildMarkerSvg(

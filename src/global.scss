@@ -36,6 +36,10 @@
 :root {
   --app-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --ion-font-family: var(--app-font-family);
+
+  /* Tab bar dimensions — referenced by action-bar and page-shell */
+  --main-tab-bar-height: 68px;
+  --main-tab-bar-bottom: max(var(--app-safe-area-bottom, 0px), 10px);
   --app-native-status-bar-height: 0px;
   --app-safe-area-top: max(env(safe-area-inset-top, 0px), var(--app-native-status-bar-height));
   --app-safe-area-right: env(safe-area-inset-right, 0px);

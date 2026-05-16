@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { NavController } from '@ionic/angular';
 import { IonContent, IonIcon, IonRefresher, IonRefresherContent, IonSpinner } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -14,6 +14,7 @@ import {
   playSkipForwardOutline,
   refreshOutline,
   statsChartOutline,
+  timeOutline,
 } from 'ionicons/icons';
 import { AuthService } from 'src/app/services/auth.service';
 import { OrderService, buildStaticDeliveryOrdersQuery } from 'src/app/services/order.service';
@@ -27,7 +28,7 @@ import { formatOrderItemsPreview } from 'src/app/utils/delivery-view.util';
   templateUrl: './dashboard.page.html',
   styleUrls: ['./dashboard.page.scss'],
   standalone: true,
-  imports: [IonContent, IonIcon, IonRefresher, IonRefresherContent, IonSpinner, CommonModule, RouterLink],
+  imports: [IonContent, IonIcon, IonRefresher, IonRefresherContent, IonSpinner, CommonModule],
 })
 export class DashboardPage implements OnInit {
   orders: DeliveryOrder[] = [];
@@ -36,7 +37,8 @@ export class DashboardPage implements OnInit {
 
   constructor(
     private readonly authService: AuthService,
-    private readonly orderService: OrderService
+    private readonly orderService: OrderService,
+    private readonly navCtrl: NavController
   ) {
     addIcons({
       arrowForwardOutline,
@@ -140,6 +142,16 @@ export class DashboardPage implements OnInit {
     });
   }
 
+  goToDeliveries(): void {
+    void this.navCtrl.navigateRoot('/deliveries', { animated: true });
+  }
+
+  goToNextStop(): void {
+    if (this.nextDelivery) {
+      void this.navCtrl.navigateForward(['/delivery', this.nextDelivery.id]);
+    }
+  }
+
   loadOrders(): void {
     this.loading = true;
     this.errorMessage = '';
@@ -162,6 +174,6 @@ export class DashboardPage implements OnInit {
 
   private isPending(order: DeliveryOrder): boolean {
     const s = (order.deliveryStatus ?? order.status ?? '').toUpperCase();
-    return ['PENDING', 'ASSIGNED', 'OUT_FOR_DELIVERY', ''].includes(s);
+    return ['PENDING', 'ASSIGNED', 'IN_PROGRESS', 'IN-PROGRESS', 'OUT_FOR_DELIVERY', ''].includes(s);
   }
 }

@@ -1,16 +1,20 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { NavController } from '@ionic/angular';
 import { IonButton, IonContent, IonIcon, IonRefresher, IonRefresherContent, IonSpinner } from '@ionic/angular/standalone';
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
 import { addIcons } from 'ionicons';
 import {
   arrowBackOutline,
+  checkmarkCircleOutline,
   closeCircleOutline,
+  flashOutline,
   funnelOutline,
   locationOutline,
   refreshOutline,
   searchOutline,
+  wifiOutline,
 } from 'ionicons/icons';
 import { DeliveryCardComponent } from 'src/app/components/delivery-card/delivery-card.component';
 import { EmptyStateComponent } from 'src/app/components/empty-state/empty-state.component';
@@ -23,8 +27,10 @@ import { OrderService, buildStaticDeliveryOrdersQuery } from 'src/app/services/o
 import { getApiErrorMessage } from 'src/app/utils/api-contract.util';
 import { formatLocalISODate } from 'src/app/utils/date.util';
 import { DeliveryStopViewModel, mapOrderToDeliveryStopViewModel } from 'src/app/utils/delivery-view.util';
+import { calculateRouteDistance, enrichStopsWithETA, estimateRouteEtaMinutes, formatDistance, formatEta, getDriverLocation, optimizeStopsFromLocation } from 'src/app/utils/route-calc.util';
+import { CHANDANAGAR_CENTER, LatLngLiteral } from 'src/app/utils/mock-coordinates.util';
 
-type FilterKey = 'all' | 'pending' | 'delivered' | 'cancelled' | 'skipped';
+type FilterKey = 'all' | 'assigned' | 'delivered' | 'cancelled' | 'skipped';
 
 @Component({
   selector: 'app-delivery-list',
@@ -40,7 +46,6 @@ type FilterKey = 'all' | 'pending' | 'delivered' | 'cancelled' | 'skipped';
     IonSpinner,
     CommonModule,
     FormsModule,
-    RouterLink,
     DeliveryCardComponent,
     EmptyStateComponent,
     PageShellComponent,
@@ -49,12 +54,22 @@ type FilterKey = 'all' | 'pending' | 'delivered' | 'cancelled' | 'skipped';
     TopHeaderComponent,
   ],
 })
-export class DeliveryListPage {
+export class DeliveryListPage implements OnInit, OnDestroy {
   searchTerm = '';
   selectedFilter: FilterKey = 'all';
   deliveries: DeliveryStopViewModel[] = [];
   loading = true;
   errorMessage = '';
+  routeOptimized = false;
+  routeDistanceLabel = '';
+  routeEtaLabel = '';
+  isOffline = false;
+  usingCachedData = false;
+  cachedAtLabel = '';
+
+  private driverLocation: LatLngLiteral = CHANDANAGAR_CENTER;
+  private onlineListener = () => { this.isOffline = false; };
+  private offlineListener = () => { this.isOffline = true; };
 
   readonly filterOptions: { key: FilterKey; label: string }[] = [
     { key: 'all', label: 'All' },
@@ -65,21 +80,39 @@ export class DeliveryListPage {
   ];
 
   constructor(
-    private readonly router: Router,
+    private readonly navCtrl: NavController,
     private readonly orderService: OrderService
   ) {
     addIcons({
       arrowBackOutline,
+      checkmarkCircleOutline,
       closeCircleOutline,
+      flashOutline,
       funnelOutline,
       locationOutline,
       refreshOutline,
       searchOutline,
+      wifiOutline,
     });
+  }
+
+  ngOnInit(): void {
+    this.isOffline = !navigator.onLine;
+    window.addEventListener('online', this.onlineListener);
+    window.addEventListener('offline', this.offlineListener);
+  }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('online', this.onlineListener);
+    window.removeEventListener('offline', this.offlineListener);
   }
 
   ionViewDidEnter(): void {
     this.loadOrders();
+  }
+
+  get allDone(): boolean {
+    return !this.loading && this.totalStops > 0 && this.pendingCount === 0;
   }
 
   get todayLabel(): string {
@@ -97,28 +130,32 @@ export class DeliveryListPage {
   get filteredDeliveries(): DeliveryStopViewModel[] {
     const query = this.searchTerm.trim().toLowerCase();
 
-    return this.deliveries.filter((stop) => {
-      const matchesSearch =
-        !query ||
-        [stop.customerName, stop.customerCode, stop.address, stop.landmark]
-          .join(' ')
-          .toLowerCase()
-          .includes(query);
+    return this.deliveries
+      .filter((stop) => {
+        const matchesSearch =
+          !query ||
+          [stop.customerName, stop.customerCode, stop.address, stop.landmark]
+            .join(' ')
+            .toLowerCase()
+            .includes(query);
 
-      const matchesFilter =
-        this.selectedFilter === 'all' ||
-        (this.selectedFilter === 'pending' && (stop.status === 'pending' || stop.status === 'in-progress')) ||
-        (this.selectedFilter === 'delivered' && stop.status === 'delivered') ||
-        (this.selectedFilter === 'cancelled' && stop.status === 'cancelled') ||
-        (this.selectedFilter === 'skipped' && stop.status === 'skipped');
+        const matchesFilter =
+          this.selectedFilter === 'all' ||
+          (this.selectedFilter === 'assigned' &&
+            (stop.status === 'assigned' || stop.status === 'pending' || stop.status === 'in-progress')) ||
+          (this.selectedFilter === 'delivered' && stop.status === 'delivered') ||
+          (this.selectedFilter === 'cancelled' && stop.status === 'cancelled') ||
+          (this.selectedFilter === 'skipped' && stop.status === 'skipped');
 
-      return matchesSearch && matchesFilter;
-    });
+        return matchesSearch && matchesFilter;
+      })
+      .sort((a, b) => a.routeOrder - b.routeOrder); // always respect optimized order
   }
 
   get activeStops(): DeliveryStopViewModel[] {
     return this.filteredDeliveries.filter(
-      (stop) => stop.status === 'pending' || stop.status === 'in-progress'
+      (stop) =>
+        stop.status === 'assigned' || stop.status === 'pending' || stop.status === 'in-progress'
     );
   }
 
@@ -128,6 +165,25 @@ export class DeliveryListPage {
 
   get remainingActiveStops(): DeliveryStopViewModel[] {
     return this.activeStops.slice(1);
+  }
+
+  get deliveredStops(): DeliveryStopViewModel[] {
+    return this.filteredDeliveries.filter((stop) => stop.status === 'delivered');
+  }
+
+  /** All resolved stops (for the count badge — not search-filtered, intentional). */
+  get resolvedCount(): number {
+    return this.deliveries.filter(
+      (stop) =>
+        stop.status === 'delivered' ||
+        stop.status === 'cancelled' ||
+        stop.status === 'skipped' ||
+        stop.status === 'failed'
+    ).length;
+  }
+
+  isAssignedStop(stop: DeliveryStopViewModel): boolean {
+    return stop.status === 'assigned' || stop.status === 'pending' || stop.status === 'in-progress';
   }
 
   get completedStops(): DeliveryStopViewModel[] {
@@ -151,7 +207,7 @@ export class DeliveryListPage {
   }
 
   get pendingCount(): number {
-    return this.deliveries.filter((stop) => stop.status === 'pending' || stop.status === 'in-progress').length;
+    return this.deliveries.filter((stop) => this.isAssignedStop(stop)).length;
   }
 
   get completedCount(): number {
@@ -194,6 +250,7 @@ export class DeliveryListPage {
 
   selectFilter(filter: FilterKey): void {
     this.selectedFilter = filter;
+    void Haptics.impact({ style: ImpactStyle.Light }).catch(() => {});
   }
 
   clearSearch(): void {
@@ -201,44 +258,132 @@ export class DeliveryListPage {
   }
 
   openDelivery(stopId: string): void {
-    void this.router.navigate(['/delivery', stopId]);
+    void this.navCtrl.navigateForward(['/delivery', stopId]);
+  }
+
+  goToMap(): void {
+    void this.navCtrl.navigateRoot('/map', { animated: false });
   }
 
   handleRefresh(event: CustomEvent): void {
-    this.orderService.getOrders(buildStaticDeliveryOrdersQuery(this.todayDate)).subscribe({
-      next: (orders) => {
-        this.setDeliveriesFromOrders(orders);
+    Promise.all([
+      new Promise<DeliveryOrder[]>((resolve, reject) => {
+        this.orderService.getOrders(buildStaticDeliveryOrdersQuery(this.todayDate)).subscribe({
+          next: resolve,
+          error: reject,
+        });
+      }),
+      getDriverLocation(),
+    ])
+      .then(([orders, location]) => {
+        this.driverLocation = location;
+        this.setDeliveriesFromOrders(orders, location);
         this.errorMessage = '';
         (event.target as HTMLIonRefresherElement).complete();
-      },
-      error: (err: unknown) => {
+      })
+      .catch((err: unknown) => {
         this.errorMessage = getApiErrorMessage(err, 'Unable to refresh deliveries.');
         (event.target as HTMLIonRefresherElement).complete();
-      },
-    });
+      });
   }
 
   loadOrders(): void {
     this.loading = true;
     this.errorMessage = '';
     this.deliveries = [];
+    this.routeOptimized = false;
+    this.usingCachedData = false;
 
-    this.orderService.getOrders(buildStaticDeliveryOrdersQuery(this.todayDate)).subscribe({
-      next: (orders) => {
-        this.setDeliveriesFromOrders(orders);
+    Promise.all([
+      new Promise<DeliveryOrder[]>((resolve, reject) => {
+        this.orderService.getOrders(buildStaticDeliveryOrdersQuery(this.todayDate)).subscribe({
+          next: (orders) => {
+            this.saveOrdersToCache(orders);
+            resolve(orders);
+          },
+          error: reject,
+        });
+      }),
+      getDriverLocation(),
+    ])
+      .then(([orders, location]) => {
+        this.driverLocation = location;
+        this.setDeliveriesFromOrders(orders, location);
         this.loading = false;
-      },
-      error: (err: unknown) => {
-        this.errorMessage = getApiErrorMessage(
-          err,
-          'Unable to load deliveries right now. Check your connection and try again.'
-        );
-        this.loading = false;
-      },
-    });
+      })
+      .catch((err: unknown) => {
+        // API failed — try local cache before showing error
+        const cached = this.loadOrdersFromCache();
+        if (cached) {
+          getDriverLocation().then((location) => {
+            this.driverLocation = location;
+            this.setDeliveriesFromOrders(cached.orders, location);
+            this.usingCachedData = true;
+            this.cachedAtLabel = cached.cachedAt;
+            this.loading = false;
+          });
+        } else {
+          this.errorMessage = getApiErrorMessage(
+            err,
+            'Unable to load deliveries right now. Check your connection and try again.',
+          );
+          this.loading = false;
+        }
+      });
   }
 
-  private setDeliveriesFromOrders(orders: DeliveryOrder[]): void {
-    this.deliveries = orders.map((order, idx) => mapOrderToDeliveryStopViewModel(order, idx));
+  private setDeliveriesFromOrders(
+    orders: DeliveryOrder[],
+    location: LatLngLiteral = this.driverLocation,
+  ): void {
+    const raw = orders.map((order, idx) => mapOrderToDeliveryStopViewModel(order, idx));
+    const optimized = optimizeStopsFromLocation(raw, location);
+    const enriched = enrichStopsWithETA(optimized, location);
+
+    const pending = enriched.filter(
+      (s) => !['delivered', 'cancelled', 'skipped', 'failed'].includes(s.status),
+    );
+    const coords = pending.map((s) => ({
+      lat: s.lat ?? location.lat,
+      lng: s.lng ?? location.lng,
+    }));
+    const distKm = calculateRouteDistance(coords);
+    const etaMin = estimateRouteEtaMinutes(distKm, pending.length);
+
+    this.deliveries = enriched;
+    this.routeDistanceLabel = formatDistance(distKm);
+    this.routeEtaLabel = formatEta(etaMin);
+    this.routeOptimized = pending.length > 1;
+  }
+
+  // ── Offline cache ──────────────────────────────────────────────────────
+
+  private get cacheKey(): string {
+    return `aroha.delivery.orders.${this.todayDate}`;
+  }
+
+  private saveOrdersToCache(orders: DeliveryOrder[]): void {
+    try {
+      const now = new Date();
+      const h = now.getHours();
+      const m = now.getMinutes().toString().padStart(2, '0');
+      const label = `${h % 12 || 12}:${m} ${h >= 12 ? 'PM' : 'AM'}`;
+      localStorage.setItem(this.cacheKey, JSON.stringify({ orders, cachedAt: label }));
+      // Remove yesterday's cache
+      const yesterday = new Date(now);
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yd = yesterday.toISOString().slice(0, 10);
+      localStorage.removeItem(`aroha.delivery.orders.${yd}`);
+    } catch {}
+  }
+
+  private loadOrdersFromCache(): { orders: DeliveryOrder[]; cachedAt: string } | null {
+    try {
+      const raw = localStorage.getItem(this.cacheKey);
+      if (!raw) return null;
+      return JSON.parse(raw) as { orders: DeliveryOrder[]; cachedAt: string };
+    } catch {
+      return null;
+    }
   }
 }

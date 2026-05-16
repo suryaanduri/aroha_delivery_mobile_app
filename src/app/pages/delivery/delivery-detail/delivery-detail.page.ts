@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
+import { NavController } from '@ionic/angular';
 import { IonButton, IonContent, IonIcon, IonSpinner } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -16,10 +17,9 @@ import {
   timeOutline,
 } from 'ionicons/icons';
 import { DeliveryProductItem } from 'src/app/components/product-list/product-list.component';
-import { ActionBarComponent } from 'src/app/components/action-bar/action-bar.component';
 import { PageShellComponent } from 'src/app/components/page-shell/page-shell.component';
 import { SectionHeaderComponent } from 'src/app/components/section-header/section-header.component';
-import { DeliveryStatus, ScheduleType, StatusChipComponent } from 'src/app/components/status-chip/status-chip.component';
+import { DeliveryStatus, StatusChipComponent } from 'src/app/components/status-chip/status-chip.component';
 import { SurfaceCardComponent } from 'src/app/components/surface-card/surface-card.component';
 import { TopHeaderComponent } from 'src/app/components/top-header/top-header.component';
 import { DeliveryOrder } from 'src/app/models/order.model';
@@ -30,7 +30,7 @@ import {
   isTerminalStatus,
   mapOrderItems,
   normalizeDeliveryStatus,
-  normalizeScheduleType,
+
   formatProductCountLabel,
 } from 'src/app/utils/delivery-view.util';
 
@@ -45,7 +45,6 @@ import {
     IonIcon,
     IonSpinner,
     CommonModule,
-    ActionBarComponent,
     PageShellComponent,
     SectionHeaderComponent,
     StatusChipComponent,
@@ -64,7 +63,6 @@ export class DeliveryDetailPage implements OnInit {
   address = '';
   landmark = '';
   routeLabel = '';
-  scheduleType: ScheduleType = 'daily';
   status: DeliveryStatus = 'pending';
   timeSlot = '';
   sequenceLabel = '';
@@ -77,7 +75,7 @@ export class DeliveryDetailPage implements OnInit {
 
   constructor(
     private readonly route: ActivatedRoute,
-    private readonly router: Router,
+    private readonly navCtrl: NavController,
     private readonly orderService: OrderService
   ) {
     this.stopId = this.route.snapshot.paramMap.get('id') ?? '';
@@ -111,12 +109,35 @@ export class DeliveryDetailPage implements OnInit {
     window.open(`tel:${tel}`, '_system');
   }
 
+  navigateToAddress(): void {
+    if (!this.address) return;
+    const destination = encodeURIComponent(
+      this.landmark ? `${this.address}, ${this.landmark}` : this.address
+    );
+
+    if (!navigator.geolocation) {
+      window.open(`https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving`, '_system');
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const origin = `${pos.coords.latitude},${pos.coords.longitude}`;
+        window.open(`https://www.google.com/maps/dir/${origin}/${destination}`, '_system');
+      },
+      () => {
+        window.open(`https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving`, '_system');
+      },
+      { enableHighAccuracy: true, timeout: 6000, maximumAge: 30000 }
+    );
+  }
+
   get canUpdateStop(): boolean {
     return this.status === 'assigned';
   }
 
   goToComplete(action: 'DELIVERED' | 'CANCELLED' | 'SKIPPED' = 'DELIVERED'): void {
-    void this.router.navigate(['/delivery', this.stopId, 'complete'], { queryParams: { action } });
+    void this.navCtrl.navigateForward(['/delivery', this.stopId, 'complete'], { queryParams: { action } });
   }
 
   private loadOrder(): void {
@@ -150,7 +171,6 @@ export class DeliveryDetailPage implements OnInit {
     this.address = order.address ?? '';
     this.landmark = order.landmark ?? '';
     this.routeLabel = order.routeLabel ?? `Stop ${String(sequence).padStart(2, '0')}`;
-    this.scheduleType = normalizeScheduleType(order.scheduleType);
     this.status = normalizeDeliveryStatus(deliveryStatusValue);
     this.deliveryStatusLabel = formatDeliveryStatusLabel(deliveryStatusValue);
     this.timeSlot = order.timeSlot ?? '';

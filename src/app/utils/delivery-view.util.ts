@@ -1,5 +1,5 @@
 import { DeliveryProductItem } from '../components/product-list/product-list.component';
-import { DeliveryStatus, ScheduleType } from '../components/status-chip/status-chip.component';
+import { DeliveryStatus } from '../components/status-chip/status-chip.component';
 import { DeliveryOrder } from '../models/order.model';
 
 export interface DeliveryStopViewModel {
@@ -9,7 +9,6 @@ export interface DeliveryStopViewModel {
   address: string;
   landmark: string;
   routeLabel: string;
-  scheduleType: ScheduleType;
   status: DeliveryStatus;
   deliveryStatusLabel: string;
   orderStatusLabel: string;
@@ -17,6 +16,15 @@ export interface DeliveryStopViewModel {
   timeSlot: string;
   sequenceLabel: string;
   items: DeliveryProductItem[];
+  /** Coordinates used for route optimization */
+  lat: number | null;
+  lng: number | null;
+  /** Optimized position in today's route; updated after optimization runs */
+  routeOrder: number;
+  /** Estimated arrival time label, e.g. "10:45 AM" — set after ETA enrichment */
+  estimatedArrival?: string;
+  /** Distance from the previous stop (or driver's location for stop #1), e.g. "~2.1 km" */
+  distanceFromPrev?: string;
 }
 
 export function normalizeDeliveryStatus(status?: string): DeliveryStatus {
@@ -35,16 +43,6 @@ export function normalizeDeliveryStatus(status?: string): DeliveryStatus {
 export function isTerminalStatus(status?: string): boolean {
   const s = normalizeDeliveryStatus(status);
   return s === 'delivered' || s === 'cancelled' || s === 'failed' || s === 'skipped';
-}
-
-export function normalizeScheduleType(type?: string): ScheduleType {
-  if (!type) return 'daily';
-
-  const normalized = type.toLowerCase().replace(/_/g, '-');
-  if (normalized.includes('alternate')) return 'alternate-day';
-  if (normalized === 'onetime' || (normalized.includes('one') && normalized.includes('time'))) return 'one-time';
-
-  return 'daily';
 }
 
 export function formatDeliveryStatusLabel(status?: string): string {
@@ -75,7 +73,6 @@ export function mapOrderToDeliveryStopViewModel(order: DeliveryOrder, index = 0)
     address: order.address?.trim() || 'Location not available',
     landmark: order.landmark ?? '',
     routeLabel: order.routeLabel ?? `Stop ${String(sequence).padStart(2, '0')}`,
-    scheduleType: normalizeScheduleType(order.scheduleType),
     status: normalizeDeliveryStatus(deliveryStatusValue),
     deliveryStatusLabel: formatDeliveryStatusLabel(deliveryStatusValue),
     orderStatusLabel: formatDeliveryStatusLabel(order.orderStatus),
@@ -83,6 +80,9 @@ export function mapOrderToDeliveryStopViewModel(order: DeliveryOrder, index = 0)
     timeSlot: order.timeSlot ?? '',
     sequenceLabel: `#${String(sequence).padStart(2, '0')}`,
     items,
+    lat: typeof order.location?.lat === 'number' ? order.location.lat : null,
+    lng: typeof order.location?.lng === 'number' ? order.location.lng : null,
+    routeOrder: sequence,
   };
 }
 

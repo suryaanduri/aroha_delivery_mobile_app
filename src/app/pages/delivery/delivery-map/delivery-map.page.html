@@ -38,12 +38,12 @@
               <strong>{{ routeStats.totalStops }}</strong>
             </div>
             <div class="route-chip">
-              <span class="route-chip__label">Distance</span>
-              <strong>{{ routeDistanceLabel }}</strong>
+              <span class="route-chip__label">Est. Distance</span>
+              <strong>~{{ routeDistanceLabel }}</strong>
             </div>
-            <div class="route-chip">
-              <span class="route-chip__label">ETA</span>
-              <strong>{{ routeEtaLabel }}</strong>
+            <div class="route-chip route-chip--optimized" *ngIf="routeOptimized">
+              <span class="route-chip__label">Route</span>
+              <strong>Optimized</strong>
             </div>
           </div>
 
@@ -53,6 +53,7 @@
               [options]="mapOptions"
               (mapReady)="onMapReady($event)"
             >
+              <!-- Optimized route polyline -->
               <map-polyline
                 *ngIf="routePath.length > 1"
                 [path]="routePath"
@@ -64,12 +65,19 @@
                 }"
               ></map-polyline>
 
-              <map-marker
+              <!-- Driver's current location marker -->
+              <map-advanced-marker
+                [position]="{ lat: driverLocation.lat, lng: driverLocation.lng }"
+                [options]="driverMarkerOptions"
+              ></map-advanced-marker>
+
+              <!-- Delivery stop markers -->
+              <map-advanced-marker
                 *ngFor="let stop of mappableStops; trackBy: trackByStopId"
                 [position]="{ lat: stop.lat!, lng: stop.lng! }"
-                [options]="getMarkerOptions(stop)"
+                [options]="getAdvancedMarkerOptions(stop)"
                 (mapClick)="selectStop(stop.id)"
-              ></map-marker>
+              ></map-advanced-marker>
             </google-map>
           </ng-container>
 
@@ -154,10 +162,15 @@
             </div>
 
             <div class="active-stop-card__actions">
-              <ion-button fill="outline" (click)="goToList()">View List</ion-button>
+              <!-- Navigate: opens Google Maps with turn-by-turn directions -->
+              <ion-button fill="outline" (click)="navigateToStop(activeStop)">
+                <ion-icon slot="start" name="navigate-outline"></ion-icon>
+                Navigate
+              </ion-button>
+              <!-- Open Stop: goes to delivery detail inside the app -->
               <ion-button *ngIf="canOpenActiveStop" fill="solid" (click)="openActiveStop()">
                 Open Stop
-                <ion-icon slot="end" name="navigate-outline"></ion-icon>
+                <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
               </ion-button>
             </div>
           </article>

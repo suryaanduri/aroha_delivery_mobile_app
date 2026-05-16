@@ -3,9 +3,13 @@ import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
+interface UploadApiResponse {
+  data?: { url?: string; logo?: string };
+  url?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class UploadService {
-  // Uses the same admin media upload endpoint — delivery persons have auth tokens
   private readonly uploadUrl = `${environment.apiBaseUrl}/api/admin/media/upload`;
 
   constructor(private readonly http: HttpClient) {}
@@ -16,17 +20,22 @@ export class UploadService {
     const extension = mimeType.split('/')[1] ?? 'jpg';
     formData.append('file', blob, `proof_${Date.now()}.${extension}`);
 
-    return this.http.post<any>(this.uploadUrl, formData).pipe(
+    return this.http.post<UploadApiResponse>(this.uploadUrl, formData).pipe(
       map((res) => {
         const url = res?.data?.url ?? res?.url ?? res?.data?.logo ?? '';
         if (!url) throw new Error('Upload failed: no URL returned');
-        return url as string;
+        return url;
       })
     );
   }
 
   private base64ToBlob(base64: string, mimeType: string): Blob {
-    const byteString = atob(base64);
+    let byteString: string;
+    try {
+      byteString = atob(base64);
+    } catch {
+      throw new Error('Invalid image data — cannot upload.');
+    }
     const ab = new ArrayBuffer(byteString.length);
     const ia = new Uint8Array(ab);
     for (let i = 0; i < byteString.length; i++) {

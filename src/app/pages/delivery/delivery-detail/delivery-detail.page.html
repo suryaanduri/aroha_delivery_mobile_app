@@ -1,5 +1,5 @@
 <ion-content [fullscreen]="true">
-  <app-page-shell [withActionBar]="!isTerminal" [maxWidth]="460">
+  <app-page-shell [maxWidth]="460">
 
     <app-surface-card *ngIf="loading" tone="muted">
       <div class="center-loader">
@@ -32,13 +32,12 @@
           <app-status-chip header-end [kind]="'status'" [value]="status"></app-status-chip>
         </app-top-header>
 
-        <div class="detail-hero__meta">
-          <div class="detail-hero__pill" *ngIf="sequenceLabel || timeSlot">
+        <div class="detail-hero__meta" *ngIf="sequenceLabel || timeSlot">
+          <div class="detail-hero__pill">
             <span *ngIf="sequenceLabel">{{ sequenceLabel }}</span>
             <span *ngIf="sequenceLabel && timeSlot">•</span>
             <span *ngIf="timeSlot">{{ timeSlot }}</span>
           </div>
-          <app-status-chip [kind]="'schedule'" [value]="scheduleType"></app-status-chip>
         </div>
       </app-surface-card>
 
@@ -55,28 +54,46 @@
                 <span>{{ routeLabel }}</span>
               </p>
             </div>
-            <!-- Call button — only shown when phone is available -->
-            <button
-              *ngIf="customerPhone"
-              class="overview-card__call"
-              type="button"
-              aria-label="Call customer"
-              (click)="callCustomer()"
-            >
-              <ion-icon name="call-outline" aria-hidden="true"></ion-icon>
-            </button>
-          </div>
-
-          <div class="overview-card__location">
-            <ion-icon name="location-outline" aria-hidden="true"></ion-icon>
-            <div class="overview-card__location-copy">
-              <p>{{ address }}</p>
-              <span *ngIf="landmark">{{ landmark }}</span>
+            <!-- Action buttons -->
+            <div class="overview-card__actions">
+              <!-- Navigate: opens Google Maps with directions to this address -->
+              <button
+                class="overview-card__action-btn overview-card__action-btn--nav"
+                type="button"
+                aria-label="Navigate to address"
+                (click)="navigateToAddress()"
+              >
+                <ion-icon name="navigate-outline" aria-hidden="true"></ion-icon>
+              </button>
+              <!-- Call: only shown when phone is available -->
+              <button
+                *ngIf="customerPhone"
+                class="overview-card__action-btn overview-card__action-btn--call"
+                type="button"
+                aria-label="Call customer"
+                (click)="callCustomer()"
+              >
+                <ion-icon name="call-outline" aria-hidden="true"></ion-icon>
+              </button>
             </div>
           </div>
 
+          <!-- Tappable address row — also opens navigation -->
+          <button
+            class="overview-card__location overview-card__location--tappable"
+            type="button"
+            aria-label="Open navigation to this address"
+            (click)="navigateToAddress()"
+          >
+            <ion-icon name="navigate-outline" aria-hidden="true"></ion-icon>
+            <div class="overview-card__location-copy">
+              <p>{{ address }}</p>
+              <span *ngIf="landmark">{{ landmark }}</span>
+              <small class="overview-card__location-hint">Tap to navigate</small>
+            </div>
+          </button>
+
           <div class="overview-card__chips">
-            <app-status-chip [kind]="'schedule'" [value]="scheduleType"></app-status-chip>
             <app-status-chip [kind]="'status'" [value]="status"></app-status-chip>
           </div>
 
@@ -114,6 +131,23 @@
         </div>
       </app-surface-card>
 
+      <!-- Action card — inline, not floating; hidden once order is terminal -->
+      <app-surface-card *ngIf="!isTerminal" class="detail-section action-card" aria-label="Delivery actions">
+        <app-section-header title="Actions" [meta]="deliveryStatusLabel"></app-section-header>
+        <div class="action-card__row">
+          <button class="action-card__btn action-card__btn--secondary" type="button" (click)="goToComplete('CANCELLED')">
+            Cancel
+          </button>
+          <button class="action-card__btn action-card__btn--secondary" type="button" (click)="goToComplete('SKIPPED')">
+            Skip
+          </button>
+          <ion-button class="action-card__btn--primary" fill="solid" expand="block" (click)="goToComplete('DELIVERED')">
+            <ion-icon slot="start" name="checkmark-circle-outline"></ion-icon>
+            Mark Delivered
+          </ion-button>
+        </div>
+      </app-surface-card>
+
       <!-- Delivery notes (from order) -->
       <app-surface-card *ngIf="deliveryNotes.length" tone="warning" class="detail-section">
         <app-section-header title="Delivery Instructions"></app-section-header>
@@ -145,15 +179,3 @@
     </ng-container>
   </app-page-shell>
 </ion-content>
-
-<!-- Action bar — hidden once order is in terminal state -->
-<app-action-bar *ngIf="!loading && !errorMessage && !isTerminal" label="Current stop" [value]="customerName">
-  <div class="detail-action-bar__actions">
-    <button class="detail-action-bar__secondary" type="button" (click)="goToComplete('CANCELLED')">Cancel</button>
-    <button class="detail-action-bar__secondary" type="button" (click)="goToComplete('SKIPPED')">Skip</button>
-    <ion-button class="detail-action-bar__primary" fill="solid" (click)="goToComplete('DELIVERED')">
-      <ion-icon slot="start" name="checkmark-circle-outline"></ion-icon>
-      Mark Delivered
-    </ion-button>
-  </div>
-</app-action-bar>

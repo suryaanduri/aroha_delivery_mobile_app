@@ -60,4 +60,13 @@ ion-content{--background:var(--dashboard-bg,#f4f2ec);font-family:var(--app-font-
 .next-card__name{display:block;font-size:.98rem;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .next-card__address{margin:.22rem 0 0;font-size:.82rem;line-height:1.35;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .next-card__items{margin:.18rem 0 0;font-size:.76rem;color:var(--dp);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.next-card__btn{flex-shrink:0;width:2.6rem;height:2.6rem;border-radius:1rem;background:var(--dp);color:#fff;display:grid;place-items:center;text-decoration:none;box-shadow:0 6px 14px rgba(25,61,52,.18)}
+.next-card__btn{flex-shrink:0;width:2.75rem;height:2.75rem;border-radius:1rem;background:var(--dp);color:#fff;display:grid;place-items:center;text-decoration:none;box-shadow:0 6px 14px rgba(25,61,52,.18)}
+
+@media (max-width: 320px) {
+  .dashboard-page{padding-left:.85rem;padding-right:.85rem}
+  .route-card{padding:.85rem}
+  .route-card h2{font-size:2.6rem}
+  .route-card__progress-pill{min-width:4.2rem}
+  .hero__title{font-size:1.55rem}
+  .next-card{padding:.8rem}
+}

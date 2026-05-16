@@ -4,7 +4,7 @@ import { IonButton, IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { arrowForwardOutline, cubeOutline, locationOutline, navigateOutline, timeOutline } from 'ionicons/icons';
 import { DeliveryProductItem } from '../product-list/product-list.component';
-import { DeliveryStatus, ScheduleType, StatusChipComponent } from '../status-chip/status-chip.component';
+import { DeliveryStatus, StatusChipComponent } from '../status-chip/status-chip.component';
 import { DeliveryStopViewModel } from 'src/app/utils/delivery-view.util';
 
 @Component({
@@ -27,7 +27,6 @@ export class DeliveryCardComponent {
   @Input() address = '';
   @Input() landmark = '';
   @Input() routeLabel = '';
-  @Input() scheduleType: ScheduleType = 'daily';
   @Input() status: DeliveryStatus = 'pending';
   @Input() deliveryStatusLabel = '';
   @Input() orderStatusLabel = '';
@@ -52,7 +51,6 @@ export class DeliveryCardComponent {
       address: this.stop?.address ?? this.address,
       landmark: this.stop?.landmark ?? this.landmark,
       routeLabel: this.stop?.routeLabel ?? this.routeLabel,
-      scheduleType: this.stop?.scheduleType ?? this.scheduleType,
       status: this.stop?.status ?? this.status,
       deliveryStatusLabel: this.stop?.deliveryStatusLabel ?? this.deliveryStatusLabel,
       orderStatusLabel: this.stop?.orderStatusLabel ?? this.orderStatusLabel,
@@ -60,6 +58,9 @@ export class DeliveryCardComponent {
       timeSlot: this.stop?.timeSlot ?? this.timeSlot,
       sequenceLabel: this.stop?.sequenceLabel ?? this.sequenceLabel,
       items: this.stop?.items ?? this.items,
+      lat: this.stop?.lat ?? null,
+      lng: this.stop?.lng ?? null,
+      routeOrder: this.stop?.routeOrder ?? 0,
     };
   }
 

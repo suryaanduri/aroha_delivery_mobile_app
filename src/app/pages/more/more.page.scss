@@ -182,3 +182,51 @@ ion-content {
     font-size: 0.78rem;
   }
 }
+
+@media (max-width: 320px) {
+  .more-profile {
+    padding: 12px;
+    gap: 8px;
+    border-radius: 18px;
+  }
+
+  .more-profile__avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+  }
+
+  .more-profile__avatar ion-icon {
+    font-size: 1.6rem;
+  }
+
+  .more-profile__copy h2 {
+    font-size: 0.96rem;
+  }
+
+  .more-profile__copy span {
+    font-size: 0.78rem;
+  }
+
+  .more-menu__item {
+    min-height: 62px;
+    padding: 10px 12px;
+    gap: 10px;
+    border-radius: 18px;
+  }
+
+  .more-menu__icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+  }
+
+  .more-menu__copy strong {
+    font-size: 0.86rem;
+  }
+
+  .more-menu__copy small {
+    font-size: 0.74rem;
+    margin-top: 3px;
+  }
+}

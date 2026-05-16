@@ -27,7 +27,6 @@
             <strong>{{ customerName }}</strong>
             <span>{{ itemSummary }}</span>
           </div>
-          <app-status-chip [kind]="'schedule'" [value]="scheduleType"></app-status-chip>
         </div>
         <app-customer-info-card
           [name]="customerName"
@@ -185,3 +184,21 @@
   [duration]="2400"
   (didDismiss)="toastOpen = false"
 ></ion-toast>
+
+<!-- Confetti celebration overlay — shown only on successful DELIVERED submission -->
+<div class="confetti-overlay" *ngIf="showConfetti" aria-hidden="true">
+  <!-- Success badge in the centre -->
+  <div class="confetti-badge">
+    <ion-icon name="checkmark-circle-outline"></ion-icon>
+    <span>Delivered!</span>
+  </div>
+
+  <!-- Falling pieces -->
+  <div
+    class="confetti-piece"
+    [class.confetti-piece--circle]="p.shape === 'circle'"
+    [class.confetti-piece--ribbon]="p.shape === 'ribbon'"
+    [ngStyle]="p.style"
+    *ngFor="let p of confettiPieces"
+  ></div>
+</div>

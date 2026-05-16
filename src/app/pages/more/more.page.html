@@ -14,7 +14,7 @@
     </section>
 
     <section class="more-menu" aria-label="More menu">
-      <a class="more-menu__item" routerLink="/profile">
+      <button type="button" class="more-menu__item" (click)="goToProfile()">
         <span class="more-menu__icon">
           <ion-icon name="person-circle-outline" aria-hidden="true"></ion-icon>
         </span>
@@ -23,9 +23,9 @@
           <small>Account and delivery partner details</small>
         </span>
         <ion-icon class="more-menu__chevron" name="chevron-forward-outline" aria-hidden="true"></ion-icon>
-      </a>
+      </button>
 
-      <a class="more-menu__item" routerLink="/day-summary">
+      <button type="button" class="more-menu__item" (click)="goToDaySummary()">
         <span class="more-menu__icon">
           <ion-icon name="stats-chart-outline" aria-hidden="true"></ion-icon>
         </span>
@@ -34,7 +34,7 @@
           <small>Review completed stops and route progress</small>
         </span>
         <ion-icon class="more-menu__chevron" name="chevron-forward-outline" aria-hidden="true"></ion-icon>
-      </a>
+      </button>
 
       <button class="more-menu__item more-menu__item--danger" type="button" (click)="confirmLogout()">
         <span class="more-menu__icon">

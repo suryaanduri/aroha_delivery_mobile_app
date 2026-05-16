@@ -1,45 +1,20 @@
-<ion-tabs class="main-layout">
-  <ion-tab-bar slot="bottom" class="main-tabs">
-    <ion-tab-button
-      tab="dashboard"
-      routerLink="/dashboard"
-      routerLinkActive="tab-selected"
-      [routerLinkActiveOptions]="{ exact: true }"
-    >
-      <ion-icon name="home-outline" aria-hidden="true"></ion-icon>
-      <ion-label>Home</ion-label>
-    </ion-tab-button>
+<div class="app-shell">
+  <!-- All pages render here via Angular routing -->
+  <ion-router-outlet class="app-outlet"></ion-router-outlet>
 
-    <ion-tab-button
-      tab="deliveries"
-      routerLink="/deliveries"
-      routerLinkActive="tab-selected"
-      [routerLinkActiveOptions]="{ exact: true }"
-      [class.tab-selected]="isListTabActive"
+  <!-- Custom bottom tab bar — no IonTabs, plain HTML -->
+  <nav class="app-tab-bar" role="tablist" aria-label="Main navigation">
+    <button
+      *ngFor="let tab of tabs"
+      type="button"
+      class="app-tab"
+      [class.app-tab--active]="isActive(tab.path)"
+      [attr.aria-selected]="isActive(tab.path)"
+      role="tab"
+      (click)="navigate(tab.path)"
     >
-      <ion-icon name="list-outline" aria-hidden="true"></ion-icon>
-      <ion-label>List View</ion-label>
-    </ion-tab-button>
-
-    <ion-tab-button
-      tab="map"
-      routerLink="/map"
-      routerLinkActive="tab-selected"
-      [routerLinkActiveOptions]="{ exact: true }"
-    >
-      <ion-icon name="map-outline" aria-hidden="true"></ion-icon>
-      <ion-label>Map View</ion-label>
-    </ion-tab-button>
-
-    <ion-tab-button
-      tab="more"
-      routerLink="/more"
-      routerLinkActive="tab-selected"
-      [class.tab-selected]="isMoreTabActive"
-      [routerLinkActiveOptions]="{ exact: true }"
-    >
-      <ion-icon name="ellipsis-horizontal-outline" aria-hidden="true"></ion-icon>
-      <ion-label>More</ion-label>
-    </ion-tab-button>
-  </ion-tab-bar>
-</ion-tabs>
+      <ion-icon [name]="tab.icon" aria-hidden="true"></ion-icon>
+      <span class="app-tab__label">{{ tab.label }}</span>
+    </button>
+  </nav>
+</div>

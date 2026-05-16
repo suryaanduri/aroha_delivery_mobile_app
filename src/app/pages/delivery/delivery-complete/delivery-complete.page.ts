@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
+import { NavController } from '@ionic/angular';
 import { IonButton, IonContent, IonIcon, IonSpinner, IonToast } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -18,21 +19,27 @@ import {
   trashOutline,
 } from 'ionicons/icons';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
 import { CustomerInfoCardComponent } from 'src/app/components/customer-info-card/customer-info-card.component';
 import { DeliveryProductItem, ProductListComponent } from 'src/app/components/product-list/product-list.component';
 import { ActionBarComponent } from 'src/app/components/action-bar/action-bar.component';
 import { PageShellComponent } from 'src/app/components/page-shell/page-shell.component';
 import { SectionHeaderComponent } from 'src/app/components/section-header/section-header.component';
-import { DeliveryStatus, ScheduleType, StatusChipComponent } from 'src/app/components/status-chip/status-chip.component';
+import { DeliveryStatus, StatusChipComponent } from 'src/app/components/status-chip/status-chip.component';
 import { SurfaceCardComponent } from 'src/app/components/surface-card/surface-card.component';
 import { TopHeaderComponent } from 'src/app/components/top-header/top-header.component';
 import { DeliveryOrder } from 'src/app/models/order.model';
 import { OrderService, UpdateOrderStatusPayload } from 'src/app/services/order.service';
 import { UploadService } from 'src/app/services/upload.service';
 import { getApiErrorMessage } from 'src/app/utils/api-contract.util';
-import { mapOrderItems, normalizeDeliveryStatus, normalizeScheduleType, formatProductCountLabel } from 'src/app/utils/delivery-view.util';
+import { mapOrderItems, normalizeDeliveryStatus, formatProductCountLabel } from 'src/app/utils/delivery-view.util';
 
 type CompletionAction = 'DELIVERED' | 'CANCELLED' | 'SKIPPED';
+
+interface ConfettiPiece {
+  style: { [key: string]: string };
+  shape: 'square' | 'circle' | 'ribbon';
+}
 
 @Component({
   selector: 'app-delivery-complete',
@@ -81,20 +88,23 @@ export class DeliveryCompletePage implements OnInit {
   routeLabel = '';
   address = '';
   landmark = '';
-  scheduleType: ScheduleType = 'daily';
   currentStatus: DeliveryStatus = 'pending';
   timeSlot = '';
   items: DeliveryProductItem[] = [];
 
   readonly reasons = ['Customer unavailable', 'Address locked', 'Payment issue', 'Route blocked', 'Product damaged'];
 
+  showConfetti = false;
+  readonly confettiPieces: ConfettiPiece[] = [];
+
   constructor(
     private readonly route: ActivatedRoute,
-    private readonly router: Router,
+    private readonly navCtrl: NavController,
     private readonly orderService: OrderService,
     private readonly uploadService: UploadService
   ) {
     this.stopId = this.route.snapshot.paramMap.get('id') ?? '';
+    this.confettiPieces = this.buildConfettiPieces(55);
     addIcons({
       alertCircleOutline,
       arrowBackOutline,
@@ -172,6 +182,7 @@ export class DeliveryCompletePage implements OnInit {
 
       if (!image.base64String) return;
 
+      void Haptics.impact({ style: ImpactStyle.Medium }).catch(() => {});
       this.capturedPhotoBase64 = image.base64String;
       this.capturedPhotoMime = image.format === 'png' ? 'image/png' : 'image/jpeg';
       this.uploadedPhotoUrl = null;
@@ -203,7 +214,7 @@ export class DeliveryCompletePage implements OnInit {
   }
 
   cancel(): void {
-    void this.router.navigate(['/delivery', this.stopId]);
+    void this.navCtrl.navigateBack(['/delivery', this.stopId]);
   }
 
   confirm(): void {
@@ -226,11 +237,21 @@ export class DeliveryCompletePage implements OnInit {
       this.orderService.updateOrderStatus(this.stopId, payload).subscribe({
         next: (res) => {
           this.submitting = false;
-          this.showToast(res.message || 'Status updated successfully.', 'success');
-          setTimeout(() => void this.router.navigate(['/deliveries']), 900);
+          void Haptics.notification({ type: NotificationType.Success }).catch(() => {});
+
+          if (this.selectedAction === 'DELIVERED') {
+            // Show confetti celebration, then navigate after animation completes
+            this.showConfetti = true;
+            this.showToast(res.message || 'Delivered successfully! 🎉', 'success');
+            setTimeout(() => void this.navCtrl.navigateRoot('/deliveries'), 2600);
+          } else {
+            this.showToast(res.message || 'Status updated successfully.', 'success');
+            setTimeout(() => void this.navCtrl.navigateRoot('/deliveries'), 900);
+          }
         },
         error: (err: unknown) => {
           this.submitting = false;
+          void Haptics.notification({ type: NotificationType.Error }).catch(() => {});
           this.showToast(getApiErrorMessage(err, 'Unable to update status.'), 'danger');
         },
       });
@@ -275,7 +296,6 @@ export class DeliveryCompletePage implements OnInit {
     this.routeLabel = order.routeLabel ?? '';
     this.address = order.address?.trim() || 'Location not available';
     this.landmark = order.landmark ?? '';
-    this.scheduleType = normalizeScheduleType(order.scheduleType);
     this.currentStatus = normalizeDeliveryStatus(order.deliveryStatus ?? order.status);
     this.timeSlot = order.timeSlot ?? '';
     this.items = mapOrderItems(order);
@@ -285,5 +305,45 @@ export class DeliveryCompletePage implements OnInit {
     this.toastMessage = message;
     this.toastColor = color;
     this.toastOpen = true;
+  }
+
+  private buildConfettiPieces(count: number): ConfettiPiece[] {
+    // Brand + celebration palette
+    const colors = [
+      '#193d34', // brand green
+      '#45866f', // brand teal
+      '#d08c49', // warm amber
+      '#e87040', // coral
+      '#4a7fd4', // blue
+      '#e45678', // pink
+      '#78c86e', // lime
+      '#f0c070', // gold
+    ];
+    const shapes: ConfettiPiece['shape'][] = ['square', 'circle', 'ribbon'];
+
+    return Array.from({ length: count }, (_, i) => {
+      // Deterministic spread across the screen
+      const leftPct = ((i * 1.9) % 100).toFixed(1);
+      const delayMs  = (i % 14) * 70;           // 0–910 ms stagger
+      const durationMs = 1100 + (i % 7) * 180;  // 1.1s – 2.2s
+      const sizePx = 7 + (i % 5) * 2;           // 7, 9, 11, 13, 15 px
+      const swayPx = (i % 2 === 0 ? 1 : -1) * (10 + (i % 6) * 8); // alternating drift
+      const color = colors[i % colors.length];
+      const shape = shapes[i % shapes.length];
+
+      return {
+        shape,
+        style: {
+          left:                  `${leftPct}%`,
+          'background-color':    color,
+          width:                 shape === 'ribbon' ? `${Math.round(sizePx * 0.45)}px` : `${sizePx}px`,
+          height:                shape === 'ribbon' ? `${sizePx * 3}px` : `${sizePx}px`,
+          'border-radius':       shape === 'circle' ? '50%' : shape === 'ribbon' ? '3px' : '2px',
+          'animation-delay':     `${delayMs}ms`,
+          'animation-duration':  `${durationMs}ms`,
+          '--sway':              `${swayPx}px`,
+        },
+      };
+    });
   }
 }

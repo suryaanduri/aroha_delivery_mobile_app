@@ -12,13 +12,12 @@
 }
 
 .page-shell--with-action-bar {
-  /*
-   * 88px  = action-bar content (label + buttons)
-   * 16px  = internal top padding inside the bar
-   * 16px  = bottom padding inside the bar (before safe-area)
-   * safe-area = device notch/home bar
-   */
-  padding-bottom: calc(var(--app-safe-area-bottom) + 120px);
+  /* tab bar + gap + action bar (~120px) + breathing room */
+  padding-bottom: calc(
+    var(--main-tab-bar-height, 68px) +
+    var(--main-tab-bar-bottom, 10px) +
+    140px
+  );
 }
 
 .page-shell__backdrop {
