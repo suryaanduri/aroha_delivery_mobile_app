@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { map, Observable } from 'rxjs';
+import { map, Observable, of, catchError } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { DeliveryOrder } from '../models/order.model';
+import { DeliveryOrder, ReturnableBottle } from '../models/order.model';
 import { ApiSuccessResponse } from '../models/auth.model';
 import { unwrapApiSuccess } from '../utils/api-contract.util';
 import { CHANDANAGAR_CENTER } from '../utils/mock-coordinates.util';
+import { monthStartDate, monthEndDate } from '../utils/date.util';
 
 interface OrdersDataPayload {
   orders?: DeliveryOrder[];
@@ -18,6 +19,8 @@ interface OrderDataPayload {
 export interface GetOrdersFilters {
   status?: string;
   deliveryDate?: string;
+  startDate?: string;
+  endDate?: string;
   lat?: number;
   lng?: number;
   page?: number;
@@ -67,6 +70,12 @@ export class OrderService {
     if (filters?.deliveryDate) {
       params = params.set('deliveryDate', filters.deliveryDate);
     }
+    if (filters?.startDate) {
+      params = params.set('startDate', filters.startDate);
+    }
+    if (filters?.endDate) {
+      params = params.set('endDate', filters.endDate);
+    }
     if (typeof filters?.lat === 'number') {
       params = params.set('lat', String(filters.lat));
     }
@@ -97,6 +106,15 @@ export class OrderService {
         return data ?? { date: date ?? '', total: 0, delivered: 0, cancelled: 0, skipped: 0, pending: 0, completionRate: 0 };
       })
     );
+  }
+
+  getOrdersForMonth(year: number, month: number): Observable<DeliveryOrder[]> {
+    return this.getOrders({
+      startDate: monthStartDate(year, month),
+      endDate: monthEndDate(year, month),
+      page: 1,
+      limit: 200,
+    }).pipe(catchError(() => of([])));
   }
 
   updateOrderStatus(orderId: string, payload: UpdateOrderStatusPayload): Observable<ApiSuccessResponse> {
@@ -167,5 +185,28 @@ export class OrderService {
 
   private looksLikeOrder(value: unknown): value is DeliveryOrder {
     return !!value && typeof value === 'object' && ('id' in value || 'orderId' in value);
+  }
+
+  // ─── Returnables ───────────────────────────────────────────────────────────
+
+  /** Get PENDING bottle returns for a specific customer. */
+  getPendingReturnables(userId: string): Observable<ReturnableBottle[]> {
+    const params = new HttpParams().set('userId', userId);
+    return this.http
+      .get<unknown>(`${environment.apiBaseUrl}/api/order/delivery/returnables`, { params })
+      .pipe(
+        map((res: any) => res?.data ?? []),
+        catchError(() => of([])),
+      );
+  }
+
+  /** Delivery person records bottle collection outcome at the customer's door. */
+  updateReturnable(
+    id: string,
+    payload: { status: 'RETURNED' | 'DAMAGED' | 'LOST'; notes?: string },
+  ): Observable<ReturnableBottle> {
+    return this.http
+      .put<unknown>(`${environment.apiBaseUrl}/api/order/delivery/returnables/${id}`, payload)
+      .pipe(map((res: any) => res?.data));
   }
 }

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { NavController } from '@ionic/angular';
-import { IonButton, IonContent, IonIcon, IonSpinner } from '@ionic/angular/standalone';
+import { IonButton, IonContent, IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
   alertCircleOutline,
@@ -43,7 +43,7 @@ import {
     IonButton,
     IonContent,
     IonIcon,
-    IonSpinner,
+    
     CommonModule,
     PageShellComponent,
     SectionHeaderComponent,
@@ -110,26 +110,7 @@ export class DeliveryDetailPage implements OnInit {
   }
 
   navigateToAddress(): void {
-    if (!this.address) return;
-    const destination = encodeURIComponent(
-      this.landmark ? `${this.address}, ${this.landmark}` : this.address
-    );
-
-    if (!navigator.geolocation) {
-      window.open(`https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving`, '_system');
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const origin = `${pos.coords.latitude},${pos.coords.longitude}`;
-        window.open(`https://www.google.com/maps/dir/${origin}/${destination}`, '_system');
-      },
-      () => {
-        window.open(`https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving`, '_system');
-      },
-      { enableHighAccuracy: true, timeout: 6000, maximumAge: 30000 }
-    );
+    void this.navCtrl.navigateForward(['/delivery', this.stopId, 'navigate']);
   }
 
   get canUpdateStop(): boolean {

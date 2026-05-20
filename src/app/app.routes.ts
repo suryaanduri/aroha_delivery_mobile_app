@@ -48,6 +48,10 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/delivery/delivery-complete/delivery-complete.page').then((m) => m.DeliveryCompletePage),
       },
       {
+        path: 'delivery/:id/navigate',
+        loadComponent: () => import('./pages/delivery/delivery-navigate/delivery-navigate.page').then((m) => m.DeliveryNavigatePage),
+      },
+      {
         path: 'day-summary',
         loadComponent: () => import('./pages/summary/day-summary/day-summary.page').then((m) => m.DaySummaryPage),
       },

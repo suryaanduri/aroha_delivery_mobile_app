@@ -14,10 +14,26 @@
       </div>
     </app-top-header>
 
-    <app-surface-card *ngIf="loading" class="route-state route-state--loading" aria-label="Loading route">
-      <ion-spinner name="crescent"></ion-spinner>
-      <p>Loading route map and today&apos;s stops...</p>
-    </app-surface-card>
+    <!-- Skeleton loader -->
+    <ng-container *ngIf="loading" aria-busy="true">
+      <div class="skel-card" style="margin-bottom:12px">
+        <div class="skel-row" style="gap:12px;margin-bottom:10px">
+          <span class="skel skel--h48 skel--r12" style="flex:1"></span>
+          <span class="skel skel--h48 skel--r12" style="flex:1"></span>
+          <span class="skel skel--h48 skel--r12" style="flex:1"></span>
+        </div>
+        <span class="skel skel--h200 skel--full skel--r16"></span>
+      </div>
+      <div class="skel-card" *ngFor="let _ of [1,2]" style="margin-bottom:10px">
+        <div class="skel-row">
+          <span class="skel skel--circle" style="width:36px;height:36px;flex-shrink:0"></span>
+          <div class="skel-stack" style="flex:1">
+            <span class="skel skel--h16 skel--w66 skel--r4"></span>
+            <span class="skel skel--h12 skel--w50 skel--r4"></span>
+          </div>
+        </div>
+      </div>
+    </ng-container>
 
     <app-surface-card *ngIf="!loading && errorMessage" class="route-state route-state--error" tone="danger">
       <p>{{ errorMessage }}</p>

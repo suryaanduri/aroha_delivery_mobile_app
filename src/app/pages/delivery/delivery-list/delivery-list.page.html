@@ -19,10 +19,34 @@
       </ion-button>
     </app-top-header>
 
-    <app-surface-card *ngIf="loading" class="loading-state" aria-label="Loading" tone="muted">
-      <ion-spinner name="crescent"></ion-spinner>
-      <p>Loading deliveries...</p>
-    </app-surface-card>
+    <!-- Skeleton loader -->
+    <ng-container *ngIf="loading" aria-label="Loading" aria-busy="true">
+      <div class="skel-card" style="margin-bottom:12px">
+        <div class="skel-row" style="justify-content:space-between">
+          <span class="skel skel--h32 skel--r12" style="width:60px"></span>
+          <span class="skel skel--h32 skel--r12" style="width:60px"></span>
+          <span class="skel skel--h32 skel--r12" style="width:60px"></span>
+        </div>
+        <span class="skel skel--h40 skel--full skel--r12" style="margin-top:10px"></span>
+        <div class="skel-row" style="margin-top:10px;gap:8px">
+          <span class="skel skel--h28 skel--r999" style="width:70px"></span>
+          <span class="skel skel--h28 skel--r999" style="width:80px"></span>
+          <span class="skel skel--h28 skel--r999" style="width:65px"></span>
+          <span class="skel skel--h28 skel--r999" style="width:75px"></span>
+        </div>
+      </div>
+      <div class="skel-card" *ngFor="let _ of [1,2,3,4]" style="margin-bottom:10px">
+        <div class="skel-row">
+          <span class="skel skel--circle" style="width:40px;height:40px;flex-shrink:0"></span>
+          <div class="skel-stack" style="flex:1">
+            <span class="skel skel--h16 skel--w75 skel--r4"></span>
+            <span class="skel skel--h12 skel--w50 skel--r4"></span>
+            <span class="skel skel--h12 skel--w33 skel--r4"></span>
+          </div>
+          <span class="skel skel--h32 skel--r12" style="width:72px;flex-shrink:0"></span>
+        </div>
+      </div>
+    </ng-container>
 
     <app-surface-card *ngIf="!loading && errorMessage" class="error-state" aria-label="Error" tone="danger">
       <p>{{ errorMessage }}</p>

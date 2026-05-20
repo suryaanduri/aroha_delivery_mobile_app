@@ -74,10 +74,6 @@ export class AuthService {
     this.initialized = true;
 
     const storage = this.getStorage();
-    if (!storage) {
-      return;
-    }
-
     const raw = storage.getItem(AuthService.STORAGE_KEY);
     if (!raw) {
       return;
@@ -193,10 +189,10 @@ export class AuthService {
   }
 
   private persistSession(): void {
-    const storage = this.getStorage();
-    if (!storage || !this.currentUser) {
+    if (!this.currentUser) {
       return;
     }
+    const storage = this.getStorage();
 
     const session: StoredAuthSession = {
       user: this.currentUser,
@@ -217,8 +213,7 @@ export class AuthService {
   }
 
   private clearPersistedSession(): void {
-    const storage = this.getStorage();
-    storage?.removeItem(AuthService.STORAGE_KEY);
+    this.getStorage().removeItem(AuthService.STORAGE_KEY);
   }
 
   private mapLoginResponse(res: unknown): LoginResponse {
@@ -342,7 +337,7 @@ export class AuthService {
     return { id, email, username, name, role };
   }
 
-  private getStorage(): Storage | null {
-    return typeof localStorage === 'undefined' ? null : localStorage;
+  private getStorage(): Storage {
+    return localStorage;
   }
 }

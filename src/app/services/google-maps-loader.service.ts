@@ -14,10 +14,6 @@ export class GoogleMapsLoaderService {
   private readonly loadTimeoutMs = 8000;
 
   load(): Promise<void> {
-    if (typeof window === 'undefined') {
-      return Promise.resolve();
-    }
-
     if (window.google?.maps) {
       return Promise.resolve();
     }
@@ -69,7 +65,8 @@ export class GoogleMapsLoaderService {
       const check = () => {
         if (
           window.google?.maps?.Map &&
-          window.google?.maps?.Polyline
+          window.google?.maps?.Polyline &&
+          window.google?.maps?.geometry?.spherical
         ) {
           resolve();
           return;

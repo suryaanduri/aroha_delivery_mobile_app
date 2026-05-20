@@ -57,7 +57,9 @@ export function formatDeliveryStatusLabel(status?: string): string {
 export function mapOrderItems(order: DeliveryOrder): DeliveryProductItem[] {
   return (order.items ?? []).map((item) => ({
     name: item.name ?? 'Item',
-    quantity: [item.quantity, item.unit].filter(Boolean).join(' '),
+    quantity: item.unit
+      ? `${item.quantity} × ${item.unit}`
+      : String(item.quantity || ''),
   }));
 }
 

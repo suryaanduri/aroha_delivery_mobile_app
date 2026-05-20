@@ -6,7 +6,7 @@ import {
   IonButton,
   IonContent,
   IonIcon,
-  IonSpinner,
+  
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -46,7 +46,7 @@ import { buildRouteStats, formatDistance, formatEta, getDriverLocation, orderSto
     IonButton,
     IonContent,
     IonIcon,
-    IonSpinner,
+    
     EmptyStateComponent,
     PageShellComponent,
     SectionHeaderComponent,
@@ -240,39 +240,7 @@ export class DeliveryMapPage {
 
   navigateToStop(stop: DeliveryMapStopViewModel | null): void {
     if (!stop) return;
-    this.openMapsNavigation(stop.lat, stop.lng, stop.address);
-  }
-
-  private openMapsNavigation(
-    destLat: number | null,
-    destLng: number | null,
-    destAddress: string
-  ): void {
-    const destination = typeof destLat === 'number' && typeof destLng === 'number'
-      ? `${destLat},${destLng}`
-      : encodeURIComponent(destAddress);
-
-    if (!navigator.geolocation) {
-      // No geolocation — open Maps with destination only
-      window.open(`https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving`, '_system');
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        // Use real GPS as origin so Maps starts from the actual device location
-        const origin = `${pos.coords.latitude},${pos.coords.longitude}`;
-        window.open(
-          `https://www.google.com/maps/dir/${origin}/${destination}`,
-          '_system'
-        );
-      },
-      () => {
-        // Permission denied or timeout — fall back to destination-only
-        window.open(`https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving`, '_system');
-      },
-      { enableHighAccuracy: true, timeout: 6000, maximumAge: 30000 }
-    );
+    void this.navCtrl.navigateForward(['/delivery', stop.id, 'navigate']);
   }
 
   getAdvancedMarkerOptions(stop: DeliveryMapStopViewModel): google.maps.marker.AdvancedMarkerElementOptions {

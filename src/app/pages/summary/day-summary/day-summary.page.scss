@@ -49,6 +49,44 @@ ion-content{--background:var(--app-color-secondary);font-family:var(--app-font-f
 .error-text{margin:0;font-size:.9rem;color:var(--app-color-tertiary)}
 .retry-btn{margin-top:.6rem;display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1rem;border-radius:.8rem;border:0;background:var(--app-color-primary);color:#fff;font:inherit;font-weight:700;cursor:pointer}
 
+/* ── Monthly Performance card ───────────────────────── */
+.monthly-perf{display:grid;gap:.9rem}
+.monthly-perf__header{display:grid;gap:.2rem}
+.monthly-perf__title-row{display:flex;align-items:center;gap:.4rem}
+.monthly-perf__icon{font-size:1rem;color:var(--app-color-primary)}
+.monthly-perf__title{margin:0;font-size:.8rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--app-color-text-muted)}
+.monthly-perf__date-label{margin:0;font-size:.78rem;color:var(--app-color-text-muted)}
+
+.month-skel{display:grid;gap:.75rem}
+.month-skel__card{background:rgba(255,255,255,.7);border-radius:14px;padding:12px;border:1px solid rgba(var(--app-color-primary-rgb),.07)}
+
+.month-block{display:grid;gap:.6rem}
+.month-block--muted{opacity:.75}
+.month-block__label-row{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.month-block__badge{padding:.28rem .6rem;border-radius:999px;font-size:.65rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:rgba(var(--app-color-primary-rgb),.09);color:var(--app-color-primary)}
+.month-block__badge--active{background:var(--app-color-primary);color:#fff}
+.month-block__name{flex:1;font-size:.8rem;font-weight:500;color:var(--app-color-text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.month-block__rate{font-size:.76rem;font-weight:700;color:var(--app-color-primary);letter-spacing:-.01em}
+.month-block__rate--muted{color:var(--app-color-text-muted)}
+
+.month-bar{height:.45rem;border-radius:999px;background:rgba(var(--app-color-primary-rgb),.08);overflow:hidden}
+.month-bar--muted .month-bar__fill{background:rgba(var(--app-color-primary-rgb),.4)}
+.month-bar__fill{display:block;height:100%;border-radius:999px;background:var(--app-color-primary);transition:width .5s ease}
+
+.month-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem}
+.month-stat{display:flex;flex-direction:column;align-items:center;gap:.2rem;padding:.5rem .25rem;border-radius:.85rem;background:rgba(var(--app-color-primary-rgb),.04);min-width:0}
+.month-stat strong{font-size:1.15rem;font-weight:800;line-height:1;letter-spacing:-.04em;color:var(--app-color-text)}
+.month-stat small{font-size:.6rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--app-color-text-muted)}
+.month-stat--delivered{background:rgba(42,122,94,.09);} .month-stat--delivered strong{color:#1e6b52}
+.month-stat--cancelled{background:rgba(192,57,43,.07);} .month-stat--cancelled strong{color:#943028}
+.month-stat--skipped{background:rgba(74,90,138,.07);} .month-stat--skipped strong{color:#3d4f7a}
+
+.month-divider{height:1px;background:rgba(var(--app-color-primary-rgb),.07);margin:.15rem 0}
+
+/* Today section label */
+.today-label{display:flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--app-color-text-muted);padding:0 .25rem}
+.today-label ion-icon{font-size:.9rem}
+
 /* 360px – compact but still 5 across */
 @media (max-width: 360px) {
   .stat-grid {

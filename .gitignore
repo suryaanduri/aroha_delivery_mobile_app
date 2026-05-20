@@ -29,6 +29,10 @@ log.txt
 /tmp
 /out-tsc
 /bazel-out
+*.tsbuildinfo
+
+# Capacitor-generated app icons (regenerated from resources/ by cap assets generate)
+/icons
 
 # Node
 /node_modules

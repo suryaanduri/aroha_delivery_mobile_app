@@ -2,11 +2,9 @@
   display: block;
   height: 100%;
 
-  --tab-h: 68px;
-  --tab-bottom: max(var(--app-safe-area-bottom, 0px), 10px);
-  --tab-w: min(calc(100% - 28px), 430px);
-  --tab-bg: rgba(255, 255, 255, 0.94);
-  --tab-border: rgba(20, 38, 33, 0.08);
+  --tab-h: 60px;
+  --tab-bg: rgba(255, 255, 255, 0.97);
+  --tab-border: rgba(20, 38, 33, 0.07);
   --tab-active: var(--app-color-primary, #1a4d3f);
   --tab-muted: var(--app-color-text-muted, #607068);
 }
@@ -23,29 +21,26 @@
   overflow: hidden;
 }
 
-/* ── Custom tab bar ───────────────────────────────────── */
+/* ── Bottom navigation bar ────────────────────────────────────
+   Anchored to screen edge. Safe area padding-bottom fills the
+   home-indicator zone so no gap is ever visible below the bar.
+   ─────────────────────────────────────────────────────────── */
 .app-tab-bar {
   position: fixed;
-  left: 50%;
-  bottom: var(--tab-bottom);
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: 1000;
-  width: var(--tab-w);
-  height: var(--tab-h);
   display: flex;
-  align-items: stretch;
-  padding: 6px;
+  align-items: flex-start;
   gap: 4px;
-  border: 1px solid var(--tab-border);
-  border-radius: 22px;
-  background:
-    radial-gradient(circle at top right, rgba(202, 163, 106, 0.1), transparent 9rem),
-    var(--tab-bg);
-  box-shadow:
-    0 20px 42px rgba(14, 32, 26, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  /* 8px top padding + tabs + safe-area flush to screen edge */
+  padding: 8px 8px env(safe-area-inset-bottom, 0px);
+  background: var(--tab-bg);
+  border-top: 1px solid var(--tab-border);
+  box-shadow: 0 -2px 20px rgba(14, 32, 26, 0.07);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
 }
 
 .app-tab {
@@ -54,77 +49,72 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 4px;
   min-width: 0;
-  padding: 4px 2px;
+  height: var(--tab-h);
+  padding: 4px 4px;
   border: 0;
-  border-radius: 16px;
+  border-radius: 14px;
   background: transparent;
   color: var(--tab-muted);
   font-family: var(--app-font-family);
   cursor: pointer;
-  transition: background-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
+  transition: background-color 0.18s ease, color 0.18s ease;
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .app-tab ion-icon {
-  font-size: 1.18rem;
+  font-size: 1.3rem;
   flex-shrink: 0;
-  transition: transform 0.16s ease;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .app-tab__label {
-  font-size: 0.64rem;
-  font-weight: 800;
-  letter-spacing: -0.01em;
+  font-size: 0.68rem;
+  font-weight: 700;
   line-height: 1;
+  letter-spacing: -0.01em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
 }
 
-/* Active state */
+/* ── Active tab ── */
 .app-tab--active {
-  background: linear-gradient(180deg, rgba(26, 77, 63, 0.97), rgba(22, 64, 52, 0.94));
+  background: linear-gradient(180deg, rgba(26, 77, 63, 0.96), rgba(22, 64, 52, 0.92));
   color: #ffffff;
-  box-shadow: 0 10px 22px rgba(26, 77, 63, 0.22);
 }
 
 .app-tab--active ion-icon {
-  transform: scale(1.08);
+  transform: scale(1.12) translateY(-1px);
 }
 
-/* Add safe-area padding to page content so it doesn't hide behind the tab bar */
+/* ── Ion content: scroll clears the full tab bar ── */
 :host ::ng-deep ion-content {
-  --padding-bottom: calc(var(--tab-h) + var(--tab-bottom) + 14px);
+  --padding-bottom: calc(var(--tab-h) + env(safe-area-inset-bottom, 0px) + 16px);
 }
 
+/* ── Small phones ── */
 @media (max-width: 360px) {
-  :host {
-    --tab-w: min(calc(100% - 20px), 430px);
-  }
-
   .app-tab {
-    padding: 4px 1px;
-    gap: 2px;
+    gap: 3px;
+    padding: 4px 2px;
   }
 
   .app-tab__label {
-    font-size: 0.6rem;
+    font-size: 0.62rem;
+  }
+
+  .app-tab ion-icon {
+    font-size: 1.2rem;
   }
 }
 
 @media (max-width: 320px) {
   :host {
-    --tab-w: calc(100% - 16px);
-    --tab-h: 62px;
-  }
-
-  .app-tab-bar {
-    padding: 5px;
-    gap: 3px;
-    border-radius: 18px;
+    --tab-h: 54px;
   }
 
   .app-tab ion-icon {
@@ -132,6 +122,6 @@
   }
 
   .app-tab__label {
-    font-size: 0.56rem;
+    font-size: 0.58rem;
   }
 }

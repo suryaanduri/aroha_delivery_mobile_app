@@ -19,11 +19,6 @@ interface OptimizableStop {
  */
 export function getDriverLocation(): Promise<LatLngLiteral> {
   return new Promise((resolve) => {
-    if (!navigator.geolocation) {
-      resolve(CHANDANAGAR_CENTER);
-      return;
-    }
-
     navigator.geolocation.getCurrentPosition(
       (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
       () => resolve(CHANDANAGAR_CENTER),

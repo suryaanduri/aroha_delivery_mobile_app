@@ -11,19 +11,11 @@ declare global {
 }
 
 function readMetaContent(name: string): string | undefined {
-  if (typeof document === 'undefined') {
-    return undefined;
-  }
-
   const value = document.querySelector<HTMLMetaElement>(`meta[name="${name}"]`)?.content?.trim();
   return value ? value : undefined;
 }
 
 function readWindowConfig(): Partial<RuntimeEnvironmentConfig> {
-  if (typeof window === 'undefined') {
-    return {};
-  }
-
   return window.__AROHA_RUNTIME_CONFIG__ ?? {};
 }
 

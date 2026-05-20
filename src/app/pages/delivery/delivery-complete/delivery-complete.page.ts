@@ -15,8 +15,10 @@ import {
   closeOutline,
   imageOutline,
   refreshOutline,
+  returnDownBackOutline,
   timeOutline,
   trashOutline,
+  warningOutline,
 } from 'ionicons/icons';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
@@ -28,7 +30,7 @@ import { SectionHeaderComponent } from 'src/app/components/section-header/sectio
 import { DeliveryStatus, StatusChipComponent } from 'src/app/components/status-chip/status-chip.component';
 import { SurfaceCardComponent } from 'src/app/components/surface-card/surface-card.component';
 import { TopHeaderComponent } from 'src/app/components/top-header/top-header.component';
-import { DeliveryOrder } from 'src/app/models/order.model';
+import { DeliveryOrder, ReturnableBottle } from 'src/app/models/order.model';
 import { OrderService, UpdateOrderStatusPayload } from 'src/app/services/order.service';
 import { UploadService } from 'src/app/services/upload.service';
 import { getApiErrorMessage } from 'src/app/utils/api-contract.util';
@@ -92,6 +94,12 @@ export class DeliveryCompletePage implements OnInit {
   timeSlot = '';
   items: DeliveryProductItem[] = [];
 
+  // Bottle returnables
+  pendingReturnables: ReturnableBottle[] = [];
+  returnableStatuses: Record<string, 'RETURNED' | 'DAMAGED' | 'LOST' | null> = {};
+  loadingReturnables = false;
+  savingReturnable: Record<string, boolean> = {};
+
   readonly reasons = ['Customer unavailable', 'Address locked', 'Payment issue', 'Route blocked', 'Product damaged'];
 
   showConfetti = false;
@@ -115,8 +123,10 @@ export class DeliveryCompletePage implements OnInit {
       closeOutline,
       imageOutline,
       refreshOutline,
+      returnDownBackOutline,
       timeOutline,
       trashOutline,
+      warningOutline,
     });
   }
 
@@ -299,6 +309,46 @@ export class DeliveryCompletePage implements OnInit {
     this.currentStatus = normalizeDeliveryStatus(order.deliveryStatus ?? order.status);
     this.timeSlot = order.timeSlot ?? '';
     this.items = mapOrderItems(order);
+
+    // Load pending bottle returns for this customer
+    if (order.userId) {
+      this.loadReturnables(order.userId);
+    }
+  }
+
+  private loadReturnables(userId: string): void {
+    this.loadingReturnables = true;
+    this.orderService.getPendingReturnables(userId).subscribe({
+      next: (bottles) => {
+        this.pendingReturnables = bottles;
+        // Default all to RETURNED (most common case)
+        for (const b of bottles) {
+          this.returnableStatuses[b.id] = 'RETURNED';
+        }
+        this.loadingReturnables = false;
+      },
+      error: () => { this.loadingReturnables = false; },
+    });
+  }
+
+  markReturnable(bottleId: string, status: 'RETURNED' | 'DAMAGED' | 'LOST'): void {
+    this.savingReturnable[bottleId] = true;
+    this.orderService.updateReturnable(bottleId, { status }).subscribe({
+      next: () => {
+        this.pendingReturnables = this.pendingReturnables.filter(b => b.id !== bottleId);
+        delete this.returnableStatuses[bottleId];
+        delete this.savingReturnable[bottleId];
+        this.showToast(
+          status === 'RETURNED' ? 'Bottle collected ✓' :
+          status === 'DAMAGED'  ? 'Bottle recorded as damaged' : 'Bottle recorded as lost',
+          status === 'RETURNED' ? 'success' : 'danger'
+        );
+      },
+      error: () => {
+        this.savingReturnable[bottleId] = false;
+        this.showToast('Failed to update bottle status', 'danger');
+      },
+    });
   }
 
   private showToast(message: string, color: 'success' | 'danger'): void {

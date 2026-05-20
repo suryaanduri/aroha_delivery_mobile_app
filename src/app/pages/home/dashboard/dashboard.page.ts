@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavController } from '@ionic/angular';
-import { IonContent, IonIcon, IonRefresher, IonRefresherContent, IonSpinner } from '@ionic/angular/standalone';
+import { IonContent, IonIcon, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
   arrowForwardOutline,
@@ -28,7 +28,7 @@ import { formatOrderItemsPreview } from 'src/app/utils/delivery-view.util';
   templateUrl: './dashboard.page.html',
   styleUrls: ['./dashboard.page.scss'],
   standalone: true,
-  imports: [IonContent, IonIcon, IonRefresher, IonRefresherContent, IonSpinner, CommonModule],
+  imports: [IonContent, IonIcon, IonRefresher, IonRefresherContent, CommonModule],
 })
 export class DashboardPage implements OnInit {
   orders: DeliveryOrder[] = [];
@@ -156,10 +156,7 @@ export class DashboardPage implements OnInit {
     this.loading = true;
     this.errorMessage = '';
     this.orderService.getOrders(buildStaticDeliveryOrdersQuery(this.todayDate)).subscribe({
-      next: (orders) => {
-        this.orders = orders;
-        this.loading = false;
-      },
+      next: (orders) => { this.orders = orders; this.loading = false; },
       error: (err: unknown) => {
         this.errorMessage = getApiErrorMessage(err, 'Unable to load deliveries. Pull down to retry.');
         this.loading = false;

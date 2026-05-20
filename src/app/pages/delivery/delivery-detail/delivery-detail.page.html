@@ -1,12 +1,42 @@
 <ion-content [fullscreen]="true">
   <app-page-shell [maxWidth]="460">
 
-    <app-surface-card *ngIf="loading" tone="muted">
-      <div class="center-loader">
-        <ion-spinner name="crescent"></ion-spinner>
-        <p>Loading stop details…</p>
+    <!-- Skeleton loader -->
+    <ng-container *ngIf="loading" aria-busy="true">
+      <div class="skel-card" style="margin-bottom:12px">
+        <span class="skel skel--h12 skel--w33 skel--r4"></span>
+        <span class="skel skel--h28 skel--w66 skel--r4" style="margin-top:8px"></span>
+        <span class="skel skel--h16 skel--w50 skel--r4" style="margin-top:6px"></span>
       </div>
-    </app-surface-card>
+      <div class="skel-card" style="margin-bottom:12px">
+        <div class="skel-row" style="justify-content:space-between;margin-bottom:12px">
+          <div class="skel-stack" style="flex:1">
+            <span class="skel skel--h20 skel--w75 skel--r4"></span>
+            <span class="skel skel--h16 skel--w50 skel--r4"></span>
+          </div>
+          <div class="skel-row" style="gap:8px">
+            <span class="skel skel--h40 skel--r12" style="width:40px"></span>
+            <span class="skel skel--h40 skel--r12" style="width:40px"></span>
+          </div>
+        </div>
+        <span class="skel skel--h48 skel--full skel--r12"></span>
+        <div class="skel-row" style="margin-top:12px;gap:8px">
+          <span class="skel skel--h48 skel--r12" style="flex:1"></span>
+          <span class="skel skel--h48 skel--r12" style="flex:1"></span>
+          <span class="skel skel--h48 skel--r12" style="flex:1"></span>
+        </div>
+      </div>
+      <div class="skel-card">
+        <span class="skel skel--h16 skel--w33 skel--r4" style="margin-bottom:10px"></span>
+        <div class="skel-stack" style="gap:10px">
+          <div class="skel-row" *ngFor="let _ of [1,2,3]">
+            <span class="skel skel--h32 skel--r12" style="width:32px;flex-shrink:0"></span>
+            <span class="skel skel--h16 skel--w66 skel--r4"></span>
+            <span class="skel skel--h16 skel--r4" style="width:30px;margin-left:auto"></span>
+          </div>
+        </div>
+      </div>
+    </ng-container>
 
     <app-surface-card *ngIf="!loading && errorMessage" tone="danger">
       <div class="error-state">
@@ -65,9 +95,9 @@
               >
                 <ion-icon name="navigate-outline" aria-hidden="true"></ion-icon>
               </button>
-              <!-- Call: only shown when phone is available -->
+              <!-- Call: only shown when phone is available and order not yet terminal -->
               <button
-                *ngIf="customerPhone"
+                *ngIf="customerPhone && !isTerminal"
                 class="overview-card__action-btn overview-card__action-btn--call"
                 type="button"
                 aria-label="Call customer"

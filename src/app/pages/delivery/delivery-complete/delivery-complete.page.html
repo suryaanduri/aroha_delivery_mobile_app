@@ -74,6 +74,61 @@
         <app-product-list [items]="items" [layout]="'expanded'"></app-product-list>
       </app-surface-card>
 
+      <!-- Bottle Collection (only shown when customer has pending returnables) -->
+      <app-surface-card *ngIf="loadingReturnables || pendingReturnables.length > 0" class="surface-card--returnables">
+        <app-section-header
+          title="Bottle Collection"
+          subtitle="Collect bottles from this customer and record their condition."
+        ></app-section-header>
+
+        <!-- Loading -->
+        <div *ngIf="loadingReturnables" class="returnable-loading">
+          <ion-spinner name="crescent"></ion-spinner>
+          <span>Checking for bottles…</span>
+        </div>
+
+        <!-- Bottle rows -->
+        <div *ngIf="!loadingReturnables" class="returnable-list">
+          <div class="returnable-row" *ngFor="let bottle of pendingReturnables">
+            <div class="returnable-row__info">
+              <span class="returnable-row__name">
+                {{ bottle.variant?.product?.name }} — {{ bottle.variant?.variantLabel }}
+              </span>
+              <span class="returnable-row__qty">{{ bottle.quantity }} bottle(s) due</span>
+            </div>
+            <div class="returnable-row__actions">
+              <button type="button"
+                class="ret-btn ret-btn--returned"
+                [class.ret-btn--active]="returnableStatuses[bottle.id] === 'RETURNED'"
+                [disabled]="savingReturnable[bottle.id]"
+                (click)="markReturnable(bottle.id, 'RETURNED')">
+                <ion-icon name="return-down-back-outline"></ion-icon>
+                Collected
+              </button>
+              <button type="button"
+                class="ret-btn ret-btn--damaged"
+                [class.ret-btn--active]="returnableStatuses[bottle.id] === 'DAMAGED'"
+                [disabled]="savingReturnable[bottle.id]"
+                (click)="markReturnable(bottle.id, 'DAMAGED')">
+                <ion-icon name="warning-outline"></ion-icon>
+                Damaged
+              </button>
+              <button type="button"
+                class="ret-btn ret-btn--lost"
+                [class.ret-btn--active]="returnableStatuses[bottle.id] === 'LOST'"
+                [disabled]="savingReturnable[bottle.id]"
+                (click)="markReturnable(bottle.id, 'LOST')">
+                <ion-icon name="close-circle-outline"></ion-icon>
+                Lost
+              </button>
+            </div>
+          </div>
+          <p *ngIf="pendingReturnables.length === 0 && !loadingReturnables" class="returnable-done">
+            <ion-icon name="checkmark-circle-outline"></ion-icon> All bottles recorded.
+          </p>
+        </div>
+      </app-surface-card>
+
       <!-- Proof & Notes -->
       <app-surface-card>
         <app-section-header

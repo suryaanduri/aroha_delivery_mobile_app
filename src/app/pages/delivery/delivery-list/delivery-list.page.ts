@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NavController } from '@ionic/angular';
-import { IonButton, IonContent, IonIcon, IonRefresher, IonRefresherContent, IonSpinner } from '@ionic/angular/standalone';
+import { IonButton, IonContent, IonIcon, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
 import { addIcons } from 'ionicons';
 import {
@@ -43,7 +43,7 @@ type FilterKey = 'all' | 'assigned' | 'delivered' | 'cancelled' | 'skipped';
     IonIcon,
     IonRefresher,
     IonRefresherContent,
-    IonSpinner,
+    
     CommonModule,
     FormsModule,
     DeliveryCardComponent,

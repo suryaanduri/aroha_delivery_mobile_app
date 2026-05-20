@@ -15,11 +15,29 @@
         <h1 class="hero__title">{{ greeting }},<br>{{ agentName }}</h1>
       </section>
 
-      <!-- Loading -->
-      <section *ngIf="loading" class="state-card state-card--loading" aria-label="Loading">
-        <div class="state-card__icon"><ion-spinner name="crescent"></ion-spinner></div>
-        <p class="state-card__title">Loading your route</p>
-        <p class="state-card__text">Fetching today's delivery overview…</p>
+      <!-- Skeleton loader -->
+      <section *ngIf="loading" class="dash-skeleton" aria-label="Loading" aria-busy="true">
+        <div class="skel-card">
+          <span class="skel skel--h12 skel--w33 skel--r4"></span>
+          <span class="skel skel--h48 skel--w50 skel--r12" style="margin-top:10px"></span>
+          <span class="skel skel--h8 skel--full skel--r999" style="margin-top:14px"></span>
+          <div class="skel-row" style="margin-top:12px">
+            <span class="skel skel--h32 skel--r999" style="width:90px"></span>
+            <span class="skel skel--h32 skel--r999" style="width:80px"></span>
+            <span class="skel skel--h32 skel--r999" style="width:90px"></span>
+          </div>
+          <span class="skel skel--h48 skel--full skel--r12" style="margin-top:14px"></span>
+        </div>
+        <div class="skel-card">
+          <span class="skel skel--h12 skel--w33 skel--r4"></span>
+          <div class="skel-row" style="margin-top:10px">
+            <div class="skel-stack" style="flex:1">
+              <span class="skel skel--h16 skel--w75 skel--r4"></span>
+              <span class="skel skel--h12 skel--w50 skel--r4"></span>
+            </div>
+            <span class="skel skel--h48" style="width:48px;border-radius:14px"></span>
+          </div>
+        </div>
       </section>
 
       <!-- Error -->

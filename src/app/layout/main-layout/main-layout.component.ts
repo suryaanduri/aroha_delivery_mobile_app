@@ -42,8 +42,7 @@ export class MainLayoutComponent {
   isActive(path: string): boolean {
     const url = this.router.url;
     if (path === '/deliveries') {
-      // /delivery/:id (detail page) should not force-highlight any tab
-      return url === '/deliveries' || url.startsWith('/deliveries?') || url.startsWith('/deliveries/');
+      return url === '/deliveries' || url.startsWith('/deliveries?') || url.startsWith('/deliveries/') || url.startsWith('/delivery/');
     }
     if (path === '/more') {
       return url.startsWith('/more') || url.startsWith('/profile') || url.startsWith('/day-summary');

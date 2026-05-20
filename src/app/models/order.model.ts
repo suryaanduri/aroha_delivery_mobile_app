@@ -5,9 +5,28 @@ export interface OrderItem {
   type?: string;
 }
 
+export interface ReturnableBottle {
+  id: string;
+  userId: string;
+  orderId: string;
+  variantId: string;
+  quantity: number;
+  deliveryDate: string;
+  expectedReturnDate: string | null;
+  status: 'PENDING' | 'RETURNED' | 'DAMAGED' | 'LOST';
+  variant?: {
+    variantLabel: string;
+    sku: string;
+    images: string[];
+    bottleType: string;
+    product?: { name: string };
+  };
+}
+
 export interface DeliveryOrder {
   id: string;
   orderId?: string;
+  userId?: string;
   customerName: string;
   customerCode?: string;
   customerPhone?: string;

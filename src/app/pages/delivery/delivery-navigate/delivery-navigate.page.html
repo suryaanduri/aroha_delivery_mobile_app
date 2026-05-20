@@ -1,0 +1,88 @@
+<ion-content [fullscreen]="true" [scrollY]="false">
+  <div class="nav-shell">
+
+    <!-- ── Google Map ─────────────────────────────────────────────────── -->
+    <google-map
+      *ngIf="googleMapsLoaded"
+      class="nav-map"
+      [options]="mapOptions"
+      (mapReady)="onMapReady($event)"
+    ></google-map>
+
+    <!-- ── Loading overlay ───────────────────────────────────────────── -->
+    <div class="nav-overlay nav-overlay--loading" *ngIf="loading">
+      <div class="nav-spinner" aria-label="Loading route" role="status">
+        <div class="nav-spinner__ring"></div>
+      </div>
+      <p class="nav-overlay__label">Getting route…</p>
+    </div>
+
+    <!-- ── Error overlay ─────────────────────────────────────────────── -->
+    <div class="nav-overlay nav-overlay--error" *ngIf="!loading && errorMessage">
+      <ion-icon name="navigate-outline" class="nav-overlay__icon"></ion-icon>
+      <p class="nav-overlay__label">{{ errorMessage }}</p>
+      <div class="nav-overlay__actions">
+        <button class="nav-btn nav-btn--outline" type="button" (click)="retry()">Retry</button>
+        <button class="nav-btn nav-btn--ghost" type="button" (click)="goBack()">Go back</button>
+      </div>
+    </div>
+
+    <!-- ── Arrived overlay ───────────────────────────────────────────── -->
+    <div class="nav-overlay nav-overlay--arrived" *ngIf="arrived" aria-live="assertive">
+      <div class="nav-arrived-icon">
+        <ion-icon name="flag-outline"></ion-icon>
+      </div>
+      <p class="nav-overlay__title">You have arrived!</p>
+      <p class="nav-overlay__label">{{ customerName }}</p>
+      <button class="nav-btn nav-btn--primary" type="button" (click)="goBack()">
+        Back to Stop
+      </button>
+    </div>
+
+    <!-- ── Floating top bar ───────────────────────────────────────────── -->
+    <div class="nav-topbar" *ngIf="!loading && !arrived">
+      <button class="nav-topbar__back" type="button" (click)="goBack()" aria-label="Go back">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </button>
+
+      <div class="nav-topbar__destination">
+        <span class="nav-topbar__name">{{ customerName }}</span>
+        <span class="nav-topbar__meta" *ngIf="routeDuration || routeDistance">
+          {{ routeDuration }}<ng-container *ngIf="routeDuration && routeDistance"> · </ng-container>{{ routeDistance }}
+        </span>
+      </div>
+
+      <button
+        class="nav-topbar__external"
+        type="button"
+        (click)="openExternalMaps()"
+        aria-label="Open in Google Maps"
+        *ngIf="!errorMessage"
+      >
+        <ion-icon name="open-outline"></ion-icon>
+      </button>
+    </div>
+
+    <!-- ── Floating step panel ───────────────────────────────────────── -->
+    <div class="nav-step-panel" *ngIf="!loading && !errorMessage && !arrived && steps.length">
+      <div class="nav-step-panel__icon" aria-hidden="true">
+        <ion-icon [name]="currentStep?.icon || 'arrow-up-outline'"></ion-icon>
+      </div>
+
+      <div class="nav-step-panel__content">
+        <p class="nav-step-panel__instruction">
+          {{ currentStep?.instruction || 'Head to destination' }}
+        </p>
+        <span class="nav-step-panel__distance" *ngIf="currentStep?.distance">
+          in {{ currentStep!.distance }}
+        </span>
+      </div>
+
+      <div class="nav-step-panel__counter" aria-label="Step {{ currentStepIndex + 1 }} of {{ steps.length }}">
+        <span class="nav-step-panel__current">{{ currentStepIndex + 1 }}</span>
+        <span class="nav-step-panel__total">/{{ steps.length }}</span>
+      </div>
+    </div>
+
+  </div>
+</ion-content>

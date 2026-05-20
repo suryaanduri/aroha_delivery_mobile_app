@@ -10,7 +10,7 @@ interface UploadApiResponse {
 
 @Injectable({ providedIn: 'root' })
 export class UploadService {
-  private readonly uploadUrl = `${environment.apiBaseUrl}/api/admin/media/upload`;
+  private readonly uploadUrl = `${environment.apiBaseUrl}/api/order/delivery/media/upload`;
 
   constructor(private readonly http: HttpClient) {}
 

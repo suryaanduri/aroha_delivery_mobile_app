@@ -1,0 +1,346 @@
+/* Override main-layout's ion-content bottom padding — map fills the full screen */
+:host {
+  display: block;
+  height: 100%;
+}
+
+ion-content {
+  --padding-bottom: 0 !important;
+  --overflow: hidden;
+}
+
+/* ── Shell ────────────────────────────────────────────────────────────────── */
+
+.nav-shell {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #e8eaed; /* fallback while map loads */
+  overflow: hidden;
+}
+
+/* Full-screen map */
+google-map,
+.nav-map {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Angular Google Maps wraps the map in a div — make it fill the space */
+:host ::ng-deep .nav-map > div {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* ── Overlays (loading / error / arrived) ─────────────────────────────────── */
+
+.nav-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 32px 24px;
+  text-align: center;
+  z-index: 50;
+  background: rgba(248, 251, 249, 0.96);
+}
+
+.nav-overlay__icon {
+  font-size: 2.8rem;
+  color: var(--app-color-primary, #1a4d3f);
+  opacity: 0.6;
+}
+
+.nav-overlay__title {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--app-color-text, #14221e);
+}
+
+.nav-overlay__label {
+  margin: 0;
+  font-size: 0.94rem;
+  font-weight: 500;
+  color: var(--app-color-text-muted, #607068);
+  line-height: 1.45;
+}
+
+.nav-overlay__actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+/* ── Buttons ──────────────────────────────────────────────────────────────── */
+
+.nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 14px;
+  font: inherit;
+  font-size: 0.94rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+
+  &:active { opacity: 0.75; }
+}
+
+.nav-btn--primary {
+  background: var(--app-color-primary, #1a4d3f);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(26, 77, 63, 0.22);
+}
+
+.nav-btn--outline {
+  background: transparent;
+  border: 1.5px solid rgba(26, 77, 63, 0.3);
+  color: var(--app-color-primary, #1a4d3f);
+}
+
+.nav-btn--ghost {
+  background: transparent;
+  color: var(--app-color-text-muted, #607068);
+}
+
+/* ── Loading spinner ──────────────────────────────────────────────────────── */
+
+.nav-spinner {
+  position: relative;
+  width: 52px;
+  height: 52px;
+}
+
+.nav-spinner__ring {
+  position: absolute;
+  inset: 0;
+  border: 3.5px solid rgba(26, 77, 63, 0.15);
+  border-top-color: var(--app-color-primary, #1a4d3f);
+  border-radius: 50%;
+  animation: nav-spin 0.9s linear infinite;
+}
+
+@keyframes nav-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Arrived icon ─────────────────────────────────────────────────────────── */
+
+.nav-arrived-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(26, 77, 63, 0.1);
+  display: grid;
+  place-items: center;
+  margin-bottom: 4px;
+
+  ion-icon {
+    font-size: 2.2rem;
+    color: var(--app-color-primary, #1a4d3f);
+  }
+}
+
+/* ── Floating top bar ─────────────────────────────────────────────────────── */
+
+.nav-topbar {
+  position: absolute;
+  top: calc(var(--app-safe-area-top, 24px) + 12px);
+  left: 12px;
+  right: 12px;
+  z-index: 30;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 10px 12px 10px 10px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid rgba(20, 38, 33, 0.07);
+  box-shadow: 0 8px 24px rgba(14, 32, 26, 0.14);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.nav-topbar__back {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 12px;
+  background: rgba(26, 77, 63, 0.08);
+  color: var(--app-color-primary, #1a4d3f);
+  font-size: 1.2rem;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s ease;
+
+  &:active { background: rgba(26, 77, 63, 0.18); }
+}
+
+.nav-topbar__destination {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav-topbar__name {
+  font-size: 0.96rem;
+  font-weight: 700;
+  color: var(--app-color-text, #14221e);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nav-topbar__meta {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--app-color-text-muted, #607068);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nav-topbar__external {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 12px;
+  background: rgba(26, 77, 63, 0.08);
+  color: var(--app-color-primary, #1a4d3f);
+  font-size: 1.1rem;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s ease;
+
+  &:active { background: rgba(26, 77, 63, 0.18); }
+}
+
+/* ── Floating step panel ──────────────────────────────────────────────────── */
+
+.nav-step-panel {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  /* Sit above the tab bar */
+  bottom: calc(var(--main-tab-bar-height, 60px) + env(safe-area-inset-bottom, 0px) + 12px);
+  z-index: 30;
+
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  padding: 16px 16px 16px 14px;
+  border-radius: 20px;
+  background: var(--app-color-primary, #1a4d3f);
+  box-shadow: 0 12px 32px rgba(14, 32, 26, 0.22);
+}
+
+.nav-step-panel__icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.16);
+
+  ion-icon {
+    font-size: 1.5rem;
+    color: #fff;
+  }
+}
+
+.nav-step-panel__content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.nav-step-panel__instruction {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.3;
+  /* Allow up to 2 lines before truncating */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.nav-step-panel__distance {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.nav-step-panel__counter {
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.nav-step-panel__current {
+  display: block;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.nav-step-panel__total {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+
+@media (max-width: 360px) {
+  .nav-topbar {
+    left: 8px;
+    right: 8px;
+  }
+
+  .nav-step-panel {
+    left: 8px;
+    right: 8px;
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .nav-step-panel__icon {
+    width: 42px;
+    height: 42px;
+
+    ion-icon { font-size: 1.3rem; }
+  }
+
+  .nav-step-panel__instruction {
+    font-size: 0.88rem;
+  }
+}
